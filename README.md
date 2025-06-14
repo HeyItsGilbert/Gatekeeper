@@ -11,9 +11,9 @@ Helps implement feature flags in your PowerShell projects.
 
 ## Overview
 
-This module is meant to allow you to easily create and use feature flags written
-in JSON. The module offers the ability to easily create new FeatureFlag files
-and leaves it up to you on how to distribute them.
+Easily create and use feature flags written in JSON. Offers the ability to
+easily create new FeatureFlag files and leaves it up to you on how to distribute
+them.
 
 ## Installation
 
