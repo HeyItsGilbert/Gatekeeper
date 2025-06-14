@@ -1,0 +1,58 @@
+{
+    "$schema": "../../Gatekeeper/Schemas/FeatureFlag.json",
+    "Name": "Managed Updawg",
+    "Description": "Ensure that updawg is enforced properly",
+    "Version": "1.0.0",
+    "Author": "Your Name",
+    "Tags": [
+        "Managed"
+    ],
+    "DefaultEffect": "Deny",
+    "Rules": [
+        {
+            "Name": "Audit staging",
+            "Effect": "Audit",
+            "Conditions": {
+                "Property": "Environment",
+                "Operator": "Equals",
+                "Value": "Staging"
+            }
+        },
+        {
+            "Name": "Warn Tier 0",
+            "Effect": "Warn",
+            "Conditions": {
+                "Property": "Tier",
+                "Operator": "Equals",
+                "Value": 0
+            }
+        },
+        {
+            "Name": "Allow Prod Tier 1",
+            "Effect": "Allow",
+            "Conditions": {
+                "AllOf": [
+                    {
+                        "AnyOf": [
+                            {
+                                "Property": "Environment",
+                                "Operator": "Equals",
+                                "Value": "Production"
+                            },
+                            {
+                                "Property": "Environment",
+                                "Operator": "Equals",
+                                "Value": "Staging"
+                            }
+                        ]
+                    },
+                    {
+                        "Property": "Tier",
+                        "Operator": "Equals",
+                        "Value": 1
+                    }
+                ]
+            }
+        }
+    ]
+}

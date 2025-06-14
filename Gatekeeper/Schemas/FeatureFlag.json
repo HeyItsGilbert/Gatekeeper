@@ -1,0 +1,152 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.com/schema/rule-schema.json",
+    "title": "Evaluation Rule Set",
+    "type": "object",
+    "required": [
+        "Name",
+        "Description",
+        "Version",
+        "DefaultEffect",
+        "Rules",
+        "Properties"
+    ],
+    "properties": {
+        "Name": {
+            "type": "string"
+        },
+        "Description": {
+            "type": "string"
+        },
+        "Tags": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "default": []
+        },
+        "Version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "Author": {
+            "type": "string"
+        },
+        "DefaultEffect": {
+            "$ref": "#/$defs/effect"
+        },
+        "Rules": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/rule"
+            },
+            "minItems": 1
+        }
+    },
+    "$defs": {
+        "effect": {
+            "type": "string",
+            "enum": [
+                "Allow",
+                "Deny",
+                "Audit",
+                "Warn"
+            ]
+        },
+        "rule": {
+            "type": "object",
+            "required": [
+                "Name",
+                "Effect",
+                "Conditions"
+            ],
+            "properties": {
+                "Name": {
+                    "type": "string"
+                },
+                "Description": {
+                    "type": "string"
+                },
+                "Effect": {
+                    "$ref": "#/$defs/effect"
+                },
+                "Conditions": {
+                    "$ref": "#/$defs/conditionGroup"
+                }
+            },
+            "additionalProperties": false
+        },
+        "conditionGroup": {
+            "type": "object",
+            "description": "A condition group may be logical or a flat condition",
+            "oneOf": [
+                {
+                    "required": [
+                        "AllOf"
+                    ],
+                    "properties": {
+                        "AllOf": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/conditionGroup"
+                            },
+                            "minItems": 1
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "required": [
+                        "AnyOf"
+                    ],
+                    "properties": {
+                        "AnyOf": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/conditionGroup"
+                            },
+                            "minItems": 1
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "required": [
+                        "Not"
+                    ],
+                    "properties": {
+                        "Not": {
+                            "$ref": "#/$defs/conditionGroup"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "required": [
+                        "Property",
+                        "Operator",
+                        "Value"
+                    ],
+                    "properties": {
+                        "Property": {
+                            "type": "string"
+                        },
+                        "Operator": {
+                            "type": "string",
+                            "enum": [
+                                "Equals",
+                                "NotEquals",
+                                "GreaterThan",
+                                "LessThan",
+                                "In",
+                                "NotIn"
+                            ]
+                        },
+                        "Value": {}
+                    },
+                    "additionalProperties": false
+                }
+            ]
+        }
+    }
+}
