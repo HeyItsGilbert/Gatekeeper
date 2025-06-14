@@ -1,6 +1,13 @@
+<center><img src="https://raw.githubusercontent.com/HeyItsGilbert/Gatekeeper/main/static/icon.png" /></center>
+
 # Gatekeeper
 
 Helps implement feature flags in your PowerShell projects.
+
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/Gatekeeper)](https://www.powershellgallery.com/packages/Gatekeeper/)
+[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Gatekeeper)](https://www.powershellgallery.com/packages/Gatekeeper/)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/HeyItsGilbert/Gatekeeper/Publish.yaml)](https://www.powershellgallery.com/packages/Gatekeeper/)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/p/Gatekeeper)](https://www.powershellgallery.com/packages/Gatekeeper/)
 
 ## Overview
 

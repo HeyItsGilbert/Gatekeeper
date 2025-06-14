@@ -1,0 +1,9 @@
+name: Update Github Pages
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  ci:
+    uses: HeyItsGilbert/.github/.github/workflows/Pages.yaml@main

@@ -1,4 +1,13 @@
 site_name: Gatekeeper
-repo_url: https://github.com/HeyItsGilbert/Gatekeeper
-theme: readthedocs
-
+site_url: http://heyitsgilbert.github.io/Gatekeeper
+repo_url: http://github.com/HeyItsGilbert/Gatekeeper
+theme:
+  name: readthedocs
+nav:
+  - Home: "index.md"
+  - Changelog: "https://github.com/HeyItsGilbert/Gatekeeper/blob/main/CHANGELOG.md"
+  - en-US:
+      - en-US/
+plugins:
+  - search
+  - include_dir_to_nav
