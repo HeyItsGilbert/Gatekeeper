@@ -103,16 +103,16 @@
             )
 
             # A URL to the license for this module.
-            LicenseUri = 'https://github.com/HeyItsGilbert/ChocoLogParse/blob/master/LICENSE'
+            LicenseUri = 'https://github.com/HeyItsGilbert/Gatekeeper/blob/master/LICENSE'
 
             # A URL to the main website for this project.
-            ProjectUri = 'https://github.com/HeyItsGilbert/ChocoLogParse/'
+            ProjectUri = 'https://github.com/HeyItsGilbert/Gatekeeper/'
 
             # A URL to an icon representing this module.
-            IconUri = 'https://raw.githubusercontent.com/HeyItsGilbert/ChocoLogParse/main/static/'
+            IconUri = 'https://raw.githubusercontent.com/HeyItsGilbert/Gatekeeper/main/static/icon.png'
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'https://github.com/HeyItsGilbert/ChocoLogParse/blob/master/CHANGELOG.md'
+            ReleaseNotes = 'https://github.com/HeyItsGilbert/Gatekeeper/blob/master/CHANGELOG.md'
 
             # Prerelease string of this module
             # Prerelease = ''
