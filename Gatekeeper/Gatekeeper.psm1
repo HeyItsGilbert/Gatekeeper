@@ -15,7 +15,9 @@ Export-ModuleMember -Function $public.Basename
 
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
-    [PropertySet]
+    [PropertySet],
+    [PropertyDefinition]
+    [FeatureFlag]
 )
 # Get the internal TypeAccelerators class to use its static methods.
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
