@@ -71,13 +71,17 @@ class PropertyDefinition {
 class PropertySet {
     [hashtable]$Properties
 
+    #PropertySet() {}
     PropertySet([hashtable]$rawData) {
         $this.Properties = @{}
         foreach ($key in $rawData.Keys) {
+            if ($key -eq '$schema') { continue }
+            Write-Verbose "Saving key: $key"
             $this.Properties[$key] = [PropertyDefinition]::new($key, $rawData[$key])
         }
     }
-    PropertySet([string]$FilePath) {
+
+    static [PropertySet] FromFile ([string]$FilePath) {
         if (-not (Test-Path -Path $FilePath)) {
             throw "File path given did not exist: $FilePath"
         }
@@ -90,12 +94,15 @@ class PropertySet {
             throw 'Properties file is not valid.'
         }
         $json = Get-Content $FilePath -Raw | ConvertFrom-Json -AsHashtable
-        $this.Properties = @{}
-        foreach ($key in $json.Keys) {
-            # Skip over schema
-            if ($key -eq '$schema') { continue }
-            $this.Properties[$key] = [PropertyDefinition]::new($key, $json[$key])
+        if ($json -isnot [hashtable]) {
+            throw 'Failed to create hashtable from json file'
         }
+        return [PropertySet]::new($json)
+    }
+
+    static [PropertySet] FromJson([string]$json) {
+        $data = $json | ConvertFrom-Json -AsHashtable
+        return [PropertySet]::new($data)
     }
 
     [PropertyDefinition]GetProperty([string]$name) {
@@ -105,6 +112,10 @@ class PropertySet {
     [string[]]GetNames() {
         return $this.Properties.Keys
     }
+
+    [boolean]ContainsKey($name) {
+        return $this.Properties.ContainsKey($name)
+    }
 }
 
 # Argument Transformer
@@ -113,6 +124,9 @@ class PropertySetTransformAttribute : System.Management.Automation.ArgumentTrans
     ## Override the abstract method "Transform". This is where the user
     ## provided value will be inspected and transformed if possible.
     [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
+        if ($null -eq $inputData) {
+            return $(Read-PropertySet)
+        }
         $item = switch ($inputData.GetType().FullName) {
             # Return the existing item if it's already a PropertySet
             'PropertySet' { $inputData }

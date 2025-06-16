@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Test-Condition
+# New-PropertySet
 
 ## SYNOPSIS
 {{ Fill in the Synopsis }}
@@ -13,8 +13,8 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Test-Condition [-Context] <Hashtable> [-Properties] <PropertySet> [-Condition] <Hashtable>
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+New-PropertySet [[-Properties] <PropertyDefinition[]>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -31,48 +31,18 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -Context
-{{ Fill Context Description }}
-
-```yaml
-Type: Hashtable
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Properties
 {{ Fill Properties Description }}
 
 ```yaml
-Type: PropertySet
+Type: PropertyDefinition[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 2
+Required: False
+Position: 0
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Condition
-{{ Fill Condition Description }}
-
-```yaml
-Type: Hashtable
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 3
-Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
@@ -96,7 +66,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
+### PropertyDefinition[]
 
 ## OUTPUTS
 

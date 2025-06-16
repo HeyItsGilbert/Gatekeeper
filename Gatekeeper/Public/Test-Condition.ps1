@@ -29,7 +29,8 @@ function Test-Condition {
         [hashtable]
         $Context,
         [Parameter(Mandatory)]
-        [hashtable]
+        [PropertySet]
+        [PropertySetTransformAttribute()]
         $Properties,
         [Parameter(Mandatory)]
         [Hashtable]
@@ -56,7 +57,12 @@ function Test-Condition {
     }
 
     if ($Condition.ContainsKey('Not')) {
-        return -not (Test-Condition -Context $Context -Properties $Properties -Condition $Condition.Not)
+        foreach ($child in $Condition.Not) {
+            if (Test-Condition -Context $Context -Properties $Properties -Condition $child) {
+                return $false
+            }
+        }
+        return $true
     }
     #endregion Recurse on groups
 
@@ -72,7 +78,7 @@ function Test-Condition {
         throw "Property metadata for '$propName' is missing"
     }
 
-    $meta = $Properties[$propName]
+    $meta = $Properties.GetProperty($propName)
     $propType = $meta.Type
     $validation = $meta.Validation
 
@@ -84,6 +90,13 @@ function Test-Condition {
         Validation = $validation
     }
     Test-TypedValue @testTypedValueSplat
+
+    if (
+        $operator -in @("In", "NotIn") -and
+        $expected -isnot [System.Collections.IEnumerable]
+    ) {
+        throw 'Condition is using In/NotIn but not passing a list'
+    }
 
     if (
         $operator -in @("In", "NotIn") -and

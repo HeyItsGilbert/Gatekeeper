@@ -5,55 +5,37 @@ online version:
 schema: 2.0.0
 ---
 
-# Test-FeatureFlag
+# New-Property
 
 ## SYNOPSIS
-Checks if the current machine's context will pass the feature flag rules.
+{{ Fill in the Synopsis }}
 
 ## SYNTAX
 
 ```
-Test-FeatureFlag [-FeatureFlag] <FeatureFlag> [[-Properties] <PropertySet>] [-Context] <Hashtable>
+New-Property [-Name] <String> [-Type] <String> [[-EnumValues] <Object[]>] [[-Validation] <Hashtable>]
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Determines if a given context will pass the feature flag rules.
-Returns a
-\`$True\` or \`$False\` allowing you to gate keep your features.
+{{ Fill in the Description }}
 
 ## EXAMPLES
 
-### EXAMPLE 1
-```
-$context = Get-DeviceContext
-Test-FeatureFlag -Feature '' -Context $context
+### Example 1
+```powershell
+PS C:\> {{ Add example code here }}
 ```
 
-This will test if the current device will pass the feature flag rules.
+{{ Add example description here }}
 
 ## PARAMETERS
 
-### -FeatureFlag
-The name of the feature flag to test.
+### -EnumValues
+{{ Fill EnumValues Description }}
 
 ```yaml
-Type: FeatureFlag
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
-```
-
-### -Properties
-{{ Fill Properties Description }}
-
-```yaml
-Type: PropertySet
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
@@ -64,15 +46,46 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Context
-{{ Fill Context Description }}
+### -Name
+{{ Fill Name Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 0
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Type
+{{ Fill Type Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+Accepted values: string, integer, boolean
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Validation
+{{ Fill Validation Description }}
 
 ```yaml
 Type: Hashtable
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 3
 Default value: None
 Accept pipeline input: False
@@ -99,8 +112,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
+### None
+
 ## OUTPUTS
 
+### System.Object
 ## NOTES
 
 ## RELATED LINKS

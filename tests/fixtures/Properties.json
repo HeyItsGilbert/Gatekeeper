@@ -1,6 +1,6 @@
 {
     "$schema": "../../Gatekeeper/Schemas/Properties.json",
-    "Hash": {
+    "Percentage": {
         "Type": "integer",
         "Validation": {
             "Minimum": 0,

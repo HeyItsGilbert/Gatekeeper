@@ -7,7 +7,7 @@
     Determines if a given context will pass the feature flag rules. Returns a
     `$True` or `$False` allowing you to gate keep your features.
 
-    .PARAMETER Feature
+    .PARAMETER FeatureFlag
     The name of the feature flag to test.
 
     .PARAMETER Properties
@@ -18,46 +18,36 @@
 
     .EXAMPLE
     $context = Get-DeviceContext
-    Test-FeatureFlag -Feature '' -Context $context
+    Test-FeatureFlag -FeatureFlag '' -Context $context
 
     This will test if the current device will pass the feature flag rules.
     #>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory, ValueFromPipeline)]
-        [string]
-        $Feature,
+        [FeatureFlag]
+        [FeatureFlagTransformAttribute()]
+        $FeatureFlag,
         [PropertySet]
         [PropertySetTransformAttribute()]
         $Properties,
+        [Parameter(Mandatory)]
         [hashtable]
         $Context
     )
 
     begin {
-        # Load the context once if it wasn't given
-        if (-not $PSBoundParameters.ContainsKey('Context')) {
-            #This means we're determining the context of the current device.
-            $currentContext = Get-DeviceContext
-        } else {
-            $currentContext = $Context
-        }
-        if (-not $PSBoundParameters.ContainsKey('Properties')) {
-            #This means we're determining the context of the current device.
-            $currentProperties = Read-PropertySet
-        } else {
-            # PropertySet has a Properties item
-            $currentProperties = $Properties.Properties
-        }
         $finalResult = $False
     }
 
     process {
         # Process each feature
+        Write-Verbose "Processing Feature $($FeatureFlag.Name) with ($($FeatureFlag.Rules.Count)) rules"
         foreach ($rule in $Feature.Rules) {
+            Write-Verbose "Processing Rule $($rule.Name)"
             $testConditionSplat = @{
-                Context = $currentContext
-                Properties = $currentProperties
+                Context = $Context
+                Properties = $Properties
                 Condition = $rule.Conditions
             }
             if (Test-Condition @testConditionSplat) {

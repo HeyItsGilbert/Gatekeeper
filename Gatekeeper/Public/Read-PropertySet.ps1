@@ -25,9 +25,11 @@ function Read-PropertySet {
         $propertySets = [System.Collections.Generic.List[PropertySet]]::new()
     }
     process {
-        $propertySets.Add(
-            ([PropertySet]::new($FilePath))
-        )
+        foreach ($file in $FilePath) {
+            $propertySets.Add(
+                ([PropertySet]::FromFile($file))
+            )
+        }
     }
 
     end {
