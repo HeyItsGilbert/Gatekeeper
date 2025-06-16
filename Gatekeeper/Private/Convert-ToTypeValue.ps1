@@ -12,7 +12,7 @@ function Convert-ToTypedValue {
             return [int]$Value
         }
         "boolean" {
-            return [bool]::Parse($Value.ToString())
+            return $Value -as [bool]
         }
         "string" {
             return [string]$Value

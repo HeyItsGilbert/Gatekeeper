@@ -20,7 +20,7 @@ $ExportableTypes = @(
     [FeatureFlag]
 )
 # Get the internal TypeAccelerators class to use its static methods.
-$TypeAcceleratorsClass = [psobject].Assembly.GetType(
+$TypeAcceleratorsClass = [PSObject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
 )
 # Ensure none of the types would clobber an existing type accelerator.
