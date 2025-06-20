@@ -2,58 +2,33 @@
 
 ## about_Gatekeeper
 
-```
-ABOUT TOPIC NOTE:
-The first header of the about topic should be the topic name.
-The second header contains the lookup name used by the help system.
-
-IE:
-# Some Help Topic Name
-## SomeHelpTopicFileName
-
-This will be transformed into the text file
-as `about_SomeHelpTopicFileName`.
-Do not include file extensions.
-The second header should have no spaces.
-```
-
 # SHORT DESCRIPTION
-{{ Short Description Placeholder }}
-
-```
-ABOUT TOPIC NOTE:
-About topics can be no longer than 80 characters wide when rendered to text.
-Any topics greater than 80 characters will be automatically wrapped.
-The generated about topic will be encoded UTF-8.
-```
+Helps implement feature flags in your PowerShell projects.
 
 # LONG DESCRIPTION
-{{ Long Description Placeholder }}
-
-## Optional Subtopics
-{{ Optional Subtopic Placeholder }}
+Easily create and use feature flags written in JSON. Offers the ability to
+easily create new FeatureFlag files and leaves it up to you on how to distribute
+them.
 
 # EXAMPLES
-{{ Code or descriptive examples of how to leverage the functions described. }}
+See
+[HeyItsGilbert/Gatekeeper#examples](https://github.com/HeyItsGilbert/Gatekeeper?tab=readme-ov-file#examples)
 
 # NOTE
-{{ Note Placeholder - Additional information that a user needs to know.}}
+N\A
 
 # TROUBLESHOOTING NOTE
-{{ Troubleshooting Placeholder - Warns users of bugs}}
-
-{{ Explains behavior that is likely to change with fixes }}
+Ensure the account running the scripts to check for the flags have permissions
+to the filepath you specify. Keep the curren running user context in mind.
 
 # SEE ALSO
-{{ See also placeholder }}
-
-{{ You can also list related articles, blogs, and video URLs. }}
+[FeatureFlags.io](https://featureflags.io/)
 
 # KEYWORDS
-{{List alternate names or titles for this topic that readers might use.}}
 
-- {{ Keyword Placeholder }}
-- {{ Keyword Placeholder }}
-- {{ Keyword Placeholder }}
-- {{ Keyword Placeholder }}
-
+- PowerShell
+- FeatureFlag
+- Feature-Flags
+- Feature-Flags-Management
+- JSON
+- JSON Schema

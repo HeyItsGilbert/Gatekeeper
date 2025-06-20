@@ -8,7 +8,7 @@ schema: 2.0.0
 # New-Property
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Create a new property definition.
 
 ## SYNTAX
 
@@ -18,72 +18,28 @@ New-Property [-Name] <String> [-Type] <String> [[-EnumValues] <Object[]>] [[-Val
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new property definition to use with your property set.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+$properties = @()
+$properties += New-Property -Name 'Hostname' -Type 'string' -Validation @{Pattern='*.contoso.com'}
+$set = New-PropertySet -Properties $properties
 ```
 
-{{ Add example description here }}
+This would create a new property object and create a new set with that property.
 
 ## PARAMETERS
 
-### -Confirm
-Prompts you for confirmation before running the cmdlet.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases: cf
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -EnumValues
-{{ Fill EnumValues Description }}
-
-```yaml
-Type: Object[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Name
-{{ Fill Name Description }}
+The name of the property.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
-
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Type
-{{ Fill Type Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-Accepted values: string, integer, boolean
 
 Required: True
 Position: 1
@@ -92,11 +48,27 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Validation
-{{ Fill Validation Description }}
+### -Type
+The type of property.
+Limited to: string, integer, boolean
 
 ```yaml
-Type: Hashtable
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -EnumValues
+If the values should be limited to a set, private an array of values.
+
+```yaml
+Type: Object[]
 Parameter Sets: (All)
 Aliases:
 
@@ -107,13 +79,44 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Validation
+Parameter description
+
+```yaml
+Type: Hashtable
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
+Shows what would happen if the cmdlet runs.
+The cmdlet is not run.
 
 ```yaml
 Type: SwitchParameter
 Parameter Sets: (All)
 Aliases: wi
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Confirm
+Prompts you for confirmation before running the cmdlet.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: cf
 
 Required: False
 Position: Named
@@ -142,11 +145,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
-
 ## OUTPUTS
 
-### System.Object
+### PropertyDefinition
 ## NOTES
 
 ## RELATED LINKS

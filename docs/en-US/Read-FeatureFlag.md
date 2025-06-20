@@ -27,6 +27,8 @@ object.
 Read-FeatureFlag -FilePath 'MyFeature.json
 ```
 
+Read the feature from disk.
+
 ## PARAMETERS
 
 ### -FilePath
@@ -66,7 +68,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Collections.Generic.List`1[[PropertySet, PowerShell Class Assembly, Version=1.0.0.1, Culture=neutral, PublicKeyToken=null]]
+### System.Collections.Generic.List`1[[PropertySet, PowerShell Class Assembly, Version=1.0.0.2, Culture=neutral, PublicKeyToken=null]]
 ## NOTES
 
 ## RELATED LINKS

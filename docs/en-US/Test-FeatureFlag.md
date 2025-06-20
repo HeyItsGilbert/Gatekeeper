@@ -27,7 +27,7 @@ Returns a
 ### EXAMPLE 1
 ```
 $context = Get-DeviceContext
-Test-FeatureFlag -Feature '' -Context $context
+Test-FeatureFlag -FeatureFlag '' -Context $context
 ```
 
 This will test if the current device will pass the feature flag rules.
@@ -50,7 +50,7 @@ Accept wildcard characters: False
 ```
 
 ### -Properties
-{{ Fill Properties Description }}
+A hashtable of properties that define the different values in the context.
 
 ```yaml
 Type: PropertySet
@@ -65,7 +65,7 @@ Accept wildcard characters: False
 ```
 
 ### -Context
-{{ Fill Context Description }}
+The context to use to test against.
 
 ```yaml
 Type: Hashtable

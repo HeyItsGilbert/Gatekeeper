@@ -8,7 +8,7 @@ schema: 2.0.0
 # Test-Condition
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Evaluate whether a feature flag rule applies.
 
 ## SYNTAX
 
@@ -18,21 +18,25 @@ Test-Condition [-Context] <Hashtable> [-Properties] <PropertySet> [-Condition] <
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Takes the given context, properties, and rule/condition and evaluates
+whether the rule applies and what it's effect is.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+$context = Get-DeviceContext
+$properties = Read-PropertySet
+$rule = $rules[0]
+Test-Condition -Context $context -Properties $properties -Condition $rule
 ```
 
-{{ Add example description here }}
+This would return a true/false
 
 ## PARAMETERS
 
 ### -Context
-{{ Fill Context Description }}
+The device context.
 
 ```yaml
 Type: Hashtable
@@ -47,7 +51,7 @@ Accept wildcard characters: False
 ```
 
 ### -Properties
-{{ Fill Properties Description }}
+The properties that matches given context.
 
 ```yaml
 Type: PropertySet
@@ -62,7 +66,7 @@ Accept wildcard characters: False
 ```
 
 ### -Condition
-{{ Fill Condition Description }}
+A condition to test which are part of rules.
 
 ```yaml
 Type: Hashtable
@@ -96,11 +100,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
-
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS

@@ -8,7 +8,7 @@ schema: 2.0.0
 # New-PropertySet
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Create a new property set.
 
 ## SYNTAX
 
@@ -18,21 +18,23 @@ New-PropertySet [[-Properties] <PropertyDefinition[]>] [-ProgressAction <ActionP
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Create a new property set to export.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+$properties = @()
+$properties += New-Property -Name 'Hostname' -Type 'string' -Validation @{Pattern='*.contoso.com'}
+$set = New-PropertySet -Properties $properties
 ```
 
-{{ Add example description here }}
+This would create a new property object and create a new set with that property.
 
 ## PARAMETERS
 
 ### -Properties
-{{ Fill Properties Description }}
+A list of properties, typically created by \`New-Property\`.
 
 ```yaml
 Type: PropertyDefinition[]
@@ -40,7 +42,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 0
+Position: 1
 Default value: None
 Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
@@ -66,11 +68,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### PropertyDefinition[]
-
 ## OUTPUTS
 
-### System.Object
+### PropertySet
 ## NOTES
 
 ## RELATED LINKS

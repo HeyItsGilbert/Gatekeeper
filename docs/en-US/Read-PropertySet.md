@@ -8,7 +8,7 @@ schema: 2.0.0
 # Read-PropertySet
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Read the properties from disk.
 
 ## SYNTAX
 
@@ -17,21 +17,22 @@ Read-PropertySet [-FilePath] <Object> [-ProgressAction <ActionPreference>] [<Com
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Reads the properties json file from disk and convert it to a property set.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+Read-PropertySet -FilePath 'C:\foo\properties.json'
 ```
 
-{{ Add example description here }}
+This would return a PropertySet object that contains all of the properties
+to evaluate.
 
 ## PARAMETERS
 
 ### -FilePath
-{{ Fill FilePath Description }}
+The file path to the json.
 
 ```yaml
 Type: Object
@@ -65,11 +66,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.Object
-
 ## OUTPUTS
 
-### System.Object
+### System.Collections.Generic.List`1[[PropertySet, PowerShell Class Assembly, Version=1.0.0.2, Culture=neutral, PublicKeyToken=null]]
 ## NOTES
 
 ## RELATED LINKS

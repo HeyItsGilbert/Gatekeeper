@@ -105,6 +105,11 @@ class PropertySet {
         return [PropertySet]::new($data)
     }
 
+    [PropertySet]AddProperty([PropertyDefinition]$Property) {
+        $this.Properties.Add($Property)
+        return $this
+    }
+
     [PropertyDefinition]GetProperty([string]$name) {
         return $this.Properties[$name]
     }
