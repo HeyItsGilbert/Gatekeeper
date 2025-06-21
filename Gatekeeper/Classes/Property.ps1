@@ -69,6 +69,10 @@ class PropertyDefinition {
 }
 
 class PropertySet {
+    # TODO: Should this class have more properties?
+    # [string]$Name
+    # FilePath is used to save the PropertySet to a file.
+    [string]$FilePath
     [hashtable]$Properties
 
     #PropertySet() {}
@@ -97,7 +101,9 @@ class PropertySet {
         if ($json -isnot [hashtable]) {
             throw 'Failed to create hashtable from json file'
         }
-        return [PropertySet]::new($json)
+        $ps = [PropertySet]::new($json)
+        $ps.FilePath = (Resolve-Path $FilePath).Path
+        return $ps
     }
 
     static [PropertySet] FromJson([string]$json) {
@@ -120,6 +126,14 @@ class PropertySet {
 
     [boolean]ContainsKey($name) {
         return $this.Properties.ContainsKey($name)
+    }
+    [void]Save() {
+        if ($null -eq $this.FilePath) {
+            throw "No file path specified to save PropertySet."
+        }
+        Write-Verbose "Saving PropertySet to file: $($this.FilePath)"
+        $json = $this.Properties | ConvertTo-Json -Depth 10
+        Set-Content -Path $this.FilePath -Value $json
     }
 }
 

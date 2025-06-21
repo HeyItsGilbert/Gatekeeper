@@ -14,21 +14,20 @@ function Get-DefaultContext {
     $context.Hostname = $(hostname)
 
     Get all the property keys and then set the hostname using the hostname command.
+    .NOTES
+    If you don't pass in Properties explicitly you will be prompted to for a
+    properties file.
     #>
     [CmdletBinding()]
     [OutputType('System.Collections.Hashtable')]
     param (
+        [Parameter(Mandatory)]
         [PropertySet]
         [PropertySetTransformAttribute()]
-        $Properties
+        $PropertySet
     )
-    if (-not $PSBoundParameters.ContainsKey('Properties')) {
-        # This means we're determining the context of the current device.
-        $currentProperties = Read-PropertySet
-    } else {
-        # PropertySet has a Properties item
-        $currentProperties = $Properties
-    }
+    # PropertySet has a Properties item
+    $currentProperties = $Properties
     $hashtable = @{}
     foreach ($property in $currentProperties.Properties.Keys) {
         Write-Verbose "Adding property: $property"
