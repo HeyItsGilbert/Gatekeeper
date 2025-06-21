@@ -1,0 +1,1074 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="http://heyitsgilbert.github.io/Gatekeeper/">
+      
+      
+      
+        <link rel="next" href="en-US/Get-DefaultContext/">
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.17">
+    
+    
+      
+        <title>Gatekeeper</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.bcfcd587.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#gatekeeper" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="Gatekeeper" class="md-header__button md-logo" aria-label="Gatekeeper" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Gatekeeper
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="http://github.com/HeyItsGilbert/Gatekeeper" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="Gatekeeper" class="md-nav__button md-logo" aria-label="Gatekeeper" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Gatekeeper
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="http://github.com/HeyItsGilbert/Gatekeeper" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goals
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Terminology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-propertyset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a PropertySet
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      Feature Flag
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defining-the-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      Defining the Context
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evaluating-the-feature-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluating the Feature Flag
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#to-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      To Do
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/HeyItsGilbert/Gatekeeper/blob/main/CHANGELOG.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    en-US
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            en-US
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="en-US/Get-DefaultContext/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Get-DefaultContext
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="en-US/New-Property/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    New-Property
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="en-US/New-PropertySet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    New-PropertySet
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="en-US/Read-FeatureFlag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Read-FeatureFlag
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="en-US/Read-PropertySet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Read-PropertySet
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="en-US/Save-PropertySet/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Save-PropertySet
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="en-US/Test-Condition/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test-Condition
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="en-US/Test-FeatureFlag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test-FeatureFlag
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="en-US/about_Gatekeeper.help/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Gatekeeper
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Goals
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Terminology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-propertyset" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a PropertySet
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      Feature Flag
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defining-the-context" class="md-nav__link">
+    <span class="md-ellipsis">
+      Defining the Context
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#evaluating-the-feature-flag" class="md-nav__link">
+    <span class="md-ellipsis">
+      Evaluating the Feature Flag
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#to-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      To Do
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<p><center><img src="https://raw.githubusercontent.com/HeyItsGilbert/Gatekeeper/main/static/icon.png" /></center></p>
+<h1 id="gatekeeper">Gatekeeper</h1>
+<p>Helps implement feature flags in your PowerShell projects.</p>
+<p><a href="https://www.powershellgallery.com/packages/Gatekeeper/"><img alt="PowerShell Gallery" src="https://img.shields.io/powershellgallery/dt/Gatekeeper" /></a>
+<a href="https://www.powershellgallery.com/packages/Gatekeeper/"><img alt="PowerShell Gallery Version" src="https://img.shields.io/powershellgallery/v/Gatekeeper" /></a>
+<a href="https://www.powershellgallery.com/packages/Gatekeeper/"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/HeyItsGilbert/Gatekeeper/Publish.yaml" /></a>
+<a href="https://www.powershellgallery.com/packages/Gatekeeper/"><img alt="PowerShell Gallery" src="https://img.shields.io/powershellgallery/p/Gatekeeper" /></a></p>
+<h2 id="overview">Overview</h2>
+<p>Easily create and use feature flags written in JSON. Offers the ability to
+easily create new FeatureFlag files and leaves it up to you on how to distribute
+them.</p>
+<h2 id="installation">Installation</h2>
+<pre><code class="language-powershell">Install-Module Gatekeeper
+</code></pre>
+<h2 id="why">Why?</h2>
+<p>I had a desire for an easy to use rule system that allowed me to specifically
+target devices. I love JSON schemas (I know I know, I have a problem) and I
+thought that with a tightly schematized rule and property system this could make
+an easy to build open tool.</p>
+<p>This was also a challenge for myself to leverage JSON, classes, and the ability
+to serialize custom objects.</p>
+<h2 id="goals">Goals</h2>
+<ol>
+<li>Allow easy gate keeping of new features by offering a simple
+   <code>Test-FeatureFlag</code> command to add to any conditional logic.</li>
+<li>Leverage JSON because it's a format that can be generated/distributed easily
+   by various public/private tools.</li>
+<li>Use JSON schemas to ensure that different aspects of the system are easily
+   enforced. And more importantly that tools guide users on how to fill these
+   files out.</li>
+<li>Allow properties and property sets to be organic and not baked into this
+   tool. This means that you can support any business logic that makes sense for
+   you and your organization.</li>
+<li>Ensure flexibility by allowing context, properties, and feature flags to be
+   defined outside of this tool, while still enforcing the schema.</li>
+<li>Err on the side of caution when possible during evaluations.</li>
+</ol>
+<blockquote>
+<p>[!IMPORTANT]
+The decision to allow context, properties, and flags to come from
+external sources was deliberate to allow you to plug this into any system/tool
+you want.</p>
+</blockquote>
+<h2 id="terminology">Terminology</h2>
+<ul>
+<li>Feature Flag: This is a name for feature you want to be able to flip on or off
+  given a set of conditions.</li>
+<li>Context: A hash table that defines a devices context. Context can be defined
+  by whatever tooling you're using. (i.e. ohai, script, etc.).</li>
+<li>Properties: These are units that define different business logic groupings.
+  These could be things like the hostname, environment, etc. The properties file
+  defines the type and possible validations for each property.</li>
+<li>PropertySet: This is a collection of properties.</li>
+<li>Rules: This is a list of conditions to check against. These evaluated top/down
+  and the first Allow/Deny wins.</li>
+<li>Conditions: These are sets of properties to match with the given context.
+  There are higher level groupings such as <code>AnyOf</code>, <code>OneOf</code>, and <code>Not</code> available
+  to join these. The conditions are composed of a <code>Property</code>, an <code>Operator</code>, and
+  a <code>Value</code>.</li>
+<li>Effect: The effect defines what should happen when a given rule matches. These
+  include: <code>Allow, Deny, Audit, and Warn</code>.</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<h3 id="creating-a-propertyset">Creating a PropertySet</h3>
+<p>Create a set of properties we want to evaluate.</p>
+<pre><code class="language-json">{
+    &quot;$schema&quot;: &quot;https://raw.githubusercontent.com/HeyItsGilbert/Gatekeeper/main/Gatekeeper/Schemas/Properties.json&quot;,
+    &quot;Percentage&quot;: {
+        &quot;Type&quot;: &quot;integer&quot;,
+        &quot;Validation&quot;: {
+            &quot;Minimum&quot;: 0,
+            &quot;Maximum&quot;: 99
+        }
+    },
+    &quot;Environment&quot;: {
+        &quot;Type&quot;: &quot;string&quot;,
+        &quot;Enum&quot;: [
+            &quot;Production&quot;,
+            &quot;Staging&quot;,
+            &quot;Dev&quot;
+        ]
+    },
+    &quot;IsCompliant&quot;: {
+        &quot;Type&quot;: &quot;boolean&quot;
+    }
+}
+</code></pre>
+<p>This defines a percentage property that must be an integer between 0-99, an
+environment string thats limited to Production, Stage, or Dev, and a boolean
+named IsCompliant. Note that these don't see how these properties are calculated
+only their type and how to validate them.</p>
+<p>For our later examples I'll save this as <code>properties.json</code></p>
+<h3 id="feature-flag">Feature Flag</h3>
+<p>Next we will create a feature flag.</p>
+<pre><code class="language-json">{
+    &quot;$schema&quot;: &quot;https://raw.githubusercontent.com/HeyItsGilbert/Gatekeeper/main/Gatekeeper/Schemas/FeatureFlag.json&quot;,
+    &quot;Name&quot;: &quot;New Startup Sound&quot;,
+    &quot;Description&quot;: &quot;Roll out new screaming goat start up sound.&quot;,
+    &quot;Version&quot;: &quot;1.0.0&quot;,
+    &quot;Author&quot;: &quot;Your Name aka who to e-mail when customers are upset&quot;,
+    &quot;Tags&quot;: [
+        &quot;Goat&quot;,
+        &quot;Managed&quot;
+    ],
+    &quot;DefaultEffect&quot;: &quot;Deny&quot;,
+    &quot;Rules&quot;: [
+        {
+            &quot;Name&quot;: &quot;Audit staging&quot;,
+            &quot;Effect&quot;: &quot;Audit&quot;,
+            &quot;Conditions&quot;: {
+                &quot;Property&quot;: &quot;Environment&quot;,
+                &quot;Operator&quot;: &quot;Equals&quot;,
+                &quot;Value&quot;: &quot;Staging&quot;
+            }
+        },
+        {
+            &quot;Name&quot;: &quot;Warn Production&quot;,
+            &quot;Effect&quot;: &quot;Warn&quot;,
+            &quot;Conditions&quot;: {
+                &quot;Property&quot;: &quot;Environment&quot;,
+                &quot;Operator&quot;: &quot;Equals&quot;,
+                &quot;Value&quot;: &quot;Production&quot;
+            }
+        },
+        {
+            &quot;Name&quot;: &quot;Allow Staging and Complaint or 10%&quot;,
+            &quot;Effect&quot;: &quot;Allow&quot;,
+            &quot;Conditions&quot;: {
+                &quot;AllOf&quot;: [
+                    {
+                        &quot;AnyOf&quot;: [
+                            {
+                                &quot;Property&quot;: &quot;IsCompliant&quot;,
+                                &quot;Operator&quot;: &quot;Equals&quot;,
+                                &quot;Value&quot;: &quot;true&quot;
+                            },
+                            {
+                                &quot;Property&quot;: &quot;Percent&quot;,
+                                &quot;Operator&quot;: &quot;LessThan&quot;,
+                                &quot;Value&quot;: &quot;11&quot;
+                            }
+                        ]
+                    },
+                    {
+                        &quot;Property&quot;: &quot;Environment&quot;,
+                        &quot;Operator&quot;: &quot;Equals&quot;,
+                        &quot;Value&quot;: &quot;Staging&quot;
+                    }
+                ]
+            }
+        }
+    ]
+}
+</code></pre>
+<p>We'll save this as <code>NewStartUpSound.json</code>.</p>
+<p>Note that how this feature is implemented isn't part of the file. That's because
+this is purely to define what should get this feature. We have a name and
+description to allow users/developers/etc. to understand what feature this is
+for. A version allows tracking of changes. An email allows teams to understand
+who to reach out for with questions or concerns.</p>
+<p>The real power is in the rules. Rules are evaluated top down and the first
+<code>Allow</code> or <code>Deny</code> wins. <code>Audit</code> and <code>Warn</code> won't stop evaluations, but will take
+their respective action.</p>
+<h3 id="defining-the-context">Defining the Context</h3>
+<p>The last step in evaluating whether a flag passes/fails is to provide context
+for the device.</p>
+<p>Context can be composed however you wish as long as the final output is a hash
+table.</p>
+<p>To make it easy to start you can create an empty hash using your property set
+file.</p>
+<pre><code class="language-pwsh">$propertySet = Get-PropertySet -FilePath 'myProperties.json'
+$context = Get-DefaultContext -Properties $propertySet
+</code></pre>
+<p>That would make <code>$context</code> a hash table with 3 keys (each with an $null value)
+that matches the property set: <code>Percentage</code>, <code>Environment</code>, and <code>IsComplaint</code>.</p>
+<p>I'll define these manually but you can imagine this could be a call to another
+tool, etc. Or maybe this is just a file you store on disk.</p>
+<pre><code class="language-pwsh">$context['Percentage'] = 30
+$context['Environment'] = 'Production'
+$context['IsCompliant'] = $true
+</code></pre>
+<blockquote>
+<p>[!NOTE]
+Another value add of this not being hard coded is that you can create a mock
+context object to see how it would apply. Or you could create a function to
+determine another devices context values and see how it would apply before
+ever rolling out the change.</p>
+</blockquote>
+<h3 id="evaluating-the-feature-flag">Evaluating the Feature Flag</h3>
+<p>Now that the context, property set, and feature flag have been defined we can
+evaluate if the flag applies to the current device.</p>
+<pre><code class="language-powershell">Test-FeatureFlag -Feature 'NewStartUpSound' -Context $context -Properties $propertySet
+</code></pre>
+<p>The feature flag will be loaded from disk and each rule will be evaluated.</p>
+<p>The first rule is:</p>
+<pre><code class="language-json">{
+    &quot;Name&quot;: &quot;Audit staging&quot;,
+    &quot;Effect&quot;: &quot;Audit&quot;,
+    &quot;Conditions&quot;: {
+        &quot;Property&quot;: &quot;Environment&quot;,
+        &quot;Operator&quot;: &quot;Equals&quot;,
+        &quot;Value&quot;: &quot;Staging&quot;
+    }
+}
+</code></pre>
+<p>Because the <code>Environment</code> property in the Context is <code>Production</code> this rule does
+not apply and is skipped.</p>
+<pre><code class="language-json">{
+    &quot;Name&quot;: &quot;Warn Production&quot;,
+    &quot;Effect&quot;: &quot;Warn&quot;,
+    &quot;Conditions&quot;: {
+        &quot;Property&quot;: &quot;Environment&quot;,
+        &quot;Operator&quot;: &quot;Equals&quot;,
+        &quot;Value&quot;: &quot;Production&quot;
+    }
+}
+</code></pre>
+<p>This rule would apply because the only condition checks if it's the <code>Production</code>
+environment. Because the Effect is <code>Warn</code> the command will write a warning to
+the screen and move to the next rule.</p>
+<pre><code class="language-json">{
+    &quot;Name&quot;: &quot;Allow Staging and Complaint or 10%&quot;,
+    &quot;Effect&quot;: &quot;Allow&quot;,
+    &quot;Conditions&quot;: {
+        &quot;AllOf&quot;: [
+            {
+                &quot;AnyOf&quot;: [
+                    {
+                        &quot;Property&quot;: &quot;IsCompliant&quot;,
+                        &quot;Operator&quot;: &quot;Equals&quot;,
+                        &quot;Value&quot;: &quot;true&quot;
+                    },
+                    {
+                        &quot;Property&quot;: &quot;Percent&quot;,
+                        &quot;Operator&quot;: &quot;LessThan&quot;,
+                        &quot;Value&quot;: &quot;11&quot;
+                    }
+                ]
+            },
+            {
+                &quot;Property&quot;: &quot;Environment&quot;,
+                &quot;Operator&quot;: &quot;Equals&quot;,
+                &quot;Value&quot;: &quot;Staging&quot;
+            }
+        ]
+    }
+}
+</code></pre>
+<p>The first (and only condition) is an <code>AllOf</code> which means the items in it must
+both evaluate to true. The first item in that group is an <code>AnyOf</code> which means
+that either of the values can be true.</p>
+<p>Because the device context has <code>IsCompliant</code> to true, then the first condition
+matches. Then we proceed back up to the second item in the <code>AllOf</code> condition.
+This one again matches on environment, but is false because the context has
+environment set to <code>Production</code>.</p>
+<p>Because one of the items in the <code>AllOf</code> condition failed, then the rule is
+skipped.</p>
+<p>Because there are no more rules, we apply the effect from the <code>DefaultEffect</code>
+property.</p>
+<blockquote>
+<p>[!IMPORTANT]
+The <code>Test-FeatureFlag</code> command will always default to $False if the default
+effect is not an approval. This protects against accidentally opening a
+feature when your default is warn or audit.</p>
+</blockquote>
+<h2 id="to-do">To Do</h2>
+<ul>
+<li>[ ] Function to create PropertySet</li>
+<li>[ ] Class for FeatureFlag</li>
+<li>[ ] Evaluate performance</li>
+<li>[ ] Handle fetching/caching feature flags</li>
+<li>[ ] Script level variables for defining where to get/set json files.</li>
+<li>[ ] Function to create property in PropertySet</li>
+<li>[ ] Ability to create PropertySet in memory and then ability to save to disk.</li>
+<li>[ ] Define auditing method that users can overwrite</li>
+<li>[ ] Publish schemas somewhere consistent with some type of versioning</li>
+<li>[ ] CRUD for creating condition</li>
+<li>[ ] TUI?</li>
+<li>[ ] Support for evaluating remote device</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.1e8ae164.min.js"></script>
+      
+        <script src="search/main.js"></script>
+      
+    
+  </body>
+</html>
