@@ -1,15 +1,23 @@
 function Test-TypedValue {
     param (
         [Parameter(Mandatory)]
+        $Value,
+        [Parameter(Mandatory, ParameterSetName = "WithPropertyDefinition")]
+        [PropertyDefinition]
+        $PropertyDefinition,
+        [Parameter(Mandatory, ParameterSetName = "WithOutPropertyDefinition")]
         [string]
         $Type,
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ParameterSetName = "WithOutPropertyDefinition")]
         $Name,
-        [Parameter(Mandatory)]
-        $Value,
-        [Parameter()]
+        [Parameter(Mandatory, ParameterSetName = "WithOutPropertyDefinition")]
         $Validation
     )
+
+    if ($PSCmdlet.ParameterSetName -eq "WithPropertyDefinition" ) {
+        $PropertyDefinition.Validate($Value) | Out-Null
+        return
+    }
 
     if (-not $Validation) { return }
 

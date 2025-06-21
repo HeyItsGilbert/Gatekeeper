@@ -5,74 +5,59 @@ online version:
 schema: 2.0.0
 ---
 
-# New-PropertySet
+# Save-PropertySet
 
 ## SYNOPSIS
-Create a new property set.
+Save a PropertySet to a file.
 
 ## SYNTAX
 
 ```
-New-PropertySet [[-Properties] <PropertyDefinition[]>] [-ProgressAction <ActionPreference>] [-WhatIf]
- [-Confirm] [<CommonParameters>]
+Save-PropertySet [-PropertySet] <PropertySet> [[-FilePath] <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Create a new property set to export.
+Save a PropertySet to a specified file path in JSON format.
+This cmdlet
+allows you to persist the PropertySet for later use or sharing.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-$properties = @()
-$properties += New-Property -Name 'Hostname' -Type 'string' -Validation @{Pattern='*.contoso.com'}
-$set = New-PropertySet -Properties $properties
+Save-PropertySet -PropertySet $myPropertySet -FilePath "C:\path\to\file.json"
 ```
 
-This would create a new property object and create a new set with that property.
+Save the PropertySet to a JSON file at the specified path.
 
 ## PARAMETERS
 
-### -Properties
-A list of properties, typically created by \`New-Property\`.
+### -PropertySet
+The PropertySet to save.
 
 ```yaml
-Type: PropertyDefinition[]
+Type: PropertySet
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
-```
-
-### -WhatIf
-Shows what would happen if the cmdlet runs. The cmdlet is not run.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases: wi
-
-Required: False
-Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Confirm
-Prompts you for confirmation before running the cmdlet.
+### -FilePath
+The file path to save the PropertySet to.
 
 ```yaml
-Type: SwitchParameter
+Type: String
 Parameter Sets: (All)
-Aliases: cf
+Aliases:
 
 Required: False
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -100,7 +85,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### PropertySet
 ## NOTES
 
 ## RELATED LINKS

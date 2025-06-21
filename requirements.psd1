@@ -12,13 +12,13 @@
         }
     }
     'psake' = @{
-        Version = '4.9.0'
+        Version = '4.9.1'
     }
     'BuildHelpers' = @{
         Version = '2.0.16'
     }
     'PowerShellBuild' = @{
-        Version = '0.6.1'
+        Version = '0.7.2'
     }
     'PSScriptAnalyzer' = @{
         Version = '1.19.1'

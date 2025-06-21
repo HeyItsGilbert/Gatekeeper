@@ -6,7 +6,7 @@ function Get-DefaultContext {
     .DESCRIPTION
     Return a hash table of all the keys for the properties with null values.
 
-    .PARAMETER Properties
+    .PARAMETER PropertySet
     The PropertySet or file path to your properties.
 
     .EXAMPLE
@@ -27,9 +27,8 @@ function Get-DefaultContext {
         $PropertySet
     )
     # PropertySet has a Properties item
-    $currentProperties = $Properties
     $hashtable = @{}
-    foreach ($property in $currentProperties.Properties.Keys) {
+    foreach ($property in $PropertySet.Properties.Keys) {
         Write-Verbose "Adding property: $property"
         $hashtable[$property] = $null
     }

@@ -13,7 +13,7 @@ BeforeDiscovery {
 Describe 'Get-DefaultContext' {
     BeforeAll {
         $propertySet = Read-PropertySet -File "$PSScriptRoot\fixtures\Properties.json"
-        $script:actual = Get-DefaultContext -Properties $propertySet
+        $script:actual = Get-DefaultContext -PropertySet $propertySet
     }
     It 'Returns a hashtable' {
         $actual | Should -BeOfType 'Hashtable'

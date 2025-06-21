@@ -16,7 +16,7 @@ function New-PropertySet {
 
     This would create a new property object and create a new set with that property.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     [OutputType([PropertySet])]
     param (
         [Parameter(ValueFromPipeline)]
@@ -28,7 +28,9 @@ function New-PropertySet {
     }
     process {
         foreach ($property in $Properties) {
-            $propertySet.Properties[$property.Name] = $property
+            if ($PSCmdlet.ShouldProcess($property.Name, "Create new property with value: $($property.Value)")) {
+                $propertySet.Properties[$property.Name] = $property
+            }
         }
     }
     end {
