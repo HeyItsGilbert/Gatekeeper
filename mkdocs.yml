@@ -6,7 +6,7 @@ theme:
 nav:
   - Home: "index.md"
   - Changelog: "https://github.com/HeyItsGilbert/Gatekeeper/blob/main/CHANGELOG.md"
-  - en-US:
+  - Commands:
       - en-US/
 plugins:
   - search
