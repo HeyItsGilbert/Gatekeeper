@@ -1,10 +1,19 @@
 . $PSScriptRoot\..\Enums\Effect.ps1
+
+enum Operator {
+    Equals
+    NotEquals
+    GreaterThan
+    LessThan
+    In
+    NotIn
+}
 class ConditionGroup {
     [object]$AllOf
     [object]$AnyOf
     [object]$Not
     [string]$Property
-    [string]$Operator
+    [Operator]$Operator
     [object]$Value
 
     ConditionGroup([hashtable]$data) {
@@ -21,6 +30,29 @@ class ConditionGroup {
             $this.Not = $data.Not | ForEach-Object { [ConditionGroup]::new($_) }
         }
     }
+    # Constructor for creating a new sub group
+    ConditionGroup([string]$operator, [object[]]$conditions) {
+        $this.Property = $null
+        $this.Operator = $null
+        $this.Value = $null
+        switch ($operator) {
+            'AllOf' { $this.AllOf = $conditions }
+            'AnyOf' { $this.AnyOf = $conditions }
+            'Not' { $this.Not = $conditions }
+            default {
+                throw "Unknown operator: $operator"
+            }
+        }
+    }
+
+    [boolean]IsValid() {
+        # This check if for the top level condition group
+        # For nested condition groups (AllOf, AnyOf, Not) the validity is not checked.
+        if ($this.Property -and $this.Operator -and $this.Value) {
+            return $true
+        }
+        return $false
+    }
 }
 
 class Rule {
@@ -29,6 +61,9 @@ class Rule {
     [Effect]$Effect
     [ConditionGroup]$Conditions
 
+    Rule() {
+        $this.Conditions = [ConditionGroup]::new(@{})
+    }
     Rule([hashtable]$data) {
         $this.Name = $data.Name
         $this.Description = $data.Description

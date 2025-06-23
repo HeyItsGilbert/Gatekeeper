@@ -12,6 +12,17 @@ class PropertyValidation {
         if ($data.ContainsKey("MaxLength")) { $this.MaxLength = [int]$data.MaxLength }
         if ($data.ContainsKey("Pattern")) { $this.Pattern = $data.Pattern }
     }
+
+    [hashtable] ToHashtable() {
+        $data = @{
+            Minimum = $this.Minimum
+            Maximum = $this.Maximum
+            MinLength = $this.MinLength
+            MaxLength = $this.MaxLength
+            Pattern = $this.Pattern
+        }
+        return $data
+    }
 }
 
 class PropertyDefinition {
@@ -31,6 +42,19 @@ class PropertyDefinition {
         if ($data.ContainsKey("Validation")) {
             $this.Validation = [PropertyValidation]::new($data.Validation)
         }
+    }
+
+    [hashtable] ToHashtable() {
+        $data = @{
+            Type = $this.Type
+        }
+        if ($null -ne $this.Enum) {
+            $data.Enum = $this.Enum
+        }
+        if ($null -ne $this.Validation) {
+            $data.Validation = $this.Validation.ToHashtable()
+        }
+        return $data
     }
 
     [bool]Validate ($Value) {
@@ -75,7 +99,10 @@ class PropertySet {
     [string]$FilePath
     [hashtable]$Properties
 
-    #PropertySet() {}
+    PropertySet($Name) {
+        $this.Name = $Name
+        $this.Properties = @{}
+    }
     PropertySet([hashtable]$rawData) {
         $this.Properties = @{}
         foreach ($key in $rawData.Keys) {
@@ -103,6 +130,7 @@ class PropertySet {
         }
         $ps = [PropertySet]::new($json)
         $ps.FilePath = (Resolve-Path $FilePath).Path
+        $ps.Name = $ps.FilePath.BaseName
         return $ps
     }
 
@@ -132,7 +160,19 @@ class PropertySet {
             throw "No file path specified to save PropertySet."
         }
         Write-Verbose "Saving PropertySet to file: $($this.FilePath)"
-        $json = $this.Properties | ConvertTo-Json -Depth 10
+        if (-not (Test-Path -Path (Split-Path -Path $this.FilePath -Parent))) {
+            New-Item -ItemType Directory -Path (Split-Path -Path $this.FilePath -Parent) | Out-Null
+        }
+        # Convert the properties to a hashtable and then to JSON
+        # Use -Depth 10 to ensure nested objects are fully serialized
+        $hashtable = @{
+            '$schema' = 'https://raw.githubusercontent.com/PowerShell/Gatekeeper/main/Schemas/Properties.json'
+        }
+        foreach ($property in $this.Properties.Keys) {
+            $hashtable[$property] = $this.Properties[$property].ToHashtable()
+        }
+        # Convert to JSON with a depth of 10 to handle nested objects
+        $json = $hashtable | ConvertTo-Json -Depth 10
         Set-Content -Path $this.FilePath -Value $json
     }
 }

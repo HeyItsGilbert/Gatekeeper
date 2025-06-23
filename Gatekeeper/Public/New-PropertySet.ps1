@@ -30,8 +30,7 @@ function New-PropertySet {
         $Properties
     )
     begin {
-        $propertySet = [PropertySet]::new()
-        $propertySet.Name = $Name
+        $propertySet = [PropertySet]::new($Name)
         $folder = Get-PropertySetFolder
         $propertySet.FilePath = Join-Path $folder "$($Name).json"
     }

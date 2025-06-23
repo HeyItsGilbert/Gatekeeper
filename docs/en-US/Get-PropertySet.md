@@ -5,51 +5,33 @@ online version:
 schema: 2.0.0
 ---
 
-# Save-PropertySet
+# Get-PropertySet
 
 ## SYNOPSIS
-Save a PropertySet to a file.
+{{ Fill in the Synopsis }}
 
 ## SYNTAX
 
 ```
-Save-PropertySet [-PropertySet] <PropertySet> [[-FilePath] <String>] [-ProgressAction <ActionPreference>]
- [<CommonParameters>]
+Get-PropertySet [[-Name] <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Save a PropertySet to a specified file path in JSON format.
-This cmdlet
-allows you to persist the PropertySet for later use or sharing.
+{{ Fill in the Description }}
 
 ## EXAMPLES
 
-### EXAMPLE 1
-```
-Save-PropertySet -PropertySet $myPropertySet -FilePath "C:\path\to\file.json"
+### Example 1
+```powershell
+PS C:\> {{ Add example code here }}
 ```
 
-Save the PropertySet to a JSON file at the specified path.
+{{ Add example description here }}
 
 ## PARAMETERS
 
-### -PropertySet
-The PropertySet to save.
-
-```yaml
-Type: PropertySet
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
-```
-
-### -FilePath
-The file path to save the PropertySet to.
+### -Name
+{{ Fill Name Description }}
 
 ```yaml
 Type: String
@@ -57,7 +39,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -83,8 +65,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
+### None
+
 ## OUTPUTS
 
+### System.Object
 ## NOTES
 
 ## RELATED LINKS

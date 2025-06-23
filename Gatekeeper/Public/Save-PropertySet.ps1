@@ -20,7 +20,7 @@ function Save-PropertySet {
     #>
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ValueFromPipeline)]
         [PropertySet]
         [PropertySetTransformAttribute()]
         $PropertySet,
