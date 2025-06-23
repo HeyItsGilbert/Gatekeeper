@@ -5,65 +5,43 @@ online version:
 schema: 2.0.0
 ---
 
-# Read-FeatureFlag
+# Import-GatekeeperConfig
 
 ## SYNOPSIS
-Read a feature flag from disk.
+{{ Fill in the Synopsis }}
 
 ## SYNTAX
 
-### ByName
 ```
-Read-FeatureFlag [-Name] <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
-```
-
-### ByFilePath
-```
-Read-FeatureFlag -FilePath <Object> [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Import-GatekeeperConfig [-ForceReload] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Reads the feature flag json file from disk and convert it to a feature flag
-object.
+{{ Fill in the Description }}
 
 ## EXAMPLES
 
-### EXAMPLE 1
-```
-Read-FeatureFlag -FilePath 'MyFeature.json
+### Example 1
+```powershell
+PS C:\> {{ Add example code here }}
 ```
 
-Read the feature from disk.
+{{ Add example description here }}
 
 ## PARAMETERS
 
-### -Name
-{{ Fill Name Description }}
+### -ForceReload
+{{ Fill ForceReload Description }}
 
 ```yaml
-Type: String
-Parameter Sets: ByName
+Type: SwitchParameter
+Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -FilePath
-The file path to the json.
-
-```yaml
-Type: Object
-Parameter Sets: ByFilePath
-Aliases:
-
-Required: True
+Required: False
 Position: Named
 Default value: None
-Accept pipeline input: True (ByValue)
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
@@ -87,9 +65,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
+### None
+
 ## OUTPUTS
 
-### System.Collections.Generic.List`1[[PropertySet, PowerShell Class Assembly, Version=1.0.0.2, Culture=neutral, PublicKeyToken=null]]
+### System.Object
 ## NOTES
 
 ## RELATED LINKS

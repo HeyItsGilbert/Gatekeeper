@@ -1,7 +1,7 @@
-function Save-PropertySet {
+function FeatureFlag {
     <#
     .SYNOPSIS
-    Save a PropertySet to a file.
+    Save a FeatureFlag to a file.
 
     .DESCRIPTION
     Save a PropertySet to a specified file path in JSON format. This cmdlet
@@ -14,27 +14,27 @@ function Save-PropertySet {
     The file path to save the PropertySet to.
 
     .EXAMPLE
-    Save-PropertySet -PropertySet $myPropertySet -FilePath "C:\path\to\file.json"
+    Save-FeatureFlag -PropertySet $myPropertySet -FilePath "C:\path\to\file.json"
 
     Save the PropertySet to a JSON file at the specified path.
     #>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [PropertySet]
-        [PropertySetTransformAttribute()]
-        $PropertySet,
+        [FeatureFlag]
+        [FeatureFlagTransformAttribute()]
+        $FeatureFlag,
         [String]
         $FilePath
     )
 
     process {
         if ($PSBoundParameters.ContainsKey('FilePath')) {
-            Write-Verbose "Saving PropertySet to file: $FilePath"
-            $PropertySet.FilePath = $FilePath
+            Write-Verbose "Saving FeatureFlag to file: $FilePath"
+            $FeatureFlag.FilePath = $FilePath
         } else {
-            Write-Verbose "No FilePath specified, using PropertySet's existing FilePath."
+            Write-Verbose "No FilePath specified, using FeatureFlag's existing FilePath."
         }
-        $PropertySet.Save()
+        $FeatureFlag.Save()
     }
 }

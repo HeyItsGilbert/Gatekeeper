@@ -12,8 +12,14 @@ Read the properties from disk.
 
 ## SYNTAX
 
+### ByName
 ```
-Read-PropertySet [-FilePath] <Object> [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Read-PropertySet [-Name] <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+### ByFilePath
+```
+Read-PropertySet -FilePath <Object> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -31,16 +37,31 @@ to evaluate.
 
 ## PARAMETERS
 
+### -Name
+{{ Fill Name Description }}
+
+```yaml
+Type: String
+Parameter Sets: ByName
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -FilePath
 The file path to the json.
 
 ```yaml
 Type: Object
-Parameter Sets: (All)
+Parameter Sets: ByFilePath
 Aliases:
 
 Required: True
-Position: 1
+Position: Named
 Default value: None
 Accept pipeline input: True (ByValue)
 Accept wildcard characters: False

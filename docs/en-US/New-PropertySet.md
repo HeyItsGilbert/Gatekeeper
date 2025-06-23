@@ -13,8 +13,8 @@ Create a new property set.
 ## SYNTAX
 
 ```
-New-PropertySet [[-Properties] <PropertyDefinition[]>] [-ProgressAction <ActionPreference>] [-WhatIf]
- [-Confirm] [<CommonParameters>]
+New-PropertySet [[-Name] <String>] [[-Properties] <PropertyDefinition[]>] [-ProgressAction <ActionPreference>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -33,6 +33,21 @@ This would create a new property object and create a new set with that property.
 
 ## PARAMETERS
 
+### -Name
+{{ Fill Name Description }}
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Properties
 A list of properties, typically created by \`New-Property\`.
 
@@ -42,7 +57,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
+Position: 2
 Default value: None
 Accept pipeline input: True (ByValue)
 Accept wildcard characters: False

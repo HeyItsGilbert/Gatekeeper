@@ -7,6 +7,10 @@ function Read-FeatureFlag {
     Reads the feature flag json file from disk and convert it to a feature flag
     object.
 
+    .PARAMETER Name
+    The name of the feature flag to read from the default feature flag folder
+    path.
+
     .PARAMETER FilePath
     The file path to the json.
 
@@ -18,15 +22,26 @@ function Read-FeatureFlag {
     [CmdletBinding()]
     [OutputType([System.Collections.Generic.List[PropertySet]])]
     param (
-        [Parameter(Mandatory, ValueFromPipeline)]
+        [Parameter(Mandatory, Position = 0, ParameterSetName = 'ByName')]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Name,
+        [Parameter(Mandatory, ValueFromPipeline, ParameterSetName = 'ByFilePath')]
         $FilePath
     )
     begin {
         $featureFlags = [System.Collections.Generic.List[PropertySet]]::new()
     }
     process {
+        if ($PSBoundParameters.ContainsKey('FilePath')) {
+            Write-Verbose "Reading FeatureFlag from file: $FilePath"
+        } else {
+            Write-Verbose "No FilePath specified, using default feature flag folder."
+            $folder = Get-FeatureFlagFolder
+            $FilePath = Join-Path $folder "$Name.json"
+        }
         $featureFlags.Add(
-            ([FeatureFlag]::new($FilePath))
+            ([FeatureFlag]::FromJson($FilePath))
         )
     }
 

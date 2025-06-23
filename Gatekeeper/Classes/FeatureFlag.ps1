@@ -45,6 +45,7 @@ class FeatureFlag {
     [string]$Author
     [Effect]$DefaultEffect
     [Rule[]]$Rules
+    [string]$FilePath
 
     FeatureFlag() {}
     FeatureFlag([hashtable]$data) {
@@ -65,7 +66,14 @@ class FeatureFlag {
         return [FeatureFlag]::new($data)
     }
 
-    # TODO: Create an export
+    [void]Save() {
+        if ($null -eq $this.FilePath) {
+            throw "No file path specified to save FeatureFlag."
+        }
+        Write-Verbose "Saving FeatureFlag to file: $($this.FilePath)"
+        $json = $this | ConvertTo-Json -Depth 10 -EnumsAsStrings
+        Set-Content -Path $this.FilePath -Value $json
+    }
 }
 
 class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {

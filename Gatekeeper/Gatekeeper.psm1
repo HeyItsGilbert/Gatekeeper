@@ -11,13 +11,19 @@ foreach ($import in @($enum + $classes + $public + $private)) {
     }
 }
 
+# Import the configuration
+$script:GatekeeperConfiguration = Import-GatekeeperConfig -ErrorAction Stop
+
 Export-ModuleMember -Function $public.Basename
 
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
     [PropertySet],
     [PropertyDefinition],
-    [FeatureFlag]
+    [FeatureFlag],
+    [Rule],
+    [ConditionGroup],
+    [Effect]
 )
 # Get the internal TypeAccelerators class to use its static methods.
 $TypeAcceleratorsClass = [PSObject].Assembly.GetType(

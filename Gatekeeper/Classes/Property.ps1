@@ -70,7 +70,7 @@ class PropertyDefinition {
 
 class PropertySet {
     # TODO: Should this class have more properties?
-    # [string]$Name
+    [string]$Name
     # FilePath is used to save the PropertySet to a file.
     [string]$FilePath
     [hashtable]$Properties
