@@ -70,6 +70,11 @@ function New-FeatureFlag {
     begin {
         $featureFlag = [FeatureFlag]::new()
         $featureFlag.Name = $Name
+        $featureFlag.Description = $Description
+        $featureFlag.Version = $Version
+        $featureFlag.Author = $Author
+        $featureFlag.DefaultEffect = $DefaultEffect
+        $featureFlag.Tags = $Tags
         $folder = Get-FeatureFlagFolder
         $featureFlag.FilePath = Join-Path $folder "$($Name).json"
     }

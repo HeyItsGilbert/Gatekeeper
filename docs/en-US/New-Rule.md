@@ -13,8 +13,8 @@ Create a new rule for a feature flag.
 ## SYNTAX
 
 ```
-New-Rule [-Name] <String> [[-Description] <Object>] [-Effect] <ValidateNotNullOrEmptyAttribute>
- [-Conditions] <ConditionGroup> [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-Rule [-Name] <String> [[-Description] <Object>] [-Effect] <Effect> [-Conditions] <ConditionGroup>
+ [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -68,9 +68,10 @@ Accept wildcard characters: False
 The effect of the rule (e.g., allow, deny).
 
 ```yaml
-Type: ValidateNotNullOrEmptyAttribute
+Type: Effect
 Parameter Sets: (All)
 Aliases:
+Accepted values: Allow, Deny, Audit, Warn
 
 Required: True
 Position: 3

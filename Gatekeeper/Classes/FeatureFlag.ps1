@@ -17,9 +17,30 @@ class ConditionGroup {
     [object]$Value
 
     ConditionGroup([hashtable]$data) {
-        $this.Property = $data.Property
-        $this.Operator = $data.Operator
-        $this.Value = $data.Value
+        if ($null -eq $data) {
+            throw "Data cannot be null."
+        }
+        # This should either have a single condition or a group of conditions
+        if ($data.ContainsKey('AllOf') -and $data.ContainsKey('AnyOf') -and $data.ContainsKey('Not')) {
+            throw "ConditionGroup cannot have AllOf, AnyOf, and Not at the same time."
+        }
+        if (($data.ContainsKey('AllOf') -or $data.ContainsKey('AnyOf') -or $data.ContainsKey('Not')) -and
+            ($data.ContainsKey('Property') -or $data.ContainsKey('Operator') -or $data.ContainsKey('Value'))) {
+            throw "ConditionGroup with AllOf, AnyOf, or Not cannot also have Property, Operator, and Value defined."
+        }
+        if ($data.ContainsKey('Property') -and
+            (-not $data.ContainsKey('Operator') -or -not $data.ContainsKey('Value'))) {
+            throw "ConditionGroup with Property must also have Operator and Value defined."
+        }
+        if ($data.ContainsKey('Property')) {
+            $this.Property = $data.Property
+        }
+        if ($data.ContainsKey('Operator')) {
+            $this.Operator = $data.Operator
+        }
+        if ($data.ContainsKey('Value')) {
+            $this.Value = $data.Value
+        }
         if ($data.ContainsKey('AllOf')) {
             $this.AllOf = $data.AllOf | ForEach-Object { [ConditionGroup]::new($_) }
         }
@@ -32,9 +53,6 @@ class ConditionGroup {
     }
     # Constructor for creating a new sub group
     ConditionGroup([string]$operator, [object[]]$conditions) {
-        $this.Property = $null
-        $this.Operator = $null
-        $this.Value = $null
         switch ($operator) {
             'AllOf' { $this.AllOf = $conditions }
             'AnyOf' { $this.AnyOf = $conditions }
@@ -48,10 +66,44 @@ class ConditionGroup {
     [boolean]IsValid() {
         # This check if for the top level condition group
         # For nested condition groups (AllOf, AnyOf, Not) the validity is not checked.
-        if ($this.Property -and $this.Operator -and $this.Value) {
+        if ($null -ne $this.Property -and $null -ne $this.Operator -and $null -ne $this.Value) {
             return $true
         }
         return $false
+    }
+    [string]ToString() {
+        $sb = [System.Text.StringBuilder]::new()
+        if ($this.AllOf) {
+            [void]$sb.Append("AllOf(")
+            $list = @()
+            foreach ($condition in $this.AllOf) {
+                $list += $condition.ToString()
+            }
+            [void]$sb.Append($list -join ', ')
+            [void]$sb.Append(")")
+        }
+        if ($this.AnyOf) {
+            [void]$sb.Append("AnyOf(")
+            $list = @()
+            foreach ($condition in $this.AnyOf) {
+                $list += $condition.ToString()
+            }
+            [void]$sb.Append($list -join ', ')
+            [void]$sb.Append(")")
+        }
+        if ($this.Not) {
+            [void]$sb.Append("Not(")
+            $list = @()
+            foreach ($condition in $this.Not) {
+                $list += $condition.ToString()
+            }
+            [void]$sb.Append($list -join ', ')
+            [void]$sb.Append(")")
+        }
+        if ($null -ne $this.Property -and $null -ne $this.Operator -and $null -ne $this.Value) {
+            [void]$sb.Append("$($this.Property) $($this.Operator) $($this.Value)")
+        }
+        return $sb.ToString()
     }
 }
 
@@ -61,14 +113,24 @@ class Rule {
     [Effect]$Effect
     [ConditionGroup]$Conditions
 
-    Rule() {
-        $this.Conditions = [ConditionGroup]::new(@{})
+    Rule([string]$Name) {
+        $this.Name = $Name
     }
+
     Rule([hashtable]$data) {
         $this.Name = $data.Name
         $this.Description = $data.Description
         $this.Effect = $data.Effect
-        $this.Conditions = [ConditionGroup]::new($data.Conditions)
+        if ($data.ContainsKey('Conditions')) {
+            # Check if it's a condition group
+            if ($data.Conditions -is [ConditionGroup]) {
+                $this.Conditions = $data.Conditions
+            } elseif ($data.Conditions -is [hashtable]) {
+                $this.Conditions = [ConditionGroup]::new($data.Conditions)
+            } else {
+                throw "Unknown type for Conditions: $($data.Conditions.GetType().FullName)"
+            }
+        }
     }
 }
 

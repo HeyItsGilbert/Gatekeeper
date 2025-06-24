@@ -35,7 +35,7 @@ function New-Rule {
         [Parameter()]
         $Description,
         [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty]
+        [ValidateNotNullOrEmpty()]
         [Effect]
         $Effect,
         [Parameter(Mandatory, ValueFromPipeline)]
@@ -43,22 +43,25 @@ function New-Rule {
         $Conditions
     )
     begin {
-        $rule = [Rule]::new()
-        $rule.Name = $Name
+        $rule = [Rule]::new($Name)
         $rule.Description = $Description
         $rule.Effect = $Effect
+        $conditionList = @()
     }
     process {
         foreach ($condition in $Conditions) {
             if ($PSCmdlet.ShouldProcess($condition.Property, "Add condition: $($condition.Property) with operator: $($condition.Operator)")) {
-                if (-not $rule.Conditions) {
-                    $rule.Conditions = [ConditionGroup]::new(@{})
-                }
-                $rule.Conditions.AllOf += $condition
+                $conditionList += $condition
             }
         }
     }
     end {
+        # Join all the conditions into a single ConditionGroup
+        if ($conditionList.Count -eq 0) {
+            Write-Warning "No conditions were provided for the rule '$($rule.Name)'. The rule will apply the default effect to all cases!"
+        } else {
+            $rule.Conditions = [ConditionGroup]::new('AllOf', $conditionList)
+        }
         if ($PSCmdlet.ShouldProcess($rule.Name, "Create new rule with effect: $($rule.Effect)")) {
             return $rule
         }
