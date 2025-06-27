@@ -26,6 +26,10 @@ BeforeDiscovery {
         $params.CommandType[0] += 'Workflow'
     }
     $commands = Get-Command @params
+    $global:customEnumTypes = @(
+        [Effect],
+        [Operator]
+    )
 
     ## When testing help, remember that help is cached at the beginning of each session.
     ## To test, restart session.
@@ -99,6 +103,11 @@ Describe "Test help for <_.Name>" -ForEach $commands {
 
         # Parameter type in help should match code
         It "Has correct parameter type" {
+            # If it's a custom object it won't show up in the help, so we skip it.
+            if ($parameter.ParameterType -in $global:customEnumTypes) {
+                Set-ItResult -Skipped -Because 'Custom object types are not shown in help.'
+            }
+
             $parameterHelpType | Should -Be $parameter.ParameterType.Name
         }
     }
