@@ -9,4 +9,5 @@ permissions:
   issues: write
 jobs:
   ci:
+    name: Continuous Integration
     uses: HeyItsGilbert/.github/.github/workflows/ModuleCI.yml@main

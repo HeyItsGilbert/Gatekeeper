@@ -1,0 +1,11 @@
+name: Publish Module
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  publish:
+    name: Publish Module
+    uses: HeyItsGilbert/.github/.github/workflows/PublishModule.yml@main
+    secrets: inherit
