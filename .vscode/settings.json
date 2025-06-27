@@ -3,5 +3,12 @@
     "files.insertFinalNewline": true,
     "editor.insertSpaces": true,
     "editor.tabSize": 4,
-    "powershell.codeFormatting.preset": "OTBS"
+    "powershell.codeFormatting.preset": "OTBS",
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "**/.ruby-lsp": true,
+        "Output/**": true
+    }
 }
