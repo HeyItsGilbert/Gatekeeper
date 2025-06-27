@@ -6,14 +6,14 @@ function New-ConditionGroup {
     .DESCRIPTION
     Create a new condition group that can be used to define rules for feature flags.
 
-    .PARAMETER JoinOperator
+    .PARAMETER Operator
     The operator to use for joining conditions in the group (e.g., 'AllOf', 'AnyOf', 'Not').
 
     .PARAMETER Conditions
     The conditions that are part of the group. This can be a single condition or an array of conditions.
 
     .EXAMPLE
-    $conditionGroup = New-ConditionGroup -JoinOperator 'AllOf' -Conditions @($condition1, $condition2)
+    $conditionGroup = New-ConditionGroup -Operator 'AllOf' -Conditions @($condition1, $condition2)
 
     This would create a new condition group that requires all of the specified conditions to be met.
     .NOTES

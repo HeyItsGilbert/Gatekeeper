@@ -42,6 +42,12 @@ function Export-GatekeeperConfig {
         if (-not $script:GatekeeperConfiguration) {
             Import-GatekeeperConfig
         }
+        if ($Configuration) {
+            Write-Verbose "Using provided configuration hashtable to export Gatekeeper configuration."
+            $script:GatekeeperConfiguration = $Configuration
+        } else {
+            Write-Verbose "Using existing Gatekeeper configuration for export."
+        }
     }
 
     process {

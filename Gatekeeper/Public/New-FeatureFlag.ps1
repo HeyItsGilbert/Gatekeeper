@@ -76,7 +76,14 @@ function New-FeatureFlag {
         $featureFlag.DefaultEffect = $DefaultEffect
         $featureFlag.Tags = $Tags
         $folder = Get-FeatureFlagFolder
-        $featureFlag.FilePath = Join-Path $folder "$($Name).json"
+        if (-not $FilePath) {
+            Write-Verbose "No file path specified, using default folder: $folder"
+            $fullPath = Join-Path $folder "$($Name).json"
+        } else {
+            Write-Verbose "Using specified file path: $FilePath"
+            $fullPath = Resolve-Path $FilePath
+        }
+        $featureFlag.FilePath = $fullPath
     }
     process {
         foreach ($rule in $Rules) {
