@@ -329,8 +329,8 @@ property.
 | `Logging.Warning`    | Logging settings for warning rules, including whether logging is enabled and the script to execute. | See the [Logging](#logging) table |
 | `Logging.Audit`      | Logging settings for audit rules, including whether logging is enabled and the script to execute.   | See the [Logging](#logging) table |
 
-[^1]: These folders are evaluated during a run and the configuration is saved to
-disk. These default to the same folder as the machine wide configuration.
+[^1]: These folders are evaluated during a run and the configuration is saved
+  to disk. These default to the same folder as the machine wide configuration.
 
 ### Loading Precedent
 
@@ -343,8 +343,6 @@ users' local settings (from `$Env:LocalAppData` or `~/.config/`).
 
 > [!NOTE]
 > All the logic of placing configuration is thanks to the Configuration module.
-
-# TODO finish this read me
 
 ## Logging
 
@@ -363,17 +361,61 @@ know the rule would have passed.
 | Warning       | Enabled  | `Write-Warning "⚠️ Rule [$($Rule.Name)] matched."`           |
 | Audit         | Enabled  | `Write-Host "Audit: $($Rule.Name)"`                          |
 
-# TODO add example of overwriting logging
-
 The most obvious logging method to overwrite will be `Audit`. In your
 [configuration file](#configuration) you will need to overwrite the script
 block.
 
-## ToDo
+### Changing Auditing Function
+
+To change your auditing function you need to update your `Configuration.psd1` to
+contain something like the following:
+
+```powershell
+Logging = @{
+    ... # Your other logging functions (if any)
+    Audit = @{
+        # Ensure it's enabled
+        Enabled = $true
+        Script = {
+            param($Rule)
+            $line = "✅ Rule [$($Rule.Name)] matched and is allowed."
+            $line | Out-File C:\Contoso\Logs\Gatekeeper.log -Append
+        }
+    }
+}
+```
+
+Here is an example if you prefer to use a script from disk.
+
+Let's say you have a script called `C:\Contoso\Logging.ps1`. That script writes
+to a log file. The script could look something like :
+
+```powershell
+param($Rule)
+$line = "✅ Rule [$($Rule.Name)] matched and is allowed."
+$line | Out-File C:\Contoso\Logs\Gatekeeper.log -Append
+```
+
+Then you would update your configuration to look like:
+
+```powershell
+Logging = @{
+    ... # Your other logging functions (if any)
+    Audit = @{
+        # Ensure it's enabled
+        Enabled = $true
+        Script = 'C:\Contoso\Logging.ps1'
+    }
+}
+```
+
+> [!IMPORTANT]
+> If you supply a string, it must be a valid path to a script file
+> that accepts the `$Rule` parameter.
+
+# ToDo List
 
 These are items that may or may not be setup.
 
 - [ ] Evaluate performance
 - [ ] Support for evaluating remote device
-
-[config]: blob/main/Gatekeeper/Configuration.psd1
