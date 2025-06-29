@@ -321,8 +321,8 @@ property.
 | `Version`    | The version of the configuration file, used for safe upgrades.                                      | `0.1.0` |
 | `FilePaths`  | An object containing paths to important folders, such as Schemas.                                   | Objects |
 | `FilePaths.Schemas` | The path to the the Schemas on disk. | `Schemas` in Module directory |
-| `FilePaths.FeatureFlags` | The path to the the FeatureFlags on disk. | `$null`. ^[1] |
-| `FilePaths.PropertySet` | The path to the the PropertySet's on disk. | `$null`. ^[1] |
+| `FilePaths.FeatureFlags` | The path to the the FeatureFlags on disk. | `$null`. [^1] |
+| `FilePaths.PropertySet` | The path to the the PropertySet's on disk. | `$null`.[^1] |
 | `Logging`    | An object defining logging behaviors for different rule outcomes (Allow, Deny, Warning, Audit).     | Object with `Allow`, `Deny`, `Warning`, and `Audit` defined. |
 | `Logging.Allow`      | Logging settings for allowed rules, including whether logging is enabled and the script to execute. | See the [Logging](#logging) table |
 | `Logging.Deny`       | Logging settings for denied rules, including whether logging is enabled and the script to execute.  | See the [Logging](#logging) table |
