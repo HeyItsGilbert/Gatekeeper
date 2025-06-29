@@ -1,4 +1,21 @@
 function Get-PropertySet {
+    <#
+    .SYNOPSIS
+    Retrieve property sets from the Gatekeeper configuration.
+
+    .DESCRIPTION
+    This function retrieves property sets from the Gatekeeper configuration.
+    It can return all property sets or a specific one by name. Property sets are
+    stored in a cache to avoid multiple reads from disk, improving performance.
+
+    .PARAMETER Name
+    The name of the property set to retrieve.
+    If not specified, all property sets will be returned.
+    .EXAMPLE
+    $propertySet = Get-PropertySet -Name 'MyPropertySet'
+
+    This retrieves the property set with the name 'MyPropertySet'.
+    #>
     param (
         [Parameter()]
         [string]

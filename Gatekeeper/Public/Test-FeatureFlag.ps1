@@ -38,6 +38,7 @@
 
     begin {
         $finalResult = $False
+        $config = Import-GatekeeperConfig
     }
 
     process {
@@ -51,22 +52,24 @@
                 Condition = $rule.Conditions
             }
             if (Test-Condition @testConditionSplat) {
-                Write-Verbose "✅ Rule [$($rule.Name)] matched. Effect: $($rule.Effect)" -ForegroundColor Green
+                Write-Verbose "✅ Rule [$($rule.Name)] matched. Effect: $($rule.Effect)"
                 # Check effect
                 switch ($rule.Effect) {
                     'Allow' {
+                        . $script:GatekeeperLogging['Allow'] -Rule $rule
                         $finalResult = $true
                         break
                     }
                     'Deny' {
+                        . $script:GatekeeperLogging['Deny'] -Rule $rule
                         $finalResult = $false
                         break
                     }
                     'Audit' {
-                        # TODO: Implement auditing function
+                        . $script:GatekeeperLogging['Audit'] -Rule $rule
                     }
                     'Warn' {
-                        Write-Warning "⚠️ Rule [$($rule.Name)] matched."
+                        . $script:GatekeeperLogging['Warning'] -Rule $rule
                     }
                     default {
                         throw 'Unknown effect'
