@@ -314,17 +314,66 @@ property.
 > effect is not an approval. This protects against accidentally opening a
 > feature when your default is warn or audit.
 
-## To Do
+## Configuration
 
-- [ ] Function to create PropertySet
-- [ ] Class for FeatureFlag
+| Key        | Description                                                                                         | Default |
+|------------|-----------------------------------------------------------------------------------------------------| -|
+| `Version`    | The version of the configuration file, used for safe upgrades.                                      | `0.1.0` |
+| `FilePaths`  | An object containing paths to important folders, such as Schemas.                                   | Objects |
+| `FilePaths.Schemas` | The path to the the Schemas on disk. | `Schemas` in Module directory |
+| `FilePaths.FeatureFlags` | The path to the the FeatureFlags on disk. | `$null`. ^[1] |
+| `FilePaths.PropertySet` | The path to the the PropertySet's on disk. | `$null`. ^[1] |
+| `Logging`    | An object defining logging behaviors for different rule outcomes (Allow, Deny, Warning, Audit).     | Object with `Allow`, `Deny`, `Warning`, and `Audit` defined. |
+| `Logging.Allow`      | Logging settings for allowed rules, including whether logging is enabled and the script to execute. | See the [Logging](#logging) table |
+| `Logging.Deny`       | Logging settings for denied rules, including whether logging is enabled and the script to execute.  | See the [Logging](#logging) table |
+| `Logging.Warning`    | Logging settings for warning rules, including whether logging is enabled and the script to execute. | See the [Logging](#logging) table |
+| `Logging.Audit`      | Logging settings for audit rules, including whether logging is enabled and the script to execute.   | See the [Logging](#logging) table |
+
+[^1]: These folders are evaluated during a run and the configuration is saved to
+disk. These default to the same folder as the machine wide configuration.
+
+### Loading Precedent
+
+Configuration begins by loading the
+[Configuration.psd1](config) from the module.
+Then it loads the machine-wide settings (e.g. `$Env:ProgramData` or
+`/etc/xdg/`). Then it imports the users' enterprise roaming settings (e.g. from
+`$Env:AppData` (the roaming path) or `~/.local/share/`). Finally it imports the
+users' local settings (from `$Env:LocalAppData` or `~/.config/`).
+
+> [!NOTE]
+> All the logic of placing configuration is thanks to the Configuration module.
+
+# TODO finish this read me
+
+## Logging
+
+Logging is defined in the configuration file and can be a a path on disk or a
+scriptblock. Either should accept a `$Rule` parameter (but don't necessarily
+need to use it).
+
+The default configuration has the Allow and Deny logging rule set to disable to
+avoid cluttering the screen. The default warning will `Write-Warning` to let you
+know the rule would have passed.
+
+| Logging Level | Enabled  | Default                                                      |
+|---------------|----------|--------------------------------------------------------------|
+| Allow         | Disabled | `Write-Host "✅ Rule [$($Rule.Name)] matched and is allowed"` |
+| Deny          | Disabled | `Write-Host "⛔ Rule [$($Rule.Name)] matched and is denied."` |
+| Warning       | Enabled  | `Write-Warning "⚠️ Rule [$($Rule.Name)] matched."`           |
+| Audit         | Enabled  | `Write-Host "Audit: $($Rule.Name)"`                          |
+
+# TODO add example of overwriting logging
+
+The most obvious logging method to overwrite will be `Audit`. In your
+[configuration file](#configuration) you will need to overwrite the script
+block.
+
+## ToDo
+
+These are items that may or may not be setup.
+
 - [ ] Evaluate performance
-- [ ] Handle fetching/caching feature flags
-- [ ] Script level variables for defining where to get/set json files.
-- [ ] Function to create property in PropertySet
-- [ ] Ability to create PropertySet in memory and then ability to save to disk.
-- [ ] Define auditing method that users can overwrite
-- [ ] Publish schemas somewhere consistent with some type of versioning
-- [ ] CRUD for creating condition
-- [ ] TUI?
 - [ ] Support for evaluating remote device
+
+[config]: blob/main/Gatekeeper/Configuration.psd1
