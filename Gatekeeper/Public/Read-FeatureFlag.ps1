@@ -40,8 +40,9 @@ function Read-FeatureFlag {
             $folder = Get-FeatureFlagFolder
             $FilePath = Join-Path $folder "$Name.json"
         }
+        $json = Get-Content -Raw $FilePath
         $featureFlags.Add(
-            ([FeatureFlag]::FromJson($FilePath))
+            ([FeatureFlag]::FromJson($json))
         )
     }
 
