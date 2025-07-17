@@ -41,7 +41,6 @@ function New-Condition {
 
     Write-Verbose "Initializing new condition for property '$Property' with operator '$Operator' and value '$Value'."
     # Test if Property is a known property
-    # TODO: Configure Get-PropertySet to return a list of all properties
     if ($property -notin (Get-PropertySet).Properties.Keys) {
         Write-Warning "Property '$Property' is not defined in any property set."
     }
