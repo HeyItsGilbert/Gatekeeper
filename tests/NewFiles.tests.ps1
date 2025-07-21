@@ -20,10 +20,9 @@ BeforeDiscovery {
 Describe 'File Creations' {
     BeforeAll {
         # Override the default file path for testing
-        InModuleScope $env:BHProjectName {
-            Mock Get-ConfigurationPath -ModuleName 'Configuration' {
-                return (Get-PSDrive TestDrive).Root
-            }
+        $script:GatekeeperConfiguration = @{
+            FeatureFlagFolder = Join-Path (Get-PSDrive TestDrive).Root 'FeatureFlags'
+            PropertySet       = Join-Path (Get-PSDrive TestDrive).Root 'PropertySet'
         }
     }
     # I'm doing a no-no IMO, but this is probably fine.
@@ -42,7 +41,6 @@ Describe 'File Creations' {
         BeforeAll {
             # Mock the Get-FeatureFlagFolder to return a test path
             Mock Get-FeatureFlagFolder -ModuleName $env:BHProjectName {
-
                 return (Get-PSDrive TestDrive).Root
             }
             $condition = New-Condition -Property 'UserRole' -Operator 'Equals' -Value 'Admin'
