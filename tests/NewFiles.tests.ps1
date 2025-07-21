@@ -20,8 +20,10 @@ BeforeDiscovery {
 Describe 'File Creations' {
     BeforeAll {
         # Override the default file path for testing
-        Mock Get-ConfigurationPath -ModuleName $env:BHProjectName {
-            return (Get-PSDrive TestDrive).Root
+        InModuleScope $env:BHProjectName {
+            Mock Get-ConfigurationPath -ModuleName 'Configuration' {
+                return (Get-PSDrive TestDrive).Root
+            }
         }
     }
     # I'm doing a no-no IMO, but this is probably fine.
