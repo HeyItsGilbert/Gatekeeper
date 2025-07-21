@@ -19,10 +19,19 @@ BeforeDiscovery {
 }
 Describe 'File Creations' {
     BeforeAll {
+        Mock -CommandName 'Get-PropertySetFolder' {
+            return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'PropertySet')
+        }
+        Mock -CommandName 'Get-PropertySetFolder' {
+            return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'PropertySet')
+        }
         # Override the default file path for testing
         $script:GatekeeperConfiguration = @{
-            FeatureFlagFolder = Join-Path (Get-PSDrive TestDrive).Root 'FeatureFlags'
-            PropertySet       = Join-Path (Get-PSDrive TestDrive).Root 'PropertySet'
+            FilePaths = @{
+                #Schemas          = Join-Path (Get-PSDrive TestDrive).Root 'Schemas'
+                FeatureFlags = Join-Path (Get-PSDrive TestDrive).Root 'FeatureFlags'
+                PropertySet  = Join-Path (Get-PSDrive TestDrive).Root 'PropertySet'
+            }
         }
     }
     # I'm doing a no-no IMO, but this is probably fine.
