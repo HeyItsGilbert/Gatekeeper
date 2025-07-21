@@ -29,9 +29,7 @@ function Read-FeatureFlag {
         [Parameter(Mandatory, ValueFromPipeline, ParameterSetName = 'ByFilePath')]
         $FilePath
     )
-    begin {
-        $featureFlags = [System.Collections.Generic.List[PropertySet]]::new()
-    }
+    begin {}
     process {
         if ($PSBoundParameters.ContainsKey('FilePath')) {
             Write-Verbose "Reading FeatureFlag from file: $FilePath"
@@ -40,13 +38,8 @@ function Read-FeatureFlag {
             $folder = Get-FeatureFlagFolder
             $FilePath = Join-Path $folder "$Name.json"
         }
-        $json = Get-Content -Raw $FilePath
-        $featureFlags.Add(
-            ([FeatureFlag]::FromFile($json))
-        )
+        [FeatureFlag]::FromFile($FilePath)
     }
 
-    end {
-        return $featureFlags
-    }
+    end {}
 }
