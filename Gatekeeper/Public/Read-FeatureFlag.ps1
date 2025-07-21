@@ -42,7 +42,7 @@ function Read-FeatureFlag {
         }
         $json = Get-Content -Raw $FilePath
         $featureFlags.Add(
-            ([FeatureFlag]::FromJson($json))
+            ([FeatureFlag]::FromFile($json))
         )
     }
 
