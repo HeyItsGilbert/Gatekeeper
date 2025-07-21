@@ -20,7 +20,7 @@ BeforeDiscovery {
 Describe 'File Creations' {
     BeforeAll {
         # Override the default file path for testing
-        Mock Get-ConfigurationPath -ModuleName Configuration {
+        Mock Get-ConfigurationPath -ModuleName $env:BHProjectName {
             return (Get-PSDrive TestDrive).Root
         }
     }
@@ -39,7 +39,7 @@ Describe 'File Creations' {
     Context 'Feature Flag Creation' {
         BeforeAll {
             # Mock the Get-FeatureFlagFolder to return a test path
-            Mock Get-FeatureFlagFolder -ModuleName Gatekeeper {
+            Mock Get-FeatureFlagFolder -ModuleName $env:BHProjectName {
 
                 return (Get-PSDrive TestDrive).Root
             }
