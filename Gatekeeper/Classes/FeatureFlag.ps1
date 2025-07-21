@@ -163,6 +163,16 @@ class FeatureFlag {
         return [FeatureFlag]::new($data)
     }
 
+    static [FeatureFlag] FromFile([string]$filePath) {
+        if (-not (Test-Path $filePath)) {
+            throw "File not found: $filePath"
+        }
+        $json = Get-Content -Raw -Path $filePath
+        $featureFlag = [FeatureFlag]::FromJson($json)
+        $featureFlag.FilePath = $filePath
+        return $featureFlag
+    }
+
     [void]Save() {
         if ($null -eq $this.FilePath) {
             throw "No file path specified to save FeatureFlag."
