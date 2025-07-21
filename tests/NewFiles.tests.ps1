@@ -19,6 +19,16 @@ BeforeDiscovery {
 }
 Describe 'File Creations' {
     BeforeAll {
+        @(
+            'PropertySet',
+            'FeatureFlags',
+            'Configuration'
+        ) | ForEach-Object {
+            $folder = Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath $_
+            if (-not (Test-Path -Path $folder)) {
+                New-Item -Path $folder -ItemType Directory | Out-Null
+            }
+        }
         Mock -CommandName 'Get-PropertySetFolder' -ModuleName $env:BHProjectName {
             return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'PropertySet')
         }
@@ -29,7 +39,7 @@ Describe 'File Creations' {
             return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'Configuration')
         }
         # Override the default file path for testing
-        $script:GatekeeperConfiguration = @{
+        $global:GatekeeperConfiguration = @{
             FilePaths = @{
                 #Schemas          = Join-Path (Get-PSDrive TestDrive).Root 'Schemas'
                 FeatureFlags = Join-Path (Get-PSDrive TestDrive).Root 'FeatureFlags'
