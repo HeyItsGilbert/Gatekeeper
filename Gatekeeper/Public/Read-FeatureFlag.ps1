@@ -20,7 +20,7 @@ function Read-FeatureFlag {
     Read the feature from disk.
     #>
     [CmdletBinding()]
-    [OutputType([PropertySet])]
+    [OutputType([FeatureFlag])]
     param (
         [Parameter(Mandatory, Position = 0, ParameterSetName = 'ByName')]
         [ValidateNotNullOrEmpty()]
