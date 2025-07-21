@@ -19,11 +19,14 @@ BeforeDiscovery {
 }
 Describe 'File Creations' {
     BeforeAll {
-        Mock -CommandName 'Get-PropertySetFolder' {
+        Mock -CommandName 'Get-PropertySetFolder' -ModuleName $env:BHProjectName {
             return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'PropertySet')
         }
-        Mock -CommandName 'Get-PropertySetFolder' {
-            return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'PropertySet')
+        Mock -CommandName 'Get-FeatureFlagFolder' -ModuleName $env:BHProjectName {
+            return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'FeatureFlags')
+        }
+        Mock -CommandName 'Get-ConfigurationPath' -ModuleName Configuration {
+            return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'Configuration')
         }
         # Override the default file path for testing
         $script:GatekeeperConfiguration = @{
