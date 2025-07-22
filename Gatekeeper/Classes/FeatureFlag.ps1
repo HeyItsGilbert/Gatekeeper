@@ -156,7 +156,7 @@ class FeatureFlag {
     }
 
     # Example usage:
-    # $json = Get-Content -Raw -Path 'd:\Gatekeeper\Gatekeeper\featureflag.json'
+    # $json = Get-Content -Raw -Path 'd:\Gatekeeper\Gatekeeper\featureFlag.json'
     # $featureFlag = [FeatureFlag]::FromJson($json)
     static [FeatureFlag] FromJson([string]$json) {
         $data = ConvertFrom-Json $json -AsHashtable

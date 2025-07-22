@@ -15,7 +15,7 @@ Describe 'Read-FeatureFlag' {
         $script:actual = Read-FeatureFlag -FilePath "$PSScriptRoot\fixtures\FeatureFlag.json"
     }
     It 'Throws file path error' {
-        { Read-FeatureFlag -FilePath 'fakepath.json' } | Should -Throw -ExpectedMessage 'File not found: fakepath.json'
+        { Read-FeatureFlag -FilePath 'fakePath.json' } | Should -Throw -ExpectedMessage 'File not found: fakePath.json'
     }
     It 'Returns a FeatureFlag object' {
         $script:actual | Should -BeOfType 'FeatureFlag'
