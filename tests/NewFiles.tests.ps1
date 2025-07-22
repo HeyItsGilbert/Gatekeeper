@@ -19,9 +19,32 @@ BeforeDiscovery {
 }
 Describe 'File Creations' {
     BeforeAll {
+        @(
+            'PropertySet',
+            'FeatureFlags',
+            'Configuration'
+        ) | ForEach-Object {
+            $folder = Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath $_
+            if (-not (Test-Path -Path $folder)) {
+                New-Item -Path $folder -ItemType Directory | Out-Null
+            }
+        }
+        Mock -CommandName 'Get-PropertySetFolder' -ModuleName $env:BHProjectName {
+            return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'PropertySet')
+        }
+        Mock -CommandName 'Get-FeatureFlagFolder' -ModuleName $env:BHProjectName {
+            return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'FeatureFlags')
+        }
+        Mock -CommandName 'Get-ConfigurationPath' -ModuleName Configuration {
+            return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'Configuration')
+        }
         # Override the default file path for testing
-        Mock Get-ConfigurationPath -ModuleName Configuration {
-            return (Get-PSDrive TestDrive).Root
+        $global:GatekeeperConfiguration = @{
+            FilePaths = @{
+                #Schemas          = Join-Path (Get-PSDrive TestDrive).Root 'Schemas'
+                FeatureFlags = Join-Path (Get-PSDrive TestDrive).Root 'FeatureFlags'
+                PropertySet  = Join-Path (Get-PSDrive TestDrive).Root 'PropertySet'
+            }
         }
     }
     # I'm doing a no-no IMO, but this is probably fine.
@@ -39,8 +62,7 @@ Describe 'File Creations' {
     Context 'Feature Flag Creation' {
         BeforeAll {
             # Mock the Get-FeatureFlagFolder to return a test path
-            Mock Get-FeatureFlagFolder -ModuleName Gatekeeper {
-
+            Mock Get-FeatureFlagFolder -ModuleName $env:BHProjectName {
                 return (Get-PSDrive TestDrive).Root
             }
             $condition = New-Condition -Property 'UserRole' -Operator 'Equals' -Value 'Admin'

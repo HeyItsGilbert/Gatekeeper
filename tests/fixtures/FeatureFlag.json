@@ -1,0 +1,59 @@
+{
+    "$schema": "../../Gatekeeper/Schemas/FeatureFlag.json",
+    "Name": "New Startup Sound",
+    "Description": "Roll out new screaming goat start up sound.",
+    "Version": "1.0.0",
+    "Author": "Your Name aka who to e-mail when customers are upset",
+    "Tags": [
+        "Goat",
+        "Managed"
+    ],
+    "DefaultEffect": "Deny",
+    "Rules": [
+        {
+            "Name": "Audit staging",
+            "Effect": "Audit",
+            "Conditions": {
+                "Property": "Environment",
+                "Operator": "Equals",
+                "Value": "Staging"
+            }
+        },
+        {
+            "Name": "Warn Production",
+            "Effect": "Warn",
+            "Conditions": {
+                "Property": "Environment",
+                "Operator": "Equals",
+                "Value": "Production"
+            }
+        },
+        {
+            "Name": "Allow Staging and Complaint or 10%",
+            "Effect": "Allow",
+            "Conditions": {
+                "AllOf": [
+                    {
+                        "AnyOf": [
+                            {
+                                "Property": "IsCompliant",
+                                "Operator": "Equals",
+                                "Value": "true"
+                            },
+                            {
+                                "Property": "Percent",
+                                "Operator": "LessThan",
+                                "Value": "11"
+                            }
+                        ]
+                    },
+                    {
+                        "Property": "Environment",
+                        "Operator": "Equals",
+                        "Value": "Staging"
+                    }
+                ]
+            }
+        }
+    ]
+}

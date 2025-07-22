@@ -156,11 +156,21 @@ class FeatureFlag {
     }
 
     # Example usage:
-    # $json = Get-Content -Raw -Path 'd:\Gatekeeper\Gatekeeper\featureflag.json'
+    # $json = Get-Content -Raw -Path 'd:\Gatekeeper\Gatekeeper\featureFlag.json'
     # $featureFlag = [FeatureFlag]::FromJson($json)
     static [FeatureFlag] FromJson([string]$json) {
         $data = ConvertFrom-Json $json -AsHashtable
         return [FeatureFlag]::new($data)
+    }
+
+    static [FeatureFlag] FromFile([string]$filePath) {
+        if (-not (Test-Path $filePath)) {
+            throw "File not found: $filePath"
+        }
+        $json = Get-Content -Raw -Path $filePath
+        $featureFlag = [FeatureFlag]::FromJson($json)
+        $featureFlag.FilePath = $filePath
+        return $featureFlag
     }
 
     [void]Save() {
