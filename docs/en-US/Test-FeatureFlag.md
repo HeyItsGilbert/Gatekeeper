@@ -13,7 +13,7 @@ Checks if the current machine's context will pass the feature flag rules.
 ## SYNTAX
 
 ```
-Test-FeatureFlag [-FeatureFlag] <FeatureFlag> [[-Properties] <PropertySet>] [-Context] <Hashtable>
+Test-FeatureFlag [-FeatureFlag] <FeatureFlag> [[-PropertySet] <PropertySet>] [-Context] <Hashtable>
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
@@ -49,8 +49,8 @@ Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
-### -Properties
-A hashtable of properties that define the different values in the context.
+### -PropertySet
+A PropertySet that defines the different values in the context.
 
 ```yaml
 Type: PropertySet

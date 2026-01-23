@@ -10,8 +10,8 @@
     .PARAMETER FeatureFlag
     The name of the feature flag to test.
 
-    .PARAMETER Properties
-    A hashtable of properties that define the different values in the context.
+    .PARAMETER PropertySet
+    A PropertySet that defines the different values in the context.
 
     .PARAMETER Context
     The context to use to test against.
@@ -30,7 +30,7 @@
         $FeatureFlag,
         [PropertySet]
         [PropertySetTransformAttribute()]
-        $Properties,
+        $PropertySet,
         [Parameter(Mandatory)]
         [hashtable]
         $Context
@@ -44,11 +44,11 @@
     process {
         # Process each feature
         Write-Verbose "Processing Feature $($FeatureFlag.Name) with ($($FeatureFlag.Rules.Count)) rules"
-        foreach ($rule in $Feature.Rules) {
+        foreach ($rule in $FeatureFlag.Rules) {
             Write-Verbose "Processing Rule $($rule.Name)"
             $testConditionSplat = @{
                 Context = $Context
-                Properties = $Properties
+                PropertySet = $PropertySet
                 Condition = $rule.Conditions
             }
             if (Test-Condition @testConditionSplat) {
@@ -56,20 +56,20 @@
                 # Check effect
                 switch ($rule.Effect) {
                     'Allow' {
-                        . $script:GatekeeperLogging['Allow'] -Rule $rule
+                        Invoke-Logging -Effect 'Allow' -Rule $rule
                         $finalResult = $true
                         break
                     }
                     'Deny' {
-                        . $script:GatekeeperLogging['Deny'] -Rule $rule
+                        Invoke-Logging -Effect 'Deny' -Rule $rule
                         $finalResult = $false
                         break
                     }
                     'Audit' {
-                        . $script:GatekeeperLogging['Audit'] -Rule $rule
+                        Invoke-Logging -Effect 'Audit' -Rule $rule
                     }
                     'Warn' {
-                        . $script:GatekeeperLogging['Warning'] -Rule $rule
+                        Invoke-Logging -Effect 'Warn' -Rule $rule
                     }
                     default {
                         throw 'Unknown effect'
