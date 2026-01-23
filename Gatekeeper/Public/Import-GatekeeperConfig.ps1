@@ -36,17 +36,21 @@ function Import-GatekeeperConfig {
                     Write-Verbose "Logging level '$level' is disabled, skipping."
                     continue
                 }
-                # Handle if the script is file or script block
-                if ($script:GatekeeperConfiguration.Logging[$level].Script -is [string]) {
-                    $scriptPath = $script:GatekeeperConfiguration.Logging[$level].Script
-                    if (-not (Test-Path -Path $scriptPath)) {
-                        throw "Logging script file not found: $scriptPath"
+                # Handle if the script is a file path or string scriptblock
+                $scriptContent = $script:GatekeeperConfiguration.Logging[$level].Script
+                if ($scriptContent -is [string]) {
+                    # Check if it's a file path
+                    if (Test-Path -Path $scriptContent -ErrorAction SilentlyContinue) {
+                        Write-Verbose "Loading logging script from file: $scriptContent"
+                        $script:GatekeeperLogging[$level] = [scriptblock]::Create((Get-Content -Path $scriptContent -Raw))
+                    } else {
+                        # Treat it as a script string and convert to scriptblock
+                        Write-Verbose "Converting string to script block for logging level: $level"
+                        $script:GatekeeperLogging[$level] = [scriptblock]::Create($scriptContent)
                     }
-                    Write-Verbose "Loading logging script from file: $scriptPath"
-                    $script:GatekeeperLogging[$level] = [scriptblock]::Create((Get-Content -Path $scriptPath -Raw))
-                } elseif ($script:GatekeeperConfiguration.Logging[$level].Script -is [scriptblock]) {
+                } elseif ($scriptContent -is [scriptblock]) {
                     Write-Verbose "Using inline script block for logging level: $level"
-                    $script:GatekeeperLogging[$level] = $script:GatekeeperConfiguration.Logging[$level].Script
+                    $script:GatekeeperLogging[$level] = $scriptContent
                 } else {
                     Write-Warning "No valid script found for logging level: $level"
                 }

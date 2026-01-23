@@ -1,4 +1,5 @@
 . $PSScriptRoot\..\Enums\Effect.ps1
+. $PSScriptRoot\..\Public\ConvertFrom-JsonToHashtable.ps1
 
 enum Operator {
     Equals
@@ -159,7 +160,7 @@ class FeatureFlag {
     # $json = Get-Content -Raw -Path 'd:\Gatekeeper\Gatekeeper\featureFlag.json'
     # $featureFlag = [FeatureFlag]::FromJson($json)
     static [FeatureFlag] FromJson([string]$json) {
-        $data = ConvertFrom-Json $json -AsHashtable
+        $data = ConvertFrom-JsonToHashtable -InputObject $json
         return [FeatureFlag]::new($data)
     }
 

@@ -5,7 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.2.0] 2026-01-22
+
+### Added
+
+- Documentation for `ConvertFrom-JsonToHashtable` cmdlet with syntax,
+  parameters, and examples for PowerShell 5.1 and 7+ compatibility.
+- CLAUDE.md project guidance document with module overview, architecture,
+  development commands, testing patterns, and key concepts.
+
+### Changed
+
+- Refactored logging script handling in configuration to support both file
+  paths and inline script blocks.
+- Enhanced auditing functionality with detailed instructions for configuring
+  logging in Configuration.psd1.
+- Improved logging configuration options and integrated cached configuration
+  in Import-GatekeeperConfig.
+- Enhanced Test-FeatureFlag to execute logging scripts based on rule outcomes.
+- Updated README with configuration details and logging behavior explanations.
+
 ## [0.1.1]
+
+### Changed
 
 - `Read-FeatureFile` uses a new static method to read the file and set the
   FilePath.

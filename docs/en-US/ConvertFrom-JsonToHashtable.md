@@ -5,43 +5,51 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-PropertySet
+# ConvertFrom-JsonToHashtable
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Converts JSON to a hashtable with PowerShell 5.1 compatibility.
 
 ## SYNTAX
 
 ```
-Get-PropertySet [[-Name] <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ConvertFrom-JsonToHashtable [-InputObject] <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Provides a compatibility layer for converting JSON to hashtables that works
+with both PowerShell 5.1 and PowerShell 7+.
+In PowerShell 7+, uses the native
+-AsHashtable parameter.
+In PowerShell 5.1, manually converts PSCustomObject
+to hashtable.
 
 ## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### EXAMPLE 1
+```
+$json = Get-Content -Path "file.json" -Raw | ConvertFrom-JsonToHashtable
 ```
 
-{{ Add example description here }}
+### EXAMPLE 2
+```
+$data = ConvertFrom-JsonToHashtable -InputObject '{"key":"value"}'
+```
 
 ## PARAMETERS
 
-### -Name
-{{ Fill Name Description }}
+### -InputObject
+The JSON string to convert or pipeline input from Get-Content.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
@@ -65,11 +73,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
-
 ## OUTPUTS
 
-### System.Object
 ## NOTES
 
 ## RELATED LINKS

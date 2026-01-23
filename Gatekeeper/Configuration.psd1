@@ -11,32 +11,20 @@
         Allow = @{
             # We leave this disabled by default to avoid cluttering the console
             Enabled = $false
-            Script = {
-                param($Rule)
-                Write-Host "✅ Rule [$($Rule.Name)] matched and is allowed."
-            }
+            Script = 'param($Rule); Write-Host "✅ Rule [$($Rule.Name)] matched and is allowed."'
         }
         Deny = @{
             # We leave this disabled by default to avoid cluttering the console
             Enabled = $false
-            Script = {
-                param($Rule)
-                Write-Host "⛔ Rule [$($Rule.Name)] matched and is denied."
-            }
+            Script = 'param($Rule); Write-Host "⛔ Rule [$($Rule.Name)] matched and is denied."'
         }
         Warning = @{
             Enabled = $true
-            Script = {
-                param($Rule)
-                Write-Warning "⚠️ Rule [$($Rule.Name)] matched."
-            }
+            Script = 'param($Rule); Write-Warning "⚠️ Rule [$($Rule.Name)] matched."'
         }
         Audit = @{
             Enabled = $true
-            Script = {
-                param($Rule)
-                Write-Host "Audit: $($Rule.Name)"
-            }
+            Script = 'param($Rule); Write-Host "Audit: $($Rule.Name)"'
         }
     }
 }
