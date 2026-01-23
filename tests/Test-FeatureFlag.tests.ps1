@@ -19,6 +19,6 @@ Describe 'Test-FeatureFlag' {
             IsCompliant = $true
         }
         # load feature flag
-        $json = Get-Content -Path "$PSScriptRoot\fixtures\Updawg.json" -Raw | ConvertFrom-Json -AsHashtable
+        $json = Get-Content -Path "$PSScriptRoot\fixtures\Updawg.json" -Raw | ConvertFrom-JsonToHashtable
     }
 }

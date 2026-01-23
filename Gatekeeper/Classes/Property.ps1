@@ -1,3 +1,5 @@
+. $PSScriptRoot\..\Public\ConvertFrom-JsonToHashtable.ps1
+
 class PropertyValidation {
     [int]$Minimum
     [int]$Maximum
@@ -124,7 +126,7 @@ class PropertySet {
         if (-not $validProperties) {
             throw 'Properties file is not valid.'
         }
-        $json = Get-Content $FilePath -Raw | ConvertFrom-Json -AsHashtable
+        $json = Get-Content $FilePath -Raw | ConvertFrom-JsonToHashtable
         if ($json -isnot [hashtable]) {
             throw 'Failed to create hashtable from json file'
         }
@@ -135,7 +137,7 @@ class PropertySet {
     }
 
     static [PropertySet] FromJson([string]$json) {
-        $data = $json | ConvertFrom-Json -AsHashtable
+        $data = ConvertFrom-JsonToHashtable -InputObject $json
         return [PropertySet]::new($data)
     }
 

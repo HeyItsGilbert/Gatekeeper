@@ -19,7 +19,7 @@ Describe 'Test-Condition' {
             IsCompliant = $true
         }
         # load feature flag
-        $json = Get-Content -Path "$PSScriptRoot\fixtures\Updawg.json" -Raw | ConvertFrom-Json -AsHashtable
+        $json = Get-Content -Path "$PSScriptRoot\fixtures\Updawg.json" -Raw | ConvertFrom-JsonToHashtable
         $script:rules = $json.Rules
         $script:testConditionSplat = @{
             Context = $script:context
