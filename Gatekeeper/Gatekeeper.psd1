@@ -9,28 +9,28 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    RootModule        = 'Gatekeeper.psm1'
+    RootModule = 'Gatekeeper.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '0.1.1'
+    ModuleVersion = '0.2.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
 
     # ID used to uniquely identify this module
-    GUID              = '7c2fb6fe-e024-4c39-b687-84fbe7473e3f'
+    GUID = '7c2fb6fe-e024-4c39-b687-84fbe7473e3f'
 
     # Author of this module
-    Author            = 'Gilbert Sanchez'
+    Author = 'Gilbert Sanchez'
 
     # Company or vendor of this module
-    CompanyName       = 'Gilbert Sanchez'
+    CompanyName = 'Gilbert Sanchez'
 
     # Copyright statement for this module
-    Copyright         = '(c) Gilbert Sanchez. All rights reserved.'
+    Copyright = '(c) Gilbert Sanchez. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description       = 'Helps implement feature flags in your PowerShell projects.'
+    Description = 'Helps implement feature flags in your PowerShell projects.'
 
     # Minimum version of the PowerShell engine required by this module
     # PowerShellVersion = ''
@@ -51,9 +51,9 @@
     # ProcessorArchitecture = ''
 
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules   = @(
+    RequiredModules = @(
         @{
-            ModuleName    = 'Configuration'
+            ModuleName = 'Configuration'
             ModuleVersion = '1.6.0'
         }
     )
@@ -62,7 +62,7 @@
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    ScriptsToProcess  = @('Enums\Effect.ps1', 'Classes\Property.ps1', 'Classes\FeatureFlag.ps1')
+    ScriptsToProcess = @('Enums\Effect.ps1', 'Classes\Property.ps1', 'Classes\FeatureFlag.ps1')
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()
@@ -77,13 +77,13 @@
     FunctionsToExport = '*'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-    CmdletsToExport   = '*'
+    CmdletsToExport = '*'
 
     # Variables to export from this module
     VariablesToExport = '*'
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport   = '*'
+    AliasesToExport = '*'
 
     # DSC resources to export from this module
     # DscResourcesToExport = @()
@@ -95,12 +95,12 @@
     # FileList = @()
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
-    PrivateData       = @{
+    PrivateData = @{
 
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags                     = @(
+            Tags = @(
                 'PSEdition_Core',
                 'Windows',
                 'Linux',
@@ -108,16 +108,16 @@
             )
 
             # A URL to the license for this module.
-            LicenseUri               = 'https://github.com/HeyItsGilbert/Gatekeeper/blob/master/LICENSE'
+            LicenseUri = 'https://github.com/HeyItsGilbert/Gatekeeper/blob/master/LICENSE'
 
             # A URL to the main website for this project.
-            ProjectUri               = 'https://github.com/HeyItsGilbert/Gatekeeper/'
+            ProjectUri = 'https://github.com/HeyItsGilbert/Gatekeeper/'
 
             # A URL to an icon representing this module.
-            IconUri                  = 'https://raw.githubusercontent.com/HeyItsGilbert/Gatekeeper/main/static/icon.png'
+            IconUri = 'https://raw.githubusercontent.com/HeyItsGilbert/Gatekeeper/main/static/icon.png'
 
             # ReleaseNotes of this module
-            ReleaseNotes             = 'https://github.com/HeyItsGilbert/Gatekeeper/blob/master/CHANGELOG.md'
+            ReleaseNotes = 'https://github.com/HeyItsGilbert/Gatekeeper/blob/master/CHANGELOG.md'
 
             # Prerelease string of this module
             # Prerelease = ''
