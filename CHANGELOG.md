@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.1.1]
 
+### Changed
+
 - `Read-FeatureFile` uses a new static method to read the file and set the
   FilePath.
 
