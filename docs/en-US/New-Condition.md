@@ -53,7 +53,7 @@ The operator to use for the evaluation (e.g., 'Equals', 'In').
 Type: Operator
 Parameter Sets: (All)
 Aliases:
-Accepted values: Equals, NotEquals, GreaterThan, LessThan, In, NotIn
+Accepted values: Equals, NotEquals, GreaterThan, GreaterThanOrEqual, LessThan, LessThanOrEqual, In, NotIn
 
 Required: True
 Position: 2

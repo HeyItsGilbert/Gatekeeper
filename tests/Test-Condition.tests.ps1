@@ -23,7 +23,7 @@ Describe 'Test-Condition' {
         $script:rules = $json.Rules
         $script:testConditionSplat = @{
             Context = $script:context
-            Properties = $script:propertySet
+            PropertySet = $script:propertySet
         }
     }
 
@@ -170,7 +170,7 @@ Describe 'Test-Condition' {
         $condition = @{
             Property = "Tier"
             # Not a real operator
-            Operator = "GreaterThanOrEquals"
+            Operator = "GreaterThanOrEqual"
             Value = 1
         }
         {
@@ -192,19 +192,19 @@ Describe 'Test-Condition' {
         }
 
         {
-            Test-Condition -Properties $script:propertySet -Context $context -Condition $condition
+            Test-Condition -PropertySet $script:propertySet -Context $context -Condition $condition
         } | Should -Throw -ExpectedMessage "Property metadata for 'Tier' is missing"
     }
     It 'Throws on a bad operator' {
         $condition = @{
             Property = "Percentage"
-            # Not a real operator
+            # Not a real operator (spelling mistake)
             Operator = "GreaterThanOrEquals"
             Value = 1
         }
         {
             Test-Condition @script:testConditionSplat -Condition $condition
-        } | Should -Throw -ExpectedMessage 'Unsupported operator: GreaterThanOrEquals'
+        } | Should -Throw
     }
     It 'Throws if doing an in/notin comparison and condition is not a list' {
         $condition = @{

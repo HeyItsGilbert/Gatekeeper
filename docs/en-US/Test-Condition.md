@@ -13,7 +13,7 @@ Evaluate whether a feature flag rule applies.
 ## SYNTAX
 
 ```
-Test-Condition [-Context] <Hashtable> [-Properties] <PropertySet> [-Condition] <Hashtable>
+Test-Condition [-Context] <Hashtable> [-PropertySet] <PropertySet> [-Condition] <ConditionGroup>
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
@@ -50,8 +50,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Properties
-The properties that matches given context.
+### -PropertySet
+{{ Fill PropertySet Description }}
 
 ```yaml
 Type: PropertySet
@@ -69,7 +69,7 @@ Accept wildcard characters: False
 A condition to test which are part of rules.
 
 ```yaml
-Type: Hashtable
+Type: ConditionGroup
 Parameter Sets: (All)
 Aliases:
 

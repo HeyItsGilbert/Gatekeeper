@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.0] 2026-01-23
+
+### Added
+
+- `GreaterThanOrEqual` and `LessThanOrEqual` operators to the Operator enum
+  for enhanced comparison capabilities in conditions.
+- `ConditionGroupTransformAttribute` class to support automatic conversion of
+  input values to ConditionGroup objects in function parameters.
+
+### Changed
+
+- `Test-Condition` function now accepts `ConditionGroup` objects instead of
+  hashtables for the Condition parameter, providing stronger type safety.
+- `Test-Condition` function now accepts `PropertySet` objects instead of a
+  generic Properties hashtable for the Properties parameter.
+- Internal condition evaluation logic updated to use null checks on
+  ConditionGroup object properties instead of hashtable ContainsKey calls.
+- Updated corresponding switch statement in `Test-Condition` to handle
+  `GreaterThanOrEqual` and `LessThanOrEqual` operators.
+
 ## [0.2.0] 2026-01-22
 
 ### Added

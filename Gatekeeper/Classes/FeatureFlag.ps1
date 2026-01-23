@@ -5,7 +5,9 @@ enum Operator {
     Equals
     NotEquals
     GreaterThan
+    GreaterThanOrEqual
     LessThan
+    LessThanOrEqual
     In
     NotIn
 }
@@ -212,5 +214,36 @@ class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTrans
 
     [string] ToString() {
         return '[FeatureFlagTransformAttribute()]'
+    }
+}
+
+class ConditionGroupTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
+
+    ## Override the abstract method "Transform". This is where the user
+    ## provided value will be inspected and transformed if possible.
+    [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
+        $item = switch ($inputData.GetType().FullName) {
+            # Return the existing item if it's already a ConditionGroup
+            'ConditionGroup' { $inputData }
+            'System.Collections.Hashtable' {
+                [ConditionGroup]::new($inputData)
+            }
+            'System.String' {
+                if (Test-Path $inputData) {
+                    $json = Get-Content -Raw -Path $inputData
+                    [ConditionGroup]::FromJson($json)
+                } else {
+                    throw "Unknown string. If this is a file path, please check if it correct. $inputData"
+                }
+            }
+            default {
+                throw "Cannot convert type to ConditionGroup: $($inputData.GetType().FullName)"
+            }
+        }
+        return $item
+    }
+
+    [string] ToString() {
+        return '[ConditionGroupTransformAttribute()]'
     }
 }

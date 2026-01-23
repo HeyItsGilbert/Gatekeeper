@@ -10,17 +10,17 @@ function Test-Condition {
     .PARAMETER Context
     The device context.
 
-    .PARAMETER Properties
-    The properties that matches given context.
+    .PARAMETER PropertySet
+    The PropertySet that matches given context.
 
     .PARAMETER Condition
     A condition to test which are part of rules.
 
     .EXAMPLE
     $context = Get-DeviceContext
-    $properties = Read-PropertySet
+    $propertySet = Read-PropertySet
     $rule = $rules[0]
-    Test-Condition -Context $context -Properties $properties -Condition $rule
+    Test-Condition -Context $context -PropertySet $propertySet -Condition $rule
 
     This would return a true/false
     #>
@@ -31,34 +31,37 @@ function Test-Condition {
         [Parameter(Mandatory)]
         [PropertySet]
         [PropertySetTransformAttribute()]
-        $Properties,
+        $PropertySet,
         [Parameter(Mandatory)]
-        [Hashtable]
+        [ConditionGroup]
+        [ConditionGroupTransformAttribute()]
         $Condition
     )
 
+    $Properties = $PropertySet.Properties
+
     #region Recurse on groups
-    if ($Condition.ContainsKey('AllOf')) {
+    if ($null -ne $Condition.AllOf) {
         foreach ($child in $Condition.AllOf) {
-            if (-not (Test-Condition -Context $Context -Properties $Properties -Condition $child)) {
+            if (-not (Test-Condition -Context $Context -PropertySet $PropertySet -Condition $child)) {
                 return $false
             }
         }
         return $true
     }
 
-    if ($Condition.ContainsKey('AnyOf')) {
+    if ($null -ne $Condition.AnyOf) {
         foreach ($child in $Condition.AnyOf) {
-            if (Test-Condition -Context $Context -Properties $Properties -Condition $child) {
+            if (Test-Condition -Context $Context -PropertySet $PropertySet -Condition $child) {
                 return $true
             }
         }
         return $false
     }
 
-    if ($Condition.ContainsKey('Not')) {
+    if ($null -ne $Condition.Not) {
         foreach ($child in $Condition.Not) {
-            if (Test-Condition -Context $Context -Properties $Properties -Condition $child) {
+            if (Test-Condition -Context $Context -PropertySet $PropertySet -Condition $child) {
                 return $false
             }
         }
@@ -78,7 +81,7 @@ function Test-Condition {
         throw "Property metadata for '$propName' is missing"
     }
 
-    $meta = $Properties.GetProperty($propName)
+    $meta = $PropertySet.GetProperty($propName)
     $propType = $meta.Type
     $validation = $meta.Validation
 
@@ -113,7 +116,9 @@ function Test-Condition {
         "Equals" { return $actual -eq $expectedCoerced }
         "NotEquals" { return $actual -ne $expectedCoerced }
         "GreaterThan" { return $actual -gt $expectedCoerced }
+        "GreaterThanOrEqual" { return $actual -ge $expectedCoerced }
         "LessThan" { return $actual -lt $expectedCoerced }
+        "LessThanOrEqual" { return $actual -le $expectedCoerced }
         "In" { return $expectedCoerced -contains $actual }
         "NotIn" { return -not ($expectedCoerced -contains $actual) }
         default { throw "Unsupported operator: $operator" }
