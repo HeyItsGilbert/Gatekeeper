@@ -119,7 +119,8 @@ class PropertySet {
             throw "File path given did not exist: $FilePath"
         }
         # Only validate JSON schema in PS 7+ (Test-Json -SchemaFile not available in PS 5.1)
-        if ($PSVersionTable.PSVersion.Major -ge 7) {
+        # PSVersionTable is not available in class static methods. Detect if Test-Json command is available.
+        if (Get-Command -Name Test-Json -ErrorAction SilentlyContinue) {
             $testJsonSplat = @{
                 Path = $FilePath
                 SchemaFile = "$PSScriptRoot\..\Schemas\Properties.json"
