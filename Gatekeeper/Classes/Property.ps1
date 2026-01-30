@@ -118,13 +118,16 @@ class PropertySet {
         if (-not (Test-Path -Path $FilePath)) {
             throw "File path given did not exist: $FilePath"
         }
-        $testJsonSplat = @{
-            Path = $FilePath
-            SchemaFile = "$PSScriptRoot\..\Schemas\Properties.json"
-        }
-        $validProperties = Test-Json @testJsonSplat
-        if (-not $validProperties) {
-            throw 'Properties file is not valid.'
+        # Only validate JSON schema in PS 7+ (Test-Json -SchemaFile not available in PS 5.1)
+        if ($PSVersionTable.PSVersion.Major -ge 7) {
+            $testJsonSplat = @{
+                Path = $FilePath
+                SchemaFile = "$PSScriptRoot\..\Schemas\Properties.json"
+            }
+            $validProperties = Test-Json @testJsonSplat
+            if (-not $validProperties) {
+                throw 'Properties file is not valid.'
+            }
         }
         $json = Get-Content $FilePath -Raw | ConvertFrom-JsonToHashtable
         if ($json -isnot [hashtable]) {

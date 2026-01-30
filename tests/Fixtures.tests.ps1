@@ -18,7 +18,7 @@ Describe '<_.name>' -ForEach $script:fixtures {
         $script:schema | Should -Not -BeNullOrEmpty
         $script:schemaFilePath | Should -Exist
     }
-    It 'matches the schema' {
+    It 'matches the schema' -Skip:($PSVersionTable.PSVersion.Major -lt 7) {
         Test-Json -Path $_.FullName -SchemaFile $script:schemaFilePath | Should -BeTrue
     }
 }

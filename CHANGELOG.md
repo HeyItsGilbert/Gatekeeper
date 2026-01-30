@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.2] 2026-01-30
+
+### Fixed
+
+- Added PowerShell 5.1 compatibility by conditionally skipping JSON schema
+  validation with `Test-Json -SchemaFile` which is only available in PS 7+.
+  PropertySet files are still validated through basic JSON parsing in PS 5.1.
+- Updated fixture tests to skip schema validation test on PowerShell versions
+  below 7.
+
 ## [0.3.1] 2026-01-23
 
 ### Changed
