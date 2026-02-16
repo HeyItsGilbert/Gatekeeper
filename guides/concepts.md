@@ -129,5 +129,5 @@ flowchart TD
 
 ## Next steps
 
-- [Creating Feature Flags](guides/creating-flags.md) -- build conditions and rules step by step
-- [How Evaluation Works](guides/evaluation.md) -- detailed walkthrough of the rule engine
+- [Creating Feature Flags](creating-flags.md) -- build conditions and rules step by step
+- [How Evaluation Works](evaluation.md) -- detailed walkthrough of the rule engine

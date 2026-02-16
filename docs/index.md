@@ -75,7 +75,7 @@ Common use cases:
 
 ## Next steps
 
-- [Getting Started](getting-started.md) -- install and evaluate your first flag
-- [Concepts](concepts.md) -- understand the data model and terminology
+- [Getting Started](guides/getting-started.md) -- install and evaluate your first flag
+- [Concepts](guides/concepts.md) -- understand the data model and terminology
 - [Creating Feature Flags](guides/creating-flags.md) -- build flags step by step
 - [How Evaluation Works](guides/evaluation.md) -- learn the rule engine

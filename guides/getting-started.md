@@ -126,5 +126,5 @@ Test-FeatureFlag -FeatureFlag $flag -PropertySet $props -Context $ctx
 ## Next steps
 
 - [Concepts](concepts.md) -- understand the data model
-- [Creating Feature Flags](guides/creating-flags.md) -- complex rules, conditions, and operators
-- [How Evaluation Works](guides/evaluation.md) -- what happens inside `Test-FeatureFlag`
+- [Creating Feature Flags](creating-flags.md) -- complex rules, conditions, and operators
+- [How Evaluation Works](evaluation.md) -- what happens inside `Test-FeatureFlag`

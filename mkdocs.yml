@@ -27,8 +27,8 @@ theme:
 
 nav:
   - Home: index.md
-  - Getting Started: getting-started.md
-  - Concepts: concepts.md
+  - Getting Started: guides/getting-started.md
+  - Concepts: guides/concepts.md
   - Guides:
       - Creating Feature Flags: guides/creating-flags.md
       - How Evaluation Works: guides/evaluation.md
