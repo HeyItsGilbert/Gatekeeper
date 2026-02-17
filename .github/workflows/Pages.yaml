@@ -8,4 +8,9 @@ permissions:
   contents: write
 jobs:
   ci:
+    # Deploy the docs to Github Pages:
     uses: HeyItsGilbert/.github/.github/workflows/Pages.yaml@main
+    with:
+      # Copy the Guides into the docs
+      additional_copies: |
+        guides/:docs/guides/
