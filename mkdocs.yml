@@ -43,7 +43,7 @@ plugins:
   - include_dir_to_nav
 
 markdown_extensions:
-  - admonitions
+  - admonition
   - pymdownx.details
   - pymdownx.superfences:
       custom_fences:
