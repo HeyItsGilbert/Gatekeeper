@@ -30,6 +30,7 @@ nav:
   - Home: index.md
   - Getting Started: guides/getting-started.md
   - Concepts: guides/concepts.md
+  - Design Philosophy: guides/design-philosophy.md
   - Guides:
       - Creating Feature Flags: guides/creating-flags.md
       - How Evaluation Works: guides/evaluation.md
