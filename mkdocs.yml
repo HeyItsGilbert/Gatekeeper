@@ -43,7 +43,6 @@ plugins:
   - include_dir_to_nav
 
 markdown_extensions:
-  - admonitions
   - pymdownx.details
   - pymdownx.superfences:
       custom_fences:
@@ -55,3 +54,4 @@ markdown_extensions:
   - attr_list
   - toc:
       permalink: true
+
