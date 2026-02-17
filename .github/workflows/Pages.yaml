@@ -13,5 +13,6 @@ jobs:
     with:
       # Copy the Guides into the docs
       additional_copies: |
-        static/:assets/images/
+        static/:docs/assets/images/
         guides/:docs/guides/
+
