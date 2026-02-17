@@ -5,6 +5,7 @@ repo_url: http://github.com/HeyItsGilbert/Gatekeeper
 repo_name: HeyItsGilbert/Gatekeeper
 
 theme:
+  logo: static/icon.png
   name: material
   features:
     - content.code.copy
@@ -54,4 +55,5 @@ markdown_extensions:
   - attr_list
   - toc:
       permalink: true
+
 
