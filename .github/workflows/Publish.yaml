@@ -19,6 +19,8 @@ on:
         required: false
         type: boolean
         default: false
+permissions:
+  contents: write
 jobs:
   publish:
     name: Publish Module
@@ -28,3 +30,4 @@ jobs:
       isPrerelease: ${{ inputs.isPrerelease || false }}
       dry_run: ${{ inputs.dry_run || false }}
     secrets: inherit
+
