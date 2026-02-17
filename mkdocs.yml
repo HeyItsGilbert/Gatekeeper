@@ -1,13 +1,57 @@
 site_name: Gatekeeper
 site_url: http://heyitsgilbert.github.io/Gatekeeper
+site_description: Feature flags for PowerShell projects
 repo_url: http://github.com/HeyItsGilbert/Gatekeeper
+repo_name: HeyItsGilbert/Gatekeeper
+
 theme:
-  name: readthedocs
+  name: material
+  features:
+    - content.code.copy
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
 nav:
-  - Home: "index.md"
+  - Home: index.md
+  - Getting Started: guides/getting-started.md
+  - Concepts: guides/concepts.md
+  - Guides:
+      - Creating Feature Flags: guides/creating-flags.md
+      - How Evaluation Works: guides/evaluation.md
+      - Configuration: guides/configuration.md
+      - Logging: guides/logging.md
   - Changelog: "https://github.com/HeyItsGilbert/Gatekeeper/blob/main/CHANGELOG.md"
   - Commands:
       - en-US/
+
 plugins:
   - search
   - include_dir_to_nav
+
+markdown_extensions:
+  - admonitions
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - toc:
+      permalink: true
