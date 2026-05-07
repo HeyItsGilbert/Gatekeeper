@@ -145,6 +145,116 @@ function Get-TrackerItem {
     return Get-TrackerItems | Where-Object Id -EQ $Id | Select-Object -First 1
 }
 
+function Save-TrackerItems {
+    param([object[]]$Items)
+
+    $lines = foreach ($item in ($Items | Sort-Object Id)) {
+        [pscustomobject]@{
+            id = [int]$item.Id
+            workstream = [string]$item.Workstream
+            scope = [string]$item.Scope
+            status = [string]$item.Status
+            model = [string]$item.Model
+            effort = [string]$item.Effort
+            reason = [string]$item.Reason
+            evidence = [string]$item.Evidence
+        } | ConvertTo-Json -Compress
+    }
+
+    Set-Content -Path $TrackerPath -Value $lines
+}
+
+function Get-IterationReport {
+    param(
+        [string[]]$Output,
+        [int]$FallbackItemId
+    )
+
+    if (-not $Output -or $Output.Count -eq 0) {
+        return $null
+    }
+
+    $text = ($Output | ForEach-Object { [string]$_ }) -join "`n"
+    $statusMatch = [regex]::Match($text, '(?mi)^STATUS:\s*(DONE|BLOCKED|NEEDS_WORK)\b(.*)$')
+    if (-not $statusMatch.Success) {
+        return $null
+    }
+
+    $itemId = $FallbackItemId
+    $itemMatch = [regex]::Match($text, '(?mi)^ITEM:\s*\[?(?:tracker\s+(?:object|row)\s+)?(?:ID\s*)?(\d+)\b')
+    if ($itemMatch.Success) {
+        $itemId = [int]$itemMatch.Groups[1].Value
+    }
+
+    $commit = $null
+    $commitMatch = [regex]::Match($text, '(?mi)^COMMIT:\s*(.+)$')
+    if ($commitMatch.Success) {
+        $commit = $commitMatch.Groups[1].Value.Trim()
+    }
+
+    $pr = $null
+    $prMatch = [regex]::Match($text, '(?mi)^PR:\s*(.+)$')
+    if ($prMatch.Success) {
+        $pr = $prMatch.Groups[1].Value.Trim()
+    }
+
+    if (-not $pr) {
+        $prUrlMatch = [regex]::Match($text, 'https://github\.com/[^\s/]+/[^\s/]+/pull/\d+')
+        if ($prUrlMatch.Success) {
+            $pr = $prUrlMatch.Value
+        }
+    }
+
+    $status = $statusMatch.Groups[1].Value.ToUpperInvariant()
+    $statusRemainder = $statusMatch.Groups[2].Value.Trim()
+    $evidence = if ($commit) {
+        $commit
+    } elseif ($statusRemainder) {
+        $statusRemainder
+    } else {
+        'Updated from CLI structured report.'
+    }
+
+    return [pscustomobject]@{
+        ItemId = $itemId
+        Status = $status
+        Evidence = $evidence
+        PR = $pr
+    }
+}
+
+function Update-TrackerFromReport {
+    param([pscustomobject]$Report)
+
+    if (-not $Report) {
+        return $false
+    }
+
+    $items = @(Get-TrackerItems)
+    $target = $items | Where-Object Id -EQ $Report.ItemId | Select-Object -First 1
+    if (-not $target) {
+        Write-Warning "Could not find tracker item #$($Report.ItemId) from CLI report."
+        return $false
+    }
+
+    $changed = $false
+    if ($target.Status -ne $Report.Status) {
+        $target.Status = $Report.Status
+        $changed = $true
+    }
+
+    if ($Report.Evidence -and $target.Evidence -ne $Report.Evidence) {
+        $target.Evidence = $Report.Evidence
+        $changed = $true
+    }
+
+    if ($changed) {
+        Save-TrackerItems -Items $items
+    }
+
+    return $changed
+}
+
 function Invoke-Iteration {
     [CmdletBinding(SupportsShouldProcess = $true)]
     param([int]$Iteration)
@@ -246,7 +356,19 @@ while ($iteration -lt $MaxIterations) {
         continue
     }
 
+    $report = Get-IterationReport -Output $result.Output -FallbackItemId $result.ItemId
+    if ($report) {
+        if (Update-TrackerFromReport -Report $report) {
+            Write-Host "Tracker updated from CLI report: item #$($report.ItemId) => $($report.Status)." -ForegroundColor Green
+        }
+
+        if ($report.PR) {
+            Write-Host "PR: $($report.PR)" -ForegroundColor Cyan
+        }
+    }
+
     $after = Get-CompletedCount
+    $result.AfterItem = Get-TrackerItem -Id $result.ItemId
     if ($after -le $before) {
         $stalled++
         $beforeStatus = if ($result.BeforeItem) { $result.BeforeItem.Status } else { 'UNKNOWN' }

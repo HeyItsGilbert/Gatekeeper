@@ -162,33 +162,24 @@ After editing:
 - Update the JSONL object's `evidence` field.
 - Commit the item.
 
-## Creating & Linking Issues with `gh` CLI
+## Creating PRs with `gh` CLI
 
-### Create an issue
+Create a PR for the worktree branch after committing the fix.
 
 ```powershell
-gh issue create `
-  --title "Brief summary of the bug" `
-  --body "Detailed description with steps to reproduce" `
-  --label "bug,p0" `
-  --assignee "@me"
+gh pr create `
+    --title "fix(<area>): <short description> (closes #<issue>)" `
+    --body "Summary of bug fix, tests, and impact"
 ```
 
-### Link to tracker
+If a PR already exists for the branch, return the existing PR URL instead of creating a duplicate.
 
-Update `trackers/p0-bugs-tracker.jsonl` with the issue number returned by `gh issue create`. Reference this number in the `reason` field.
+### Return PR in report
 
-### View issue details
+The structured report **must** include the PR URL when available:
 
-```powershell
-gh issue view <number>        # View full issue
-gh issue view <number> --web  # Open in browser
-```
-
-### Check issue status during work
-
-```powershell
-gh issue status
+```text
+PR: https://github.com/<owner>/<repo>/pull/<number>
 ```
 
 ## Commit Format
@@ -213,4 +204,5 @@ TESTS: PASS | FAIL | N/A [counts]
 ANALYZER: PASS | FAIL | N/A
 HELP: UPDATED | UNCHANGED | N/A
 COMMIT: [hash or reason]
+PR: [PR]
 ```
