@@ -1,7 +1,18 @@
 # Gatekeeper P0 Bug Fixes — Iteration Prompt
 
-Open `trackers/p0-bugs-TRACKER.md` and pick the **first PENDING row only**.
-Work only that one row. Do not batch multiple rows in one iteration.
+Open `trackers/p0-bugs-tracker.jsonl` and pick the **first PENDING object only**.
+Work only that one object. Do not batch multiple objects in one iteration.
+
+Each line in the tracker file is one JSON object with these fields:
+
+- `id`
+- `workstream`
+- `scope`
+- `status`
+- `model`
+- `effort`
+- `reason`
+- `evidence`
 
 ## Before Editing
 
@@ -9,16 +20,16 @@ Find and read these files before touching anything:
 
 - `Gatekeeper/Gatekeeper.psd1` — manifest (ScriptsToProcess, dot-source order)
 - `Gatekeeper/Gatekeeper.psm1` — module loader (dot-source paths)
-- The specific source file(s) named in the tracker row
+- The specific source file(s) implied by the tracker object's `scope`
 - The corresponding test file(s) in `tests/` if they exist
 - `Gatekeeper/Configuration.psd1` for config-related rows
 
-Follow the existing code style exactly. Do not refactor code outside the scope of the row.
+Follow the existing code style exactly. Do not refactor code outside the scope of the object.
 
-## Work the Row
+## Work the Object
 
-Make the smallest complete change that fixes the bug described in the Scope column.
-The GitHub issue number in the Reason column contains the detailed description.
+Make the smallest complete change that fixes the bug described in the `scope` field.
+The GitHub issue number in the `reason` field contains the detailed description.
 
 ### Key fixes reference
 
@@ -128,7 +139,7 @@ Replace `$Value -as [bool]` with an explicit switch:
 
 ## After Editing
 
-Open the tracker and pick the first PENDING row. Work only that row.
+Open the tracker and pick the first PENDING object. Work only that object.
 
 Before editing:
 
@@ -148,7 +159,7 @@ After editing:
 - Verify mutating commands use SupportsShouldProcess when appropriate.
 - Verify help/docs/examples are updated when public behavior changes.
 - Re-read every modified file.
-- Update tracker evidence.
+- Update the JSONL object's `evidence` field.
 - Commit the item.
 
 ## Creating & Linking Issues with `gh` CLI
@@ -165,7 +176,7 @@ gh issue create `
 
 ### Link to tracker
 
-Update `trackers/p0-bugs-TRACKER.md` with the issue number returned by `gh issue create`. Reference this number in the Reason column.
+Update `trackers/p0-bugs-tracker.jsonl` with the issue number returned by `gh issue create`. Reference this number in the `reason` field.
 
 ### View issue details
 
@@ -193,7 +204,7 @@ Example: `fix(Classes): correct PropertySet.AddProperty hashtable key (closes #1
 End every iteration with:
 
 ```
-ITEM: [tracker row ID and scope]
+ITEM: [tracker object id and scope]
 STATUS: DONE | BLOCKED [reason]
 FILES_MODIFIED: [files]
 FILES_READ_BACK: yes | no [reason]

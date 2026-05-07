@@ -15,7 +15,7 @@ if (Get-Variable -Name PSNativeCommandUseErrorActionPreference -ErrorAction Sile
 }
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$TrackerPath = Join-Path $RepoRoot 'trackers/p0-bugs-TRACKER.md'
+$TrackerPath = Join-Path $RepoRoot 'trackers/p0-bugs-tracker.jsonl'
 $PromptPath = Join-Path $RepoRoot 'scripts/p0-bugs-prompt.md'
 
 if ($Type -eq 'copilot') {
@@ -27,15 +27,14 @@ if ($Type -eq 'copilot') {
 }
 
 function Get-PendingCount {
-    $tracker = Get-Content $TrackerPath -Raw
-    return ([regex]::Matches($tracker, '\| PENDING[\s|]')).Count
+    return @(Get-TrackerItems | Where-Object Status -EQ 'PENDING').Count
 }
 
 function Get-CompletedCount {
-    $tracker = Get-Content $TrackerPath -Raw
-    $done = ([regex]::Matches($tracker, '\| DONE[\s|]')).Count
-    $needsWork = ([regex]::Matches($tracker, '\| NEEDS_WORK[\s|]')).Count
-    $blocked = ([regex]::Matches($tracker, '\| BLOCKED[\s|]')).Count
+    $items = @(Get-TrackerItems)
+    $done = @($items | Where-Object Status -EQ 'DONE').Count
+    $needsWork = @($items | Where-Object Status -EQ 'NEEDS_WORK').Count
+    $blocked = @($items | Where-Object Status -EQ 'BLOCKED').Count
     return $done + $needsWork + $blocked
 }
 
@@ -114,21 +113,40 @@ function Format-CommandPreview {
     return "{0} {1}" -f $Command, ($quotedArgs -join ' ')
 }
 
-function Get-NextPendingItem {
-    foreach ($line in Get-Content $TrackerPath) {
-        if ($line -match '^\|\s*\d+\s*\|' -and $line -match '\|\s*PENDING\s*\|') {
-            $cells = $line -split '\|' | ForEach-Object { $PSItem.Trim() }
-            return @{
-                Id = $cells[1]
-                Model = $cells[5]
-                Effort = $cells[6]
-            }
+function Get-TrackerItems {
+    $items = foreach ($line in Get-Content $TrackerPath) {
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            continue
+        }
+
+        $item = $line | ConvertFrom-Json
+        [pscustomobject]@{
+            Id = [int]$item.id
+            Workstream = [string]$item.workstream
+            Scope = [string]$item.scope
+            Status = [string]$item.status
+            Model = [string]$item.model
+            Effort = [string]$item.effort
+            Reason = [string]$item.reason
+            Evidence = [string]$item.evidence
         }
     }
-    return $null
+
+    return @($items | Sort-Object Id)
+}
+
+function Get-NextPendingItem {
+    return Get-TrackerItems | Where-Object Status -EQ 'PENDING' | Select-Object -First 1
+}
+
+function Get-TrackerItem {
+    param([int]$Id)
+
+    return Get-TrackerItems | Where-Object Id -EQ $Id | Select-Object -First 1
 }
 
 function Invoke-Iteration {
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param([int]$Iteration)
 
     $next = Get-NextPendingItem
@@ -136,6 +154,8 @@ function Invoke-Iteration {
         Write-Verbose 'No pending tracker item found for this iteration.'
         return $true
     }
+
+    $beforeItem = Get-TrackerItem -Id $next.Id
 
     $modelAlias = if ($next -and $next.Model) { $next.Model } else { $Model }
     $effortAlias = if ($next -and $next.Effort) { $next.Effort } else { $Effort }
@@ -165,14 +185,35 @@ function Invoke-Iteration {
 
     if (-not $PSCmdlet.ShouldProcess("item #$($next.Id)", "Invoke: $preview")) {
         Write-Verbose 'Skipped due to WhatIf/ShouldProcess.'
-        return $true
+        return [pscustomobject]@{
+            Success = $true
+            Simulated = $true
+            ItemId = [int]$next.Id
+            BeforeItem = $beforeItem
+            AfterItem = $beforeItem
+            ExitCode = 0
+            Output = @()
+            Preview = $preview
+        }
     }
 
-    & $EngineBin @cmdArgs
-    return $LASTEXITCODE -eq 0
+    & $EngineBin @cmdArgs 2>&1 | Tee-Object -Variable cliOutput | Out-Null
+    $exitCode = $LASTEXITCODE
+    $afterItem = Get-TrackerItem -Id $next.Id
+
+    return [pscustomobject]@{
+        Success = $exitCode -eq 0
+        Simulated = $false
+        ItemId = [int]$next.Id
+        BeforeItem = $beforeItem
+        AfterItem = $afterItem
+        ExitCode = $exitCode
+        Output = @($cliOutput)
+        Preview = $preview
+    }
 }
 
-$total = 13
+$total = @(Get-TrackerItems).Count
 $iteration = 0
 $stalled = 0
 
@@ -188,15 +229,36 @@ while ($iteration -lt $MaxIterations) {
         break
     }
 
-    if (-not (Invoke-Iteration -Iteration $iteration)) {
-        Write-Host 'Iteration failed.' -ForegroundColor Red
+    $result = Invoke-Iteration -Iteration $iteration
+    if (-not $result.Success) {
+        Write-Host "Iteration failed (exit code $($result.ExitCode))." -ForegroundColor Red
+        if ($result.Output.Count -gt 0) {
+            Write-Host 'CLI output:' -ForegroundColor DarkYellow
+            $result.Output | Select-Object -Last 20 | ForEach-Object {
+                Write-Host "  $_"
+            }
+        }
         exit 1
+    }
+
+    if ($result.Simulated) {
+        Write-Host "Validation only: tracker item #$($result.ItemId) was not executed because WhatIf/ShouldProcess skipped the CLI call." -ForegroundColor DarkYellow
+        continue
     }
 
     $after = Get-CompletedCount
     if ($after -le $before) {
         $stalled++
-        Write-Host "No progress detected ($stalled/3)." -ForegroundColor Yellow
+        $beforeStatus = if ($result.BeforeItem) { $result.BeforeItem.Status } else { 'UNKNOWN' }
+        $afterStatus = if ($result.AfterItem) { $result.AfterItem.Status } else { 'MISSING' }
+        Write-Host "No progress detected ($stalled/3). Tracker item #$($result.ItemId) stayed $beforeStatus -> $afterStatus." -ForegroundColor Yellow
+        if ($result.Output.Count -gt 0) {
+            Write-Host 'CLI output:' -ForegroundColor DarkYellow
+            $result.Output | Select-Object -Last 20 | ForEach-Object {
+                Write-Host "  $_"
+            }
+        }
+        Write-Host 'Validation check: the current checkout JSONL tracker did not change. If the CLI used an isolated worktree, inspect that worktree or disable --worktree for this loop.' -ForegroundColor DarkYellow
         if ($stalled -ge 3) { exit 1 }
     } else {
         $stalled = 0
