@@ -24,8 +24,9 @@ class ConditionGroup {
             throw "Data cannot be null."
         }
         # This should either have a single condition or a group of conditions
-        if ($data.ContainsKey('AllOf') -and $data.ContainsKey('AnyOf') -and $data.ContainsKey('Not')) {
-            throw "ConditionGroup cannot have AllOf, AnyOf, and Not at the same time."
+        $groupKeys = @('AllOf', 'AnyOf', 'Not') | Where-Object { $data.ContainsKey($_) }
+        if ($groupKeys.Count -gt 1) {
+            throw "ConditionGroup may only define one of: AllOf, AnyOf, Not. Got: $($groupKeys -join ', ')"
         }
         if (($data.ContainsKey('AllOf') -or $data.ContainsKey('AnyOf') -or $data.ContainsKey('Not')) -and
             ($data.ContainsKey('Property') -or $data.ContainsKey('Operator') -or $data.ContainsKey('Value'))) {
