@@ -15,7 +15,7 @@ if (Get-Variable -Name PSNativeCommandUseErrorActionPreference -ErrorAction Sile
 }
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$TrackerPath = Join-Path $RepoRoot 'docs/trackers/p0-bugs-TRACKER.md'
+$TrackerPath = Join-Path $RepoRoot 'trackers/p0-bugs-TRACKER.md'
 $PromptPath = Join-Path $RepoRoot 'scripts/p0-bugs-prompt.md'
 
 if ($Type -eq 'copilot') {

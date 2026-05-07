@@ -1,11 +1,12 @@
 # Gatekeeper P0 Bug Fixes — Iteration Prompt
 
-Open `docs/trackers/p0-bugs-TRACKER.md` and pick the **first PENDING row only**.
+Open `trackers/p0-bugs-TRACKER.md` and pick the **first PENDING row only**.
 Work only that one row. Do not batch multiple rows in one iteration.
 
 ## Before Editing
 
 Find and read these files before touching anything:
+
 - `Gatekeeper/Gatekeeper.psd1` — manifest (ScriptsToProcess, dot-source order)
 - `Gatekeeper/Gatekeeper.psm1` — module loader (dot-source paths)
 - The specific source file(s) named in the tracker row
@@ -23,6 +24,7 @@ The GitHub issue number in the Reason column contains the detailed description.
 
 **ID 1 — break-in-switch (Issue #9)**
 `break` inside `switch` does not exit the enclosing `foreach`. Use a labeled break:
+
 ```powershell
 :ruleLoop foreach ($rule in $FeatureFlag.Rules) {
     if (Test-Condition @testConditionSplat) {
@@ -38,6 +40,7 @@ The GitHub issue number in the Reason column contains the detailed description.
 
 **ID 2 — DefaultEffect (Issue #10)**
 Track whether a terminal rule fired. In `end{}`, use DefaultEffect only when no terminal rule matched:
+
 ```powershell
 begin { $finalResult = $false; $terminalHit = $false }
 # process: set $terminalHit = $true on Allow/Deny
@@ -54,6 +57,7 @@ end {
 
 **ID 4 — ConditionGroup.FromJson (Issue #12)**
 Add to the `ConditionGroup` class:
+
 ```powershell
 static [ConditionGroup] FromJson([string]$json) {
     $data = ConvertFrom-JsonToHashtable -InputObject $json
@@ -63,6 +67,7 @@ static [ConditionGroup] FromJson([string]$json) {
 
 **ID 5 — Two-group guard (Issue #13)**
 Replace the `ContainsKey('AllOf') -and ContainsKey('AnyOf') -and ContainsKey('Not')` check with:
+
 ```powershell
 $groupKeys = @('AllOf', 'AnyOf', 'Not') | Where-Object { $data.ContainsKey($_) }
 if ($groupKeys.Count -gt 1) {
@@ -98,6 +103,7 @@ Alternatively, extend `IsValid()` to return `$true` for well-formed group condit
 
 **ID 12 — CmdletBinding (Issue #32)**
 Add `[CmdletBinding()]` before the `param` block in:
+
 - `Public/Test-Condition.ps1`
 - `Private/Test-TypedValue.ps1`
 - `Private/Invoke-Logging.ps1`
@@ -105,6 +111,7 @@ Add `[CmdletBinding()]` before the `param` block in:
 
 **ID 13 — Boolean coercion (Issue #28)**
 Replace `$Value -as [bool]` with an explicit switch:
+
 ```powershell
 "boolean" {
     if ($Value -is [bool])   { return $Value }
@@ -124,15 +131,17 @@ Replace `$Value -as [bool]` with an explicit switch:
 Open the tracker and pick the first PENDING row. Work only that row.
 
 Before editing:
+
 - Find the manifest (*.psd1).
 - Find the module entry point (*.psm1).
 - Find public commands, private helpers, tests, and docs.
 - Follow the existing layout.
 
 After editing:
-- Import the module from the repo path in a fresh PowerShell session.
-- Run relevant Pester tests if present.
-- Run PSScriptAnalyzer if present.
+
+- Run the tests: `.\build.ps1 -Task Test -OutputFormat Quiet`
+  - Errors will be show in ErrorMessage object.
+  - Success is indicated by zero exit code and the result object show Success as True.
 - Verify public commands use approved verbs.
 - Verify exported commands are intentional.
 - Verify parameters are typed and validated.
@@ -141,6 +150,35 @@ After editing:
 - Re-read every modified file.
 - Update tracker evidence.
 - Commit the item.
+
+## Creating & Linking Issues with `gh` CLI
+
+### Create an issue
+
+```powershell
+gh issue create `
+  --title "Brief summary of the bug" `
+  --body "Detailed description with steps to reproduce" `
+  --label "bug,p0" `
+  --assignee "@me"
+```
+
+### Link to tracker
+
+Update `trackers/p0-bugs-TRACKER.md` with the issue number returned by `gh issue create`. Reference this number in the Reason column.
+
+### View issue details
+
+```powershell
+gh issue view <number>        # View full issue
+gh issue view <number> --web  # Open in browser
+```
+
+### Check issue status during work
+
+```powershell
+gh issue status
+```
 
 ## Commit Format
 

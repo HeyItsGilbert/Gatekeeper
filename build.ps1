@@ -7,20 +7,20 @@ param(
         $psakeFile = './psakeFile.ps1'
         switch ($Parameter) {
             'Task' {
+                $plan = Get-PsakeBuildPlan -BuildFile $psakeFile
+                $names = $plan.TaskMap.Keys
                 if ([string]::IsNullOrEmpty($WordToComplete)) {
-                    Get-PSakeScriptTasks -buildFile $psakeFile | Select-Object -ExpandProperty Name
+                    $names
                 }
                 else {
-                    Get-PSakeScriptTasks -buildFile $psakeFile |
-                        Where-Object { $_.Name -match $WordToComplete } |
-                        Select-Object -ExpandProperty Name
+                    $names | Where-Object { $_ -match $WordToComplete }
                 }
             }
             Default {
             }
         }
     })]
-    [string[]]$Task = 'default',
+    [string[]]$Task = 'Default',
 
     # Bootstrap dependencies
     [switch]$Bootstrap,
@@ -33,7 +33,13 @@ param(
     [hashtable]$Properties,
 
     # Optional parameters to pass to psake
-    [hashtable]$Parameters
+    [hashtable]$Parameters,
+
+    # Output format for psake. Valid values: Default, Quiet, JSON, GitHubActions.
+    # LLMs and automated callers should prefer 'Quiet' — it suppresses console noise
+    # and returns a structured PsakeBuildResult object instead of printing to the host.
+    [ValidateSet('Default', 'Quiet', 'JSON', 'GitHubActions')]
+    [string]$OutputFormat = 'Default'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -56,10 +62,24 @@ if ($Bootstrap.IsPresent) {
 # Execute psake task(s)
 $psakeFile = './psakeFile.ps1'
 if ($PSCmdlet.ParameterSetName -eq 'Help') {
-    Get-PSakeScriptTasks -buildFile $psakeFile |
-        Format-Table -Property Name, Description, Alias, DependsOn
+    $plan = Get-PsakeBuildPlan -BuildFile $psakeFile
+    $plan.TaskMap.Values | Select-Object Name, Description, DependsOn |
+        Format-Table -AutoSize
 } else {
     Set-BuildEnvironment -Force
-    Invoke-psake -buildFile $psakeFile -taskList $Task -nologo -properties $Properties -parameters $Parameters
-    exit ([int](-not $psake.build_success))
+    $psakeParams = @{
+        buildFile   = $psakeFile
+        taskList    = $Task
+        nologo      = $true
+        properties  = $Properties
+        parameters  = $Parameters
+    }
+    if ($OutputFormat -eq 'Quiet') {
+        $psakeParams['Quiet'] = $true
+    } elseif ($OutputFormat -ne 'Default') {
+        $psakeParams['OutputFormat'] = $OutputFormat
+    }
+    $result = Invoke-psake @psakeParams
+    $result
+    exit ([int](-not $result.Success))
 }
