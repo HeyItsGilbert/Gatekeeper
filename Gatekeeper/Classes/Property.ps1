@@ -136,7 +136,7 @@ class PropertySet {
         }
         $ps = [PropertySet]::new($json)
         $ps.FilePath = (Resolve-Path $FilePath).Path
-        $ps.Name = $ps.FilePath.BaseName
+        $ps.Name = [System.IO.Path]::GetFileNameWithoutExtension($ps.FilePath)
         return $ps
     }
 
