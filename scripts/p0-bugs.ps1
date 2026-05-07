@@ -150,13 +150,13 @@ function Invoke-Iteration {
     Write-Host "Iteration $Iteration/$MaxIterations : item #$($next.Id), $Type, $iterModel, effort=$iterEffort" -ForegroundColor Cyan
 
     if ($Type -eq 'copilot') {
-        $cmdArgs = @('-p', $prompt, '--model', $iterModel, '--allow-all', '--reasoning-effort', $iterEffort)
+        $cmdArgs = @('-p', $prompt, '--model', $iterModel, '--allow-all', '--reasoning-effort', $iterEffort, '--worktree')
     } elseif ($Type -eq 'codex') {
         $cmdArgs = @('exec', '--model', $iterModel, '--config', "model_reasoning_effort=`"$iterEffort`"",
-            '--dangerously-bypass-approvals-and-sandbox', $prompt)
+            '--dangerously-bypass-approvals-and-sandbox', '--worktree', $prompt)
     } else {
         $cmdArgs = @('--dangerously-skip-permissions', '--no-session-persistence',
-            '--model', $iterModel, '--effort', $iterEffort, '-p', $prompt)
+            '--model', $iterModel, '--effort', $iterEffort, '--worktree', '-p', $prompt)
     }
 
     $preview = Format-CommandPreview -Command $EngineBin -Arguments $cmdArgs
