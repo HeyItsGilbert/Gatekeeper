@@ -44,7 +44,7 @@
     process {
         # Process each feature
         Write-Verbose "Processing Feature $($FeatureFlag.Name) with ($($FeatureFlag.Rules.Count)) rules"
-        foreach ($rule in $FeatureFlag.Rules) {
+        :ruleLoop foreach ($rule in $FeatureFlag.Rules) {
             Write-Verbose "Processing Rule $($rule.Name)"
             $testConditionSplat = @{
                 Context = $Context
@@ -58,12 +58,12 @@
                     'Allow' {
                         Invoke-Logging -Effect 'Allow' -Rule $rule
                         $finalResult = $true
-                        break
+                        break ruleLoop
                     }
                     'Deny' {
                         Invoke-Logging -Effect 'Deny' -Rule $rule
                         $finalResult = $false
-                        break
+                        break ruleLoop
                     }
                     'Audit' {
                         Invoke-Logging -Effect 'Audit' -Rule $rule
