@@ -17,9 +17,14 @@ function Test-Condition {
     A condition to test which are part of rules.
 
     .EXAMPLE
-    $context = Get-DeviceContext
-    $propertySet = Read-PropertySet
-    $rule = $rules[0]
+    $propertySet = Read-PropertySet -Path .\props.json
+    $rule = New-Rule -Name 'MyRule' -Conditions @{
+        AllOf = @(
+            @{ Property = 'Hostname'; Operator = 'Equals'; Value = $env:COMPUTERNAME }
+        )
+    }
+    $context = Get-DefaultContext -PropertySet $propertySet
+    $context.Hostname = $env:COMPUTERNAME
     Test-Condition -Context $context -PropertySet $propertySet -Condition $rule
 
     This would return a true/false
