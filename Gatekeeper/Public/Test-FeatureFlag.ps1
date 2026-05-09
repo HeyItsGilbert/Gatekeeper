@@ -17,8 +17,11 @@
     The context to use to test against.
 
     .EXAMPLE
-    $context = Get-DeviceContext
-    Test-FeatureFlag -FeatureFlag '' -Context $context
+    $propertySet = Read-PropertySet -Path .\props.json
+    $flag = New-FeatureFlag -Name 'MyFeature'
+    $context = Get-DefaultContext -PropertySet $propertySet
+    $context.Hostname = $env:COMPUTERNAME
+    Test-FeatureFlag -FeatureFlag $flag -PropertySet $propertySet -Context $context
 
     This will test if the current device will pass the feature flag rules.
     #>
