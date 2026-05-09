@@ -55,7 +55,7 @@ function New-FeatureFlag {
         $Author = $env:USERNAME,
         [Effect]
         $DefaultEffect = [Effect]::Warn,
-        [Parameter(Mandatory, ValueFromPipeline)]
+        [Parameter(ValueFromPipeline)]
         [Rule[]]
         $Rules = @(),
         [ValidateScript({
