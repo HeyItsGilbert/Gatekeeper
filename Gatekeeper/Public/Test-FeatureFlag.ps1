@@ -40,7 +40,8 @@
     )
 
     begin {
-        $finalResult = $False
+        $finalResult = $false
+        $terminalHit = $false
         $config = Import-GatekeeperConfig
     }
 
@@ -61,11 +62,13 @@
                     'Allow' {
                         Invoke-Logging -Effect 'Allow' -Rule $rule
                         $finalResult = $true
+                        $terminalHit = $true
                         break ruleLoop
                     }
                     'Deny' {
                         Invoke-Logging -Effect 'Deny' -Rule $rule
                         $finalResult = $false
+                        $terminalHit = $true
                         break ruleLoop
                     }
                     'Audit' {
@@ -85,7 +88,9 @@
     }
 
     end {
-        # Return a single bool
+        if (-not $terminalHit) {
+            $finalResult = $FeatureFlag.DefaultEffect -eq [Effect]::Allow
+        }
         return $finalResult
     }
 }
