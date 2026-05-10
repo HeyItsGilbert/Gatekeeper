@@ -146,7 +146,7 @@ class PropertySet {
     }
 
     [PropertySet]AddProperty([PropertyDefinition]$Property) {
-        $this.Properties.Add($Property)
+        $this.Properties.Add($Property.Name, $Property)
         return $this
     }
 
