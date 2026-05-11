@@ -192,6 +192,41 @@ class FeatureFlag {
     }
 }
 
+class GatekeeperPath {
+    # Validates a user-supplied string as a safe path to an existing JSON file.
+    # Rejects wildcard patterns, non-.json files, and UNC paths (unless enabled
+    # via the Security.AllowUncPaths configuration setting) so callers that accept
+    # untrusted flag names cannot be redirected to read arbitrary files. Returns
+    # the resolved provider path on success and throws otherwise.
+    static [string] ResolveJsonFilePath([string]$Path) {
+        if ([string]::IsNullOrWhiteSpace($Path)) {
+            throw "File path cannot be empty."
+        }
+        if ([System.Management.Automation.WildcardPattern]::ContainsWildcardCharacters($Path)) {
+            throw "File path cannot contain wildcard characters: $Path"
+        }
+        if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+            throw "File not found: $Path"
+        }
+        $resolved = (Resolve-Path -LiteralPath $Path).ProviderPath
+        if ([System.IO.Path]::GetExtension($resolved) -ne '.json') {
+            throw "File path must point to a .json file: $Path"
+        }
+        if (([uri]$resolved).IsUnc -and -not [GatekeeperPath]::AllowUncPaths()) {
+            throw "UNC file paths are not permitted unless enabled via the Security.AllowUncPaths configuration: $Path"
+        }
+        return $resolved
+    }
+
+    static [boolean] AllowUncPaths() {
+        try {
+            return [boolean](Import-GatekeeperConfig).Security.AllowUncPaths
+        } catch {
+            return $false
+        }
+    }
+}
+
 class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
 
     ## Override the abstract method "Transform". This is where the user
@@ -204,12 +239,9 @@ class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTrans
                 [FeatureFlag]::new($inputData)
             }
             'System.String' {
-                if (Test-Path $inputData) {
-                    $json = Get-Content -Raw -Path $inputData
-                    [FeatureFlag]::FromJson($json)
-                } else {
-                    throw "Unknown string. If this is a file path, please check if it correct. $inputData"
-                }
+                $resolvedPath = [GatekeeperPath]::ResolveJsonFilePath($inputData)
+                $json = Get-Content -Raw -LiteralPath $resolvedPath
+                [FeatureFlag]::FromJson($json)
             }
             default {
                 throw "Cannot convert type to FeatureFlag: $($inputData.GetType().FullName)"
@@ -235,12 +267,9 @@ class ConditionGroupTransformAttribute : System.Management.Automation.ArgumentTr
                 [ConditionGroup]::new($inputData)
             }
             'System.String' {
-                if (Test-Path $inputData) {
-                    $json = Get-Content -Raw -Path $inputData
-                    [ConditionGroup]::FromJson($json)
-                } else {
-                    throw "Unknown string. If this is a file path, please check if it correct. $inputData"
-                }
+                $resolvedPath = [GatekeeperPath]::ResolveJsonFilePath($inputData)
+                $json = Get-Content -Raw -LiteralPath $resolvedPath
+                [ConditionGroup]::FromJson($json)
             }
             default {
                 throw "Cannot convert type to ConditionGroup: $($inputData.GetType().FullName)"

@@ -128,6 +128,9 @@ Configuration path: `Gilbert Sanchez\Gatekeeper\Configuration.psd1`
         FeatureFlags = $null  # Defaults to machine-wide config location
         PropertySet = $null   # Defaults to machine-wide config location
     }
+    Security = @{
+        AllowUncPaths = $false  # Allow UNC file paths passed to commands
+    }
     Logging = @{
         Allow = @{ Enabled = $bool; Script = {param($Rule) ...} }
         Deny = @{ Enabled = $bool; Script = {param($Rule) ...} }

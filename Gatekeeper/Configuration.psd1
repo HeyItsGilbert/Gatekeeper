@@ -7,6 +7,11 @@
     FilePaths = @{
         Schemas = "$PSScriptRoot\Schemas"
     }
+    Security = @{
+        # When $false, file paths passed to commands (e.g. Test-FeatureFlag,
+        # Test-Condition) may not be UNC paths. Set to $true to opt in.
+        AllowUncPaths = $false
+    }
     Logging = @{
         Allow = @{
             # We leave this disabled by default to avoid cluttering the console

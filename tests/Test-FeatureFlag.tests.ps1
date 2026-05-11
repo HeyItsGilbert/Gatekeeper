@@ -31,4 +31,18 @@ Describe 'Test-FeatureFlag' {
             $Effect -eq 'Allow'
         } -Times 1
     }
+
+    It 'Rejects a wildcard feature flag path' {
+        {
+            Test-FeatureFlag -FeatureFlag (Join-Path $TestDrive '*.json') -PropertySet $script:propertySet -Context $script:context
+        } | Should -Throw -ExpectedMessage '*wildcard*'
+    }
+
+    It 'Rejects a non-JSON feature flag path' {
+        $notJson = Join-Path $TestDrive 'flag.txt'
+        'not json' | Set-Content -LiteralPath $notJson
+        {
+            Test-FeatureFlag -FeatureFlag $notJson -PropertySet $script:propertySet -Context $script:context
+        } | Should -Throw -ExpectedMessage '*must point to a .json file*'
+    }
 }
