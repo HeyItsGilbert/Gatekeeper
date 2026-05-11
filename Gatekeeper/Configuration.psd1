@@ -18,7 +18,7 @@
             Enabled = $false
             Script = 'param($Rule); Write-Host "⛔ Rule [$($Rule.Name)] matched and is denied."'
         }
-        Warning = @{
+        Warn = @{
             Enabled = $true
             Script = 'param($Rule); Write-Warning "⚠️ Rule [$($Rule.Name)] matched."'
         }
