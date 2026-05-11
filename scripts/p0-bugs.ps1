@@ -6,7 +6,14 @@ param(
     [string]$Type = 'claude',
     [string]$Model = 'opus',
     [ValidateSet('low', 'medium', 'high', 'max', 'xhigh')]
-    [string]$Effort = 'high'
+    [string]$Effort = 'high',
+    [string]$IssueLabel = 'ralph',
+    [string]$InProgressLabel = 'in-progress',
+    [ValidateSet('claude', 'copilot', 'codex')]
+    [string]$TriageType = 'claude',
+    [string]$TriageModel = 'haiku',
+    [switch]$SkipTriage,
+    [switch]$SkipUpdate
 )
 
 $ErrorActionPreference = 'Stop'
@@ -146,10 +153,11 @@ function Get-TrackerItem {
 }
 
 function Save-TrackerItems {
+    [CmdletBinding()]
     param([object[]]$Items)
 
     $lines = foreach ($item in ($Items | Sort-Object Id)) {
-        [pscustomobject]@{
+        [PSCustomObject]@{
             id = [int]$item.Id
             workstream = [string]$item.Workstream
             scope = [string]$item.Scope
@@ -161,7 +169,242 @@ function Save-TrackerItems {
         } | ConvertTo-Json -Compress
     }
 
-    Set-Content -Path $TrackerPath -Value $lines
+    $trackerDir = Split-Path -Parent $TrackerPath
+    if ($trackerDir -and -not (Test-Path -LiteralPath $trackerDir)) {
+        New-Item -ItemType Directory -Path $trackerDir -Force | Out-Null
+    }
+
+    Set-Content -Path $TrackerPath -Value $lines -WhatIf:$false
+}
+
+function Get-IssueContext {
+    param([int]$Number)
+
+    $json = gh issue view $Number --json number,title,body,url,labels,state,closedByPullRequestsReferences 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $json) {
+        return $null
+    }
+    return ($json | ConvertFrom-Json)
+}
+
+function Find-LinkedOpenPR {
+    param([int]$Number)
+
+    $json = gh pr list --state open --search "#$Number" --json number,body,state,url,title 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $json) {
+        return $null
+    }
+    $prs = $json | ConvertFrom-Json
+    $pattern = "(?i)(close[sd]?|fix(es|ed)?|resolve[sd]?)\s+#$Number\b"
+    foreach ($pr in $prs) {
+        $haystack = "$($pr.title)`n$($pr.body)"
+        if ($haystack -match $pattern) {
+            return $pr
+        }
+    }
+    return $null
+}
+
+function Test-IssueHasOpenPR {
+    param([pscustomobject]$Issue)
+
+    if (-not $Issue) { return $false }
+    $refs = $Issue.closedByPullRequestsReferences
+    if ($refs) {
+        foreach ($pr in $refs) {
+            if ($pr.state -eq 'OPEN') { return $true }
+        }
+    }
+    if (Find-LinkedOpenPR -Number ([int]$Issue.number)) {
+        return $true
+    }
+    return $false
+}
+
+function Set-IssueInProgress {
+    param([int]$Number)
+
+    gh issue edit $Number --add-label $InProgressLabel 2>&1 | Out-Null
+}
+
+function Remove-IssueInProgress {
+    param([int]$Number)
+
+    gh issue edit $Number --remove-label $InProgressLabel 2>&1 | Out-Null
+}
+
+function Invoke-TriageModel {
+    param([pscustomobject]$Issue)
+
+    $triageBin = if ($TriageType -eq 'copilot') {
+        '/home/vscode/.local/bin/copilot'
+    } elseif ($TriageType -eq 'codex') {
+        'codex'
+    } else {
+        'claude'
+    }
+    $triageModelResolved = Resolve-ModelAlias -Alias $TriageModel -EngineType $TriageType
+
+    $labels = @($Issue.labels | ForEach-Object { $_.name }) -join ', '
+    $bodyExcerpt = if ($Issue.body) {
+        $b = [string]$Issue.body
+        if ($b.Length -gt 1500) { $b.Substring(0, 1500) } else { $b }
+    } else {
+        ''
+    }
+
+    $triagePrompt = @"
+You are triaging a GitHub issue. Decide which model and effort level to use to fix it.
+
+Reply with ONE LINE of JSON, no prose, no code fences:
+{"model":"opus|sonnet|haiku","effort":"low|medium|high|max","reason":"<one short sentence>"}
+
+Guidelines:
+- haiku/low for trivial renames, typo fixes, dead-variable removal.
+- sonnet/medium for ordinary bug fixes or small refactors.
+- opus/high for security work, multi-file coordination, or anything touching public contracts.
+
+Issue #$($Issue.number): $($Issue.title)
+Labels: $labels
+
+$bodyExcerpt
+"@
+
+    try {
+        if ($TriageType -eq 'codex') {
+            $triageArgs = @('exec', '--model', $triageModelResolved, '--dangerously-bypass-approvals-and-sandbox', $triagePrompt)
+        } else {
+            $triageArgs = @('-p', $triagePrompt, '--model', $triageModelResolved)
+            if ($TriageType -eq 'claude') {
+                $triageArgs += @('--dangerously-skip-permissions', '--no-session-persistence')
+            } elseif ($TriageType -eq 'copilot') {
+                $triageArgs += @('--allow-all')
+            }
+        }
+        $raw = & $triageBin @triageArgs 2>$null
+        $text = ($raw | ForEach-Object { [string]$_ }) -join "`n"
+        $jsonMatch = [regex]::Match($text, '\{[^{}]*"model"[^{}]*\}')
+        if ($jsonMatch.Success) {
+            $parsed = $jsonMatch.Value | ConvertFrom-Json
+            return [pscustomobject]@{
+                Model = [string]$parsed.model
+                Effort = [string]$parsed.effort
+                Reason = [string]$parsed.reason
+            }
+        }
+    } catch {
+        Write-Verbose "Triage call failed for #$($Issue.number): $_"
+    }
+
+    return [pscustomobject]@{
+        Model = $Model
+        Effort = $Effort
+        Reason = "Issue #$($Issue.number)"
+    }
+}
+
+function Sync-TrackerFromGitHub {
+    Write-Host "Syncing tracker from GitHub issues (label: $IssueLabel)..." -ForegroundColor Cyan
+
+    $listJson = gh issue list --label $IssueLabel --state open --limit 200 --json number,title,labels,url 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $listJson) {
+        throw "gh issue list failed (label '$IssueLabel'). Is the gh CLI authenticated?"
+    }
+    $issues = $listJson | ConvertFrom-Json
+
+    $existing = @{}
+    if (Test-Path -LiteralPath $TrackerPath) {
+        foreach ($item in Get-TrackerItems) {
+            $existing[[int]$item.Id] = $item
+        }
+    }
+
+    $rows = New-Object System.Collections.Generic.List[object]
+    $kept = 0
+    $added = 0
+    $skipped = 0
+
+    foreach ($issue in $issues) {
+        $labelNames = @($issue.labels | ForEach-Object { $_.name })
+        if ($labelNames -contains $InProgressLabel) {
+            Write-Host "  skip #$($issue.number) — has '$InProgressLabel' label" -ForegroundColor DarkGray
+            $skipped++
+            continue
+        }
+
+        $detail = Get-IssueContext -Number $issue.number
+        if (Test-IssueHasOpenPR -Issue $detail) {
+            Write-Host "  skip #$($issue.number) — open PR already linked" -ForegroundColor DarkGray
+            $skipped++
+            continue
+        }
+
+        if ($existing.ContainsKey([int]$issue.number)) {
+            $prior = $existing[[int]$issue.number]
+            if ($prior.Status -in @('DONE', 'BLOCKED', 'NEEDS_WORK')) {
+                $rows.Add($prior) | Out-Null
+                $kept++
+                continue
+            }
+        }
+
+        $workstream = ($labelNames | Where-Object { $_ -ne $InProgressLabel -and $_ -ne $IssueLabel } | Select-Object -First 1)
+        if (-not $workstream) { $workstream = 'general' }
+
+        $triage = Invoke-TriageModel -Issue $detail
+        Write-Host ("  add  #{0} — {1}/{2} ({3})" -f $issue.number, $triage.Model, $triage.Effort, $issue.title) -ForegroundColor Green
+        $added++
+
+        $rows.Add([pscustomobject]@{
+            Id = [int]$issue.number
+            Workstream = $workstream
+            Scope = [string]$issue.title
+            Status = 'PENDING'
+            Model = $triage.Model
+            Effort = $triage.Effort
+            Reason = "Issue #$($issue.number)"
+            Evidence = [string]$issue.url
+        }) | Out-Null
+    }
+
+    foreach ($id in $existing.Keys) {
+        $hit = $rows | Where-Object Id -EQ $id | Select-Object -First 1
+        if (-not $hit -and $existing[$id].Status -in @('DONE', 'BLOCKED', 'NEEDS_WORK')) {
+            $rows.Add($existing[$id]) | Out-Null
+            $kept++
+        }
+    }
+
+    Save-TrackerItems -Items $rows.ToArray()
+    Write-Host "Tracker synced: $added added, $kept kept, $skipped skipped." -ForegroundColor Cyan
+}
+
+function Resolve-IssueStatusFromGitHub {
+    param([int]$Number)
+
+    $issue = Get-IssueContext -Number $Number
+    if (-not $issue) {
+        return $null
+    }
+    if ($issue.state -eq 'CLOSED') {
+        return [pscustomobject]@{ Status = 'DONE'; PR = $null; Evidence = "Issue #$Number closed." }
+    }
+    $refs = $issue.closedByPullRequestsReferences
+    if ($refs) {
+        $open = $refs | Where-Object state -EQ 'OPEN' | Select-Object -First 1
+        $merged = $refs | Where-Object state -EQ 'MERGED' | Select-Object -First 1
+        if ($merged) {
+            return [pscustomobject]@{ Status = 'DONE'; PR = $merged.url; Evidence = "PR merged: $($merged.url)" }
+        }
+        if ($open) {
+            return [pscustomobject]@{ Status = 'DONE'; PR = $open.url; Evidence = "PR open: $($open.url)" }
+        }
+    }
+    $pr = Find-LinkedOpenPR -Number $Number
+    if ($pr) {
+        return [pscustomobject]@{ Status = 'DONE'; PR = $pr.url; Evidence = "PR open: $($pr.url)" }
+    }
+    return $null
 }
 
 function Get-IterationReport {
@@ -270,8 +513,29 @@ function Invoke-Iteration {
     $modelAlias = if ($next -and $next.Model) { $next.Model } else { $Model }
     $effortAlias = if ($next -and $next.Effort) { $next.Effort } else { $Effort }
     $iterModel = Resolve-ModelAlias -Alias $modelAlias  -EngineType $Type
-    $iterEffort = Resolve-Effort     -Value $effortAlias -EngineType $Type
-    $prompt = Get-Content $PromptPath -Raw
+    $iterEffort = Resolve-Effort -Value $effortAlias -EngineType $Type
+
+    $issue = Get-IssueContext -Number $next.Id
+    if (-not $issue) {
+        Write-Warning "Could not fetch GitHub issue #$($next.Id); skipping iteration."
+        return [PSCustomObject]@{
+            Success = $false
+            Simulated = $false
+            ItemId = [int]$next.Id
+            BeforeItem = $beforeItem
+            AfterItem = $beforeItem
+            ExitCode = 1
+            Output = @()
+            Preview = ''
+        }
+    }
+
+    $promptTemplate = Get-Content $PromptPath -Raw
+    $prompt = $promptTemplate.
+        Replace('{{ISSUE_NUMBER}}', [string]$issue.number).
+        Replace('{{ISSUE_TITLE}}',  [string]$issue.title).
+        Replace('{{ISSUE_URL}}',    [string]$issue.url).
+        Replace('{{ISSUE_BODY}}',   [string]$issue.body)
 
     Write-Verbose "Tracker item: Id=$($next.Id), Model='$($next.Model)', Effort='$($next.Effort)'"
     Write-Verbose "Alias resolution: model '$modelAlias' -> '$iterModel'; effort '$effortAlias' -> '$iterEffort'"
@@ -280,13 +544,39 @@ function Invoke-Iteration {
     Write-Host "Iteration $Iteration/$MaxIterations : item #$($next.Id), $Type, $iterModel, effort=$iterEffort" -ForegroundColor Cyan
 
     if ($Type -eq 'copilot') {
-        $cmdArgs = @('-p', $prompt, '--model', $iterModel, '--allow-all', '--reasoning-effort', $iterEffort, '--worktree')
+        $cmdArgs = @(
+            '-p',
+            $prompt,
+            '--model',
+            $iterModel,
+            '--allow-all',
+            '--reasoning-effort',
+            $iterEffort,
+            '--worktree'
+        )
     } elseif ($Type -eq 'codex') {
-        $cmdArgs = @('exec', '--model', $iterModel, '--config', "model_reasoning_effort=`"$iterEffort`"",
-            '--dangerously-bypass-approvals-and-sandbox', '--worktree', $prompt)
+        $cmdArgs = @(
+            'exec',
+            '--model',
+            $iterModel,
+            '--config',
+            "model_reasoning_effort=`"$iterEffort`"",
+            '--dangerously-bypass-approvals-and-sandbox',
+            '--worktree',
+            $prompt
+        )
     } else {
-        $cmdArgs = @('--dangerously-skip-permissions', '--no-session-persistence',
-            '--model', $iterModel, '--effort', $iterEffort, '--worktree', '-p', $prompt)
+        $cmdArgs = @(
+            '--dangerously-skip-permissions',
+            '--no-session-persistence',
+            '--model',
+            $iterModel,
+            '--effort',
+            $iterEffort,
+            '--worktree',
+            '-p',
+            $prompt
+        )
     }
 
     $preview = Format-CommandPreview -Command $EngineBin -Arguments $cmdArgs
@@ -295,7 +585,7 @@ function Invoke-Iteration {
 
     if (-not $PSCmdlet.ShouldProcess("item #$($next.Id)", "Invoke: $preview")) {
         Write-Verbose 'Skipped due to WhatIf/ShouldProcess.'
-        return [pscustomobject]@{
+        return [PSCustomObject]@{
             Success = $true
             Simulated = $true
             ItemId = [int]$next.Id
@@ -307,11 +597,30 @@ function Invoke-Iteration {
         }
     }
 
-    & $EngineBin @cmdArgs 2>&1 | Tee-Object -Variable cliOutput | Out-Null
-    $exitCode = $LASTEXITCODE
+    Set-IssueInProgress -Number $next.Id
+
+    try {
+        & $EngineBin @cmdArgs 2>&1 | Tee-Object -Variable cliOutput | Out-Null
+        $exitCode = $LASTEXITCODE
+    } finally {
+        Remove-IssueInProgress -Number $next.Id
+    }
+
+    $ghStatus = Resolve-IssueStatusFromGitHub -Number $next.Id
+    if ($ghStatus) {
+        $items = @(Get-TrackerItems)
+        $row = $items | Where-Object Id -EQ $next.Id | Select-Object -First 1
+        if ($row) {
+            $row.Status = $ghStatus.Status
+            if ($ghStatus.Evidence) { $row.Evidence = $ghStatus.Evidence }
+            Save-TrackerItems -Items $items
+            Write-Host "GitHub state: issue #$($next.Id) -> $($ghStatus.Status). $($ghStatus.Evidence)" -ForegroundColor Green
+        }
+    }
+
     $afterItem = Get-TrackerItem -Id $next.Id
 
-    return [pscustomobject]@{
+    return [PSCustomObject]@{
         Success = $exitCode -eq 0
         Simulated = $false
         ItemId = [int]$next.Id
@@ -321,6 +630,42 @@ function Invoke-Iteration {
         Output = @($cliOutput)
         Preview = $preview
     }
+}
+
+function Update-MainBranch {
+    Write-Host "Fetching origin/main..." -ForegroundColor Cyan
+    git -C $RepoRoot fetch origin main --quiet 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "git fetch failed; continuing with current state." -ForegroundColor DarkYellow
+        return
+    }
+
+    $branch = (git -C $RepoRoot rev-parse --abbrev-ref HEAD 2>$null).Trim()
+    if ($branch -ne 'main') {
+        Write-Host "Not on main (currently '$branch'). Skipping fast-forward; worktrees branch from current HEAD." -ForegroundColor DarkYellow
+        return
+    }
+
+    $ahead = (git -C $RepoRoot rev-list --count origin/main..HEAD 2>$null).Trim()
+    if ($ahead -and [int]$ahead -gt 0) {
+        Write-Host "main is $ahead commit(s) ahead of origin/main. Skipping fast-forward." -ForegroundColor DarkYellow
+        return
+    }
+
+    git -C $RepoRoot merge --ff-only origin/main 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "main fast-forwarded to origin/main." -ForegroundColor Green
+    } else {
+        Write-Host "Could not fast-forward main (working tree may conflict). Continuing." -ForegroundColor DarkYellow
+    }
+}
+
+if (-not $SkipUpdate) {
+    Update-MainBranch
+}
+
+if (-not $SkipTriage) {
+    Sync-TrackerFromGitHub
 }
 
 $total = @(Get-TrackerItems).Count
@@ -380,7 +725,7 @@ while ($iteration -lt $MaxIterations) {
                 Write-Host "  $_"
             }
         }
-        Write-Host 'Validation check: the current checkout JSONL tracker did not change. If the CLI used an isolated worktree, inspect that worktree or disable --worktree for this loop.' -ForegroundColor DarkYellow
+        Write-Host "Validation check: GitHub issue #$($result.ItemId) did not move to closed/has no linked PR. Inspect the issue and any associated worktree, or remove the '$IssueLabel' label to skip it." -ForegroundColor DarkYellow
         if ($stalled -ge 3) { exit 1 }
     } else {
         $stalled = 0
