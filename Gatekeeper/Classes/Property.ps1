@@ -83,9 +83,17 @@ class PropertyDefinition {
                     Write-Warning "Value for '$($this.Name)' is longer than MaxLength ($($this.Validation.MaxLength))"
                     return $false
                 }
-                if ($this.Validation.Pattern -and ($Value -notmatch $this.Validation.Pattern)) {
-                    Write-Warning "Value for '$($this.Name)' does not match pattern '$($this.Validation.Pattern)'"
-                    return $false
+                if ($this.Validation.Pattern) {
+                    try {
+                        $re = [regex]::new($this.Validation.Pattern, [System.Text.RegularExpressions.RegexOptions]::None, [TimeSpan]::FromMilliseconds(250))
+                        if (-not $re.IsMatch($Value)) {
+                            Write-Warning "Value for '$($this.Name)' does not match pattern '$($this.Validation.Pattern)'"
+                            return $false
+                        }
+                    } catch [System.Text.RegularExpressions.RegexMatchTimeoutException] {
+                        Write-Warning "Pattern evaluation timed out for '$($this.Name)'"
+                        return $false
+                    }
                 }
             }
         }
