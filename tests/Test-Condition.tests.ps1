@@ -166,6 +166,80 @@ Describe 'Test-Condition' {
         }
         Test-Condition @script:testConditionSplat -Condition $condition | Should -BeFalse
     }
+    It 'AllOf containing AnyOf returns true when both pass' {
+        $condition = @{
+            AllOf = @(
+                @{
+                    Property = "IsCompliant"
+                    Operator = "Equals"
+                    Value = $true
+                },
+                @{
+                    AnyOf = @(
+                        @{
+                            Property = "Environment"
+                            Operator = "Equals"
+                            Value = "Production"
+                        },
+                        @{
+                            Property = "Environment"
+                            Operator = "Equals"
+                            Value = "Staging"
+                        }
+                    )
+                }
+            )
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeTrue
+    }
+    It 'AllOf containing AnyOf returns false when inner AnyOf fails' {
+        $condition = @{
+            AllOf = @(
+                @{
+                    Property = "IsCompliant"
+                    Operator = "Equals"
+                    Value = $true
+                },
+                @{
+                    AnyOf = @(
+                        @{
+                            Property = "Environment"
+                            Operator = "Equals"
+                            Value = "Dev"
+                        },
+                        @{
+                            Property = "Environment"
+                            Operator = "Equals"
+                            Value = "Staging"
+                        }
+                    )
+                }
+            )
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeFalse
+    }
+    It 'NotIn returns true when value is not in the list' {
+        $condition = @{
+            Property = "Environment"
+            Operator = "NotIn"
+            Value = @(
+                "Dev",
+                "Staging"
+            )
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeTrue
+    }
+    It 'NotIn returns false when value is in the list' {
+        $condition = @{
+            Property = "Environment"
+            Operator = "NotIn"
+            Value = @(
+                "Production",
+                "Staging"
+            )
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeFalse
+    }
     It 'Accepts a file path string via ConditionGroupTransformAttribute' {
         $conditionPath = Join-Path $TestDrive 'Condition.json'
         @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' } |
