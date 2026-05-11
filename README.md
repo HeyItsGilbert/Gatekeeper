@@ -54,6 +54,15 @@ Test-FeatureFlag -FeatureFlag $flag -PropertySet $props -Context $context
 - **No external runtime dependencies** -- just PowerShell and a JSON file
 - **Cross-platform** -- Windows, Linux, macOS
 
+## Security
+
+Logging `Script` values in your `Configuration.psd1` are **executed as code with the
+caller's full privileges** -- a `Script` string is either inline PowerShell that gets
+compiled and run, or a path to a local `.ps1` file that gets loaded and run (UNC /
+remote paths are rejected). Keep your configuration files (and any referenced `.ps1`
+scripts) writable only by trusted users. See
+[Logging](https://heyitsgilbert.github.io/Gatekeeper/guides/logging/) for details.
+
 ## Documentation
 
 | Topic | Description |
