@@ -7,6 +7,11 @@
     FilePaths = @{
         Schemas = "$PSScriptRoot\Schemas"
     }
+    Security = @{
+        # When $false, file paths passed to commands (e.g. Test-FeatureFlag,
+        # Test-Condition) may not be UNC paths. Set to $true to opt in.
+        AllowUncPaths = $false
+    }
     # NOTE: A logging Script is executed as code with the caller's full
     # privileges. It is a string that is either inline PowerShell code or a
     # path to a local *.ps1 file (UNC/remote paths are rejected). Treat these

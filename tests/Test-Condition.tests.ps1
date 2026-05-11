@@ -172,6 +172,23 @@ Describe 'Test-Condition' {
             ConvertTo-Json | Set-Content -Path $conditionPath
         Test-Condition @script:testConditionSplat -Condition $conditionPath | Should -BeTrue
     }
+    It 'Rejects a wildcard path via ConditionGroupTransformAttribute' {
+        {
+            Test-Condition @script:testConditionSplat -Condition (Join-Path $TestDrive '*.json')
+        } | Should -Throw -ExpectedMessage '*wildcard*'
+    }
+    It 'Rejects a non-JSON file path via ConditionGroupTransformAttribute' {
+        $notJson = Join-Path $TestDrive 'condition.txt'
+        'not json' | Set-Content -LiteralPath $notJson
+        {
+            Test-Condition @script:testConditionSplat -Condition $notJson
+        } | Should -Throw -ExpectedMessage '*must point to a .json file*'
+    }
+    It 'Rejects a missing file path via ConditionGroupTransformAttribute' {
+        {
+            Test-Condition @script:testConditionSplat -Condition (Join-Path $TestDrive 'missing.json')
+        } | Should -Throw -ExpectedMessage '*File not found:*'
+    }
     It 'Throws on context missing property' {
         $condition = @{
             Property = "Tier"
