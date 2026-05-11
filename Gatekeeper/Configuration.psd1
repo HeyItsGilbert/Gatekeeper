@@ -7,6 +7,10 @@
     FilePaths = @{
         Schemas = "$PSScriptRoot\Schemas"
     }
+    # NOTE: A logging Script is executed as code with the caller's full
+    # privileges. It is a string that is either inline PowerShell code or a
+    # path to a local *.ps1 file (UNC/remote paths are rejected). Treat these
+    # files as trusted code. See guides/logging.md for details.
     Logging = @{
         Allow = @{
             # We leave this disabled by default to avoid cluttering the console
