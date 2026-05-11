@@ -6,3 +6,5 @@ scratch/
 testResults.xml
 
 trackers/
+
+.claude/
