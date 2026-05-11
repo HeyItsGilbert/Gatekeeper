@@ -166,6 +166,12 @@ Describe 'Test-Condition' {
         }
         Test-Condition @script:testConditionSplat -Condition $condition | Should -BeFalse
     }
+    It 'Accepts a file path string via ConditionGroupTransformAttribute' {
+        $conditionPath = Join-Path $TestDrive 'Condition.json'
+        @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' } |
+            ConvertTo-Json | Set-Content -Path $conditionPath
+        Test-Condition @script:testConditionSplat -Condition $conditionPath | Should -BeTrue
+    }
     It 'Throws on context missing property' {
         $condition = @{
             Property = "Tier"

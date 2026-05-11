@@ -14,7 +14,7 @@ Create a new feature flag.
 
 ```
 New-FeatureFlag [-Name] <String> [[-Description] <String>] [-Tags <String[]>] [-Version <Version>]
- [-Author <String>] [-DefaultEffect <Effect>] -Rules <Rule[]> [-FilePath <String>]
+ [-Author <String>] [-DefaultEffect <Effect>] [-Rules <Rule[]>] [-FilePath <String>]
  [-ProgressAction <ActionPreference>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
@@ -132,7 +132,7 @@ Type: Rule[]
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: Named
 Default value: @()
 Accept pipeline input: True (ByValue)
