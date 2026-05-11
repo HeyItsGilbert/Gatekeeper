@@ -67,6 +67,11 @@ class ConditionGroup {
         }
     }
 
+    static [ConditionGroup] FromJson([string]$json) {
+        $data = ConvertFrom-JsonToHashtable -InputObject $json
+        return [ConditionGroup]::new($data)
+    }
+
     [boolean]IsValid() {
         # This check if for the top level condition group
         # For nested condition groups (AllOf, AnyOf, Not) the validity is not checked.
