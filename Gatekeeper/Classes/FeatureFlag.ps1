@@ -205,7 +205,14 @@ class FeatureFlag {
             throw "No file path specified to save FeatureFlag."
         }
         Write-Verbose "Saving FeatureFlag to file: $($this.FilePath)"
-        $json = $this | ConvertTo-Json -Depth 10 -EnumsAsStrings
+        $jsonParams = @{ Depth = 10 }
+        # -EnumsAsStrings was introduced in PowerShell 7.2; on older hosts
+        # (e.g. Windows PowerShell 5.1) enums serialize as their integer value,
+        # which still round-trips back to the enum on load.
+        if ((Get-Command ConvertTo-Json).Parameters.ContainsKey('EnumsAsStrings')) {
+            $jsonParams['EnumsAsStrings'] = $true
+        }
+        $json = $this | ConvertTo-Json @jsonParams
         Set-Content -Path $this.FilePath -Value $json
     }
 }

@@ -51,6 +51,7 @@ function ConvertTo-Hashtable {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
+        [AllowNull()]
         [object]$InputObject
     )
 

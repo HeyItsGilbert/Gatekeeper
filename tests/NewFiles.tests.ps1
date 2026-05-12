@@ -135,7 +135,7 @@ Describe 'File Creations' {
         BeforeAll {
             $p = New-Property -Name 'Region' -Type 'string'
             $script:savedSet = $p | New-PropertySet -Name 'SaveTest'
-            $script:savedPath = Join-Path (Get-PSDrive TestDrive).Root 'PropertySet' 'SaveTest.json'
+            $script:savedPath = Join-Path -Path (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'PropertySet') -ChildPath 'SaveTest.json'
         }
 
         It 'creates the file at the expected path' {
