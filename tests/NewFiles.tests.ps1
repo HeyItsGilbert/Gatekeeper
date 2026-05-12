@@ -80,5 +80,74 @@ Describe 'File Creations' {
             $filePath = $script:featureFlag.FilePath
             Test-Path $filePath | Should -BeTrue
         }
+
+        It 'round-trips: saved feature flag can be read back with correct values' {
+            $filePath = $script:featureFlag.FilePath
+            $loaded = Read-FeatureFlag -FilePath $filePath
+            $loaded | Should -BeOfType FeatureFlag
+            $loaded.Name | Should -Be $script:featureFlag.Name
+            $loaded.DefaultEffect | Should -Be $script:featureFlag.DefaultEffect
+        }
+    }
+
+    Context 'New-Property' {
+        It 'returns a PropertyDefinition object' {
+            $result = New-Property -Name 'TestProp' -Type 'string'
+            $result | Should -BeOfType PropertyDefinition
+        }
+
+        It 'populates Name and Type fields' {
+            $result = New-Property -Name 'Count' -Type 'integer'
+            $result.Name | Should -Be 'Count'
+            $result.Type | Should -Be 'integer'
+        }
+
+        It 'populates Validation when provided' {
+            $result = New-Property -Name 'Score' -Type 'integer' -Validation @{ Minimum = 0; Maximum = 100 }
+            $result.Validation | Should -Not -BeNullOrEmpty
+            $result.Validation.Minimum | Should -Be 0
+            $result.Validation.Maximum | Should -Be 100
+        }
+
+        It 'populates Enum values when provided' {
+            $result = New-Property -Name 'Env' -Type 'string' -EnumValues @('Prod', 'Staging', 'Dev')
+            $result.Enum | Should -HaveCount 3
+            $result.Enum | Should -Contain 'Prod'
+        }
+    }
+
+    Context 'New-PropertySet' {
+        It 'returns a PropertySet object' {
+            $result = New-PropertySet -Name 'TestSet'
+            $result | Should -BeOfType PropertySet
+        }
+
+        It 'includes piped properties in the set' {
+            $p1 = New-Property -Name 'Host' -Type 'string'
+            $p2 = New-Property -Name 'Port' -Type 'integer'
+            $result = $p1, $p2 | New-PropertySet -Name 'Network'
+            $result.Properties.ContainsKey('Host') | Should -BeTrue
+            $result.Properties.ContainsKey('Port') | Should -BeTrue
+        }
+    }
+
+    Context 'Save-PropertySet' {
+        BeforeAll {
+            $p = New-Property -Name 'Region' -Type 'string'
+            $script:savedSet = $p | New-PropertySet -Name 'SaveTest'
+            $script:savedPath = Join-Path (Get-PSDrive TestDrive).Root 'PropertySet' 'SaveTest.json'
+        }
+
+        It 'creates the file at the expected path' {
+            Save-PropertySet -PropertySet $script:savedSet -FilePath $script:savedPath
+            Test-Path $script:savedPath | Should -BeTrue
+        }
+
+        It 'round-trips: saved PropertySet can be read back with correct properties' {
+            $loaded = Read-PropertySet -FilePath $script:savedPath
+            $loaded | Should -BeOfType PropertySet
+            $loaded.Properties.ContainsKey('Region') | Should -BeTrue
+            $loaded.Properties['Region'].Type | Should -Be 'string'
+        }
     }
 }
