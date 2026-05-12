@@ -1,28 +1,27 @@
 . $PSScriptRoot\..\Public\ConvertFrom-JsonToHashtable.ps1
 
 class PropertyValidation {
-    [int]$Minimum
-    [int]$Maximum
-    [int]$MinLength
-    [int]$MaxLength
+    [Nullable[int]]$Minimum
+    [Nullable[int]]$Maximum
+    [Nullable[int]]$MinLength
+    [Nullable[int]]$MaxLength
     [string]$Pattern
 
     PropertyValidation([hashtable]$data) {
-        if ($data.ContainsKey("Minimum")) { $this.Minimum = [int]$data.Minimum }
-        if ($data.ContainsKey("Maximum")) { $this.Maximum = [int]$data.Maximum }
-        if ($data.ContainsKey("MinLength")) { $this.MinLength = [int]$data.MinLength }
-        if ($data.ContainsKey("MaxLength")) { $this.MaxLength = [int]$data.MaxLength }
+        if ($data.ContainsKey("Minimum") -and $null -ne $data.Minimum) { $this.Minimum = [int]$data.Minimum }
+        if ($data.ContainsKey("Maximum") -and $null -ne $data.Maximum) { $this.Maximum = [int]$data.Maximum }
+        if ($data.ContainsKey("MinLength") -and $null -ne $data.MinLength) { $this.MinLength = [int]$data.MinLength }
+        if ($data.ContainsKey("MaxLength") -and $null -ne $data.MaxLength) { $this.MaxLength = [int]$data.MaxLength }
         if ($data.ContainsKey("Pattern")) { $this.Pattern = $data.Pattern }
     }
 
     [hashtable] ToHashtable() {
-        $data = @{
-            Minimum = $this.Minimum
-            Maximum = $this.Maximum
-            MinLength = $this.MinLength
-            MaxLength = $this.MaxLength
-            Pattern = $this.Pattern
-        }
+        $data = @{}
+        if ($null -ne $this.Minimum) { $data.Minimum = $this.Minimum }
+        if ($null -ne $this.Maximum) { $data.Maximum = $this.Maximum }
+        if ($null -ne $this.MinLength) { $data.MinLength = $this.MinLength }
+        if ($null -ne $this.MaxLength) { $data.MaxLength = $this.MaxLength }
+        if ($this.Pattern) { $data.Pattern = $this.Pattern }
         return $data
     }
 }
