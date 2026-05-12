@@ -55,6 +55,54 @@ Describe 'Test-Condition' {
         }
         Test-Condition @script:testConditionSplat -Condition $condition | Should -BeTrue
     }
+    It 'GreaterThanOrEqual returns true at exact boundary' {
+        $condition = @{
+            Property = "Percentage"
+            Operator = "GreaterThanOrEqual"
+            Value = 30
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeTrue
+    }
+    It 'GreaterThanOrEqual returns false when value is above threshold' {
+        $condition = @{
+            Property = "Percentage"
+            Operator = "GreaterThanOrEqual"
+            Value = 31
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeFalse
+    }
+    It 'LessThan returns true when value is below threshold' {
+        $condition = @{
+            Property = "Percentage"
+            Operator = "LessThan"
+            Value = 31
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeTrue
+    }
+    It 'LessThan returns false at exact boundary (exclusive)' {
+        $condition = @{
+            Property = "Percentage"
+            Operator = "LessThan"
+            Value = 30
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeFalse
+    }
+    It 'LessThanOrEqual returns true at exact boundary (inclusive)' {
+        $condition = @{
+            Property = "Percentage"
+            Operator = "LessThanOrEqual"
+            Value = 30
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeTrue
+    }
+    It 'LessThanOrEqual returns false when value is above threshold' {
+        $condition = @{
+            Property = "Percentage"
+            Operator = "LessThanOrEqual"
+            Value = 29
+        }
+        Test-Condition @script:testConditionSplat -Condition $condition | Should -BeFalse
+    }
     It 'Can evaluate a $true bool with equals' {
         $condition = @{
             Property = "IsCompliant"
