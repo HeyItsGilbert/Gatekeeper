@@ -91,11 +91,8 @@ function Test-Condition {
     $validation = $meta.Validation
 
     $actual = Convert-ToTypedValue -Type $propType -Value $Context[$propName]
-    $testTypedValueSplat = @{
-        PropertyDefinition = $meta
-        Value = $actual
-    }
-    Test-TypedValue @testTypedValueSplat | Out-Null
+    $valid = $meta.Validate($actual)
+    if (-not $valid) { return $false }
 
     if (
         $operator -in @("In", "NotIn") -and
