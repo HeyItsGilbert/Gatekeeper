@@ -62,7 +62,7 @@
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    ScriptsToProcess = @('Enums\Effect.ps1', 'Classes\Property.ps1', 'Classes\FeatureFlag.ps1')
+    ScriptsToProcess = @('Enums\Effect.ps1', 'Public\ConvertFrom-JsonToHashtable.ps1', 'Classes\Property.ps1', 'Classes\FeatureFlag.ps1')
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()
@@ -74,7 +74,27 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = '*'
+    FunctionsToExport = @(
+        'ConvertFrom-JsonToHashtable',
+        'Export-GatekeeperConfig',
+        'Get-DefaultContext',
+        'Get-FeatureFlagFolder',
+        'Get-PropertySet',
+        'Get-PropertySetFolder',
+        'Import-GatekeeperConfig',
+        'New-Condition',
+        'New-ConditionGroup',
+        'New-FeatureFlag',
+        'New-Property',
+        'New-PropertySet',
+        'New-Rule',
+        'Read-FeatureFlag',
+        'Read-PropertySet',
+        'Save-FeatureFlag',
+        'Save-PropertySet',
+        'Test-Condition',
+        'Test-FeatureFlag'
+    )
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = '*'

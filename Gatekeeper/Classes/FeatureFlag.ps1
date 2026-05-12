@@ -1,5 +1,4 @@
 . $PSScriptRoot\..\Enums\Effect.ps1
-. $PSScriptRoot\..\Public\ConvertFrom-JsonToHashtable.ps1
 
 enum Operator {
     Equals
