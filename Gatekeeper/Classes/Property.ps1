@@ -1,10 +1,10 @@
 . $PSScriptRoot\..\Public\ConvertFrom-JsonToHashtable.ps1
 
 class PropertyValidation {
-    [int]$Minimum
-    [int]$Maximum
-    [int]$MinLength
-    [int]$MaxLength
+    [Nullable[int]]$Minimum
+    [Nullable[int]]$Maximum
+    [Nullable[int]]$MinLength
+    [Nullable[int]]$MaxLength
     [string]$Pattern
 
     PropertyValidation([hashtable]$data) {
@@ -16,13 +16,12 @@ class PropertyValidation {
     }
 
     [hashtable] ToHashtable() {
-        $data = @{
-            Minimum = $this.Minimum
-            Maximum = $this.Maximum
-            MinLength = $this.MinLength
-            MaxLength = $this.MaxLength
-            Pattern = $this.Pattern
-        }
+        $data = @{}
+        if ($null -ne $this.Minimum) { $data.Minimum = $this.Minimum }
+        if ($null -ne $this.Maximum) { $data.Maximum = $this.Maximum }
+        if ($null -ne $this.MinLength) { $data.MinLength = $this.MinLength }
+        if ($null -ne $this.MaxLength) { $data.MaxLength = $this.MaxLength }
+        if ($this.Pattern) { $data.Pattern = $this.Pattern }
         return $data
     }
 }
