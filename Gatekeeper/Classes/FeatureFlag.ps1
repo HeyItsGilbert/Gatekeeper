@@ -23,35 +23,43 @@ class ConditionGroup {
         if ($null -eq $data) {
             throw "Data cannot be null."
         }
-        # This should either have a single condition or a group of conditions
-        $groupKeys = @('AllOf', 'AnyOf', 'Not') | Where-Object { $data.ContainsKey($_) }
+        # Treat keys present but null as non-present (handles JSON round-trips where all
+        # class fields are serialized including null/default ones).
+        $groupKeys = @('AllOf', 'AnyOf', 'Not') | Where-Object { $data.ContainsKey($_) -and $null -ne $data[$_] }
         if ($groupKeys.Count -gt 1) {
             throw "ConditionGroup may only define one of: AllOf, AnyOf, Not. Got: $($groupKeys -join ', ')"
         }
-        if (($data.ContainsKey('AllOf') -or $data.ContainsKey('AnyOf') -or $data.ContainsKey('Not')) -and
-            ($data.ContainsKey('Property') -or $data.ContainsKey('Operator') -or $data.ContainsKey('Value'))) {
+        # Property presence (non-null) is the canonical signal for a flat/leaf condition.
+        # Operator is excluded from this check because its enum default ("Equals") is always
+        # serialized as a non-null string in JSON round-trips, making it unreliable as a signal.
+        $hasGroup = $groupKeys.Count -gt 0
+        $hasProperty = $data.ContainsKey('Property') -and $null -ne $data['Property']
+        if ($hasGroup -and $hasProperty) {
             throw "ConditionGroup with AllOf, AnyOf, or Not cannot also have Property, Operator, and Value defined."
         }
-        if ($data.ContainsKey('Property') -and
-            (-not $data.ContainsKey('Operator') -or -not $data.ContainsKey('Value'))) {
-            throw "ConditionGroup with Property must also have Operator and Value defined."
+        if ($hasProperty) {
+            $hasOperator = $data.ContainsKey('Operator') -and $null -ne $data['Operator']
+            $hasValue = $data.ContainsKey('Value') -and $null -ne $data['Value']
+            if (-not $hasOperator -or -not $hasValue) {
+                throw "ConditionGroup with Property must also have Operator and Value defined."
+            }
         }
-        if ($data.ContainsKey('Property')) {
+        if ($hasProperty) {
             $this.Property = $data.Property
         }
-        if ($data.ContainsKey('Operator')) {
+        if ($data.ContainsKey('Operator') -and $null -ne $data['Operator']) {
             $this.Operator = $data.Operator
         }
-        if ($data.ContainsKey('Value')) {
+        if ($data.ContainsKey('Value') -and $null -ne $data['Value']) {
             $this.Value = $data.Value
         }
-        if ($data.ContainsKey('AllOf')) {
+        if ($data.ContainsKey('AllOf') -and $null -ne $data['AllOf']) {
             $this.AllOf = $data.AllOf | ForEach-Object { [ConditionGroup]::new($_) }
         }
-        if ($data.ContainsKey('AnyOf')) {
+        if ($data.ContainsKey('AnyOf') -and $null -ne $data['AnyOf']) {
             $this.AnyOf = $data.AnyOf | ForEach-Object { [ConditionGroup]::new($_) }
         }
-        if ($data.ContainsKey('Not')) {
+        if ($data.ContainsKey('Not') -and $null -ne $data['Not']) {
             $this.Not = $data.Not | ForEach-Object { [ConditionGroup]::new($_) }
         }
     }
@@ -158,7 +166,18 @@ class FeatureFlag {
         $this.Name = $data.Name
         $this.Description = $data.Description
         $this.Tags = $data.Tags
-        $this.Version = $data.Version
+        if ($null -ne $data.Version) {
+            if ($data.Version -is [System.Collections.IDictionary]) {
+                $b = [int]$data.Version.Build
+                $this.Version = if ($b -ge 0) {
+                    [version]"$($data.Version.Major).$($data.Version.Minor).$b"
+                } else {
+                    [version]"$($data.Version.Major).$($data.Version.Minor)"
+                }
+            } else {
+                $this.Version = [version]$data.Version
+            }
+        }
         $this.Author = $data.Author
         $this.DefaultEffect = $data.DefaultEffect
         $this.Rules = $data.Rules | ForEach-Object { [Rule]::new($_) }
