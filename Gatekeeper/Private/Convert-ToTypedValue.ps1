@@ -12,7 +12,15 @@ function Convert-ToTypedValue {
             return [int]$Value
         }
         "boolean" {
-            return $Value -as [bool]
+            if ($Value -is [bool]) { return $Value }
+            if ($Value -is [int])  { return [bool]$Value }
+            switch ($Value.ToString().ToLower()) {
+                'true'  { return $true }
+                'false' { return $false }
+                '1'     { return $true }
+                '0'     { return $false }
+                default { throw "Cannot convert '$Value' to boolean" }
+            }
         }
         "string" {
             return [string]$Value

@@ -43,17 +43,42 @@ Describe 'Convert-ToTypedValue' {
     Context 'Boolean' {
         It 'can cast a $true' {
             InModuleScope $env:BHProjectName {
-                Convert-ToTypedValue -Type 'Boolean' -Value $True | Should -BeOfType 'Boolean'
+                Convert-ToTypedValue -Type 'Boolean' -Value $True | Should -Be $true
+            }
+        }
+        It 'can cast a $false' {
+            InModuleScope $env:BHProjectName {
+                Convert-ToTypedValue -Type 'Boolean' -Value $False | Should -Be $false
             }
         }
         It 'can cast a "true"' {
             InModuleScope $env:BHProjectName {
-                Convert-ToTypedValue -Type 'Boolean' -Value "true" | Should -BeOfType 'Boolean'
+                Convert-ToTypedValue -Type 'Boolean' -Value "true" | Should -Be $true
+            }
+        }
+        It 'can cast a "false"' {
+            InModuleScope $env:BHProjectName {
+                Convert-ToTypedValue -Type 'Boolean' -Value "false" | Should -Be $false
+            }
+        }
+        It 'can cast a 1 as True' {
+            InModuleScope $env:BHProjectName {
+                Convert-ToTypedValue -Type 'Boolean' -Value 1 | Should -Be $true
             }
         }
         It 'can cast a 0 as False' {
             InModuleScope $env:BHProjectName {
-                Convert-ToTypedValue -Type 'Boolean' -Value 0 | Should -BeOfType 'Boolean'
+                Convert-ToTypedValue -Type 'Boolean' -Value 0 | Should -Be $false
+            }
+        }
+        It 'can cast a "1" as True' {
+            InModuleScope $env:BHProjectName {
+                Convert-ToTypedValue -Type 'Boolean' -Value "1" | Should -Be $true
+            }
+        }
+        It 'can cast a "0" as False' {
+            InModuleScope $env:BHProjectName {
+                Convert-ToTypedValue -Type 'Boolean' -Value "0" | Should -Be $false
             }
         }
     }
