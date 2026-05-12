@@ -1,5 +1,3 @@
-. $PSScriptRoot\..\Public\ConvertFrom-JsonToHashtable.ps1
-
 class PropertyValidation {
     [int]$Minimum
     [int]$Maximum
