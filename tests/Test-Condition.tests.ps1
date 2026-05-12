@@ -311,6 +311,20 @@ Describe 'Test-Condition' {
             Test-Condition @script:testConditionSplat -Condition (Join-Path $TestDrive 'missing.json')
         } | Should -Throw -ExpectedMessage '*File not found:*'
     }
+    It 'Returns false when context value fails property validation' {
+        $condition = @{
+            Property = "Percentage"
+            Operator = "Equals"
+            Value = 100
+        }
+        $invalidContext = @{
+            Percentage = 100
+            Environment = 'Production'
+            IsCompliant = $true
+        }
+        Test-Condition -PropertySet $script:propertySet -Context $invalidContext -Condition $condition |
+            Should -BeFalse
+    }
     It 'Throws on context missing property' {
         $condition = @{
             Property = "Tier"
