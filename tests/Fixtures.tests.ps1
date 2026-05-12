@@ -8,11 +8,9 @@ Describe '<_.name>' -ForEach $script:fixtures {
         $json = Get-Content -Path $_.FullName -Raw | ConvertFrom-Json
         $script:schema = $json.'$schema'
 
-        $resolvePathSplat = @{
-            RelativeBasePath = $_.Directory.FullName
-            Path = $script:schema
-        }
-        $script:schemaFilePath = Resolve-Path @resolvePathSplat
+        # Resolve-Path -RelativeBasePath was added in PowerShell 7.4, so join the
+        # fixture's directory with the (relative) $schema path before resolving.
+        $script:schemaFilePath = Resolve-Path -Path (Join-Path -Path $_.Directory.FullName -ChildPath $script:schema)
     }
     It 'Has a schema' {
         $script:schema | Should -Not -BeNullOrEmpty
