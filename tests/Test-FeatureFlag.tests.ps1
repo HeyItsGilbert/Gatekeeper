@@ -9,40 +9,204 @@ BeforeDiscovery {
     $outputModVerManifest = Join-Path -Path $outputModVerDir -ChildPath "$($env:BHProjectName).psd1"
     Import-Module -Name $outputModVerManifest -Verbose:$false -ErrorAction Stop
 }
+
 Describe 'Test-FeatureFlag' {
     BeforeAll {
         $script:propertySet = Read-PropertySet -File "$PSScriptRoot\fixtures\Properties.json"
         $script:context = @{
-            Percentage = 30
+            Percentage  = 30
             Environment = 'Staging'
             IsCompliant = $true
         }
-        # load feature flag
-        $script:featureFlag = Read-FeatureFlag -FilePath "$PSScriptRoot\fixtures\FeatureFlag.json"
+        # Conditions that always match / never match given $script:context
+        $script:matchCond   = @{ Property = 'IsCompliant'; Operator = 'Equals'; Value = $true }
+        $script:noMatchCond = @{ Property = 'IsCompliant'; Operator = 'Equals'; Value = $false }
 
-        Mock -CommandName Invoke-Logging -ModuleName $env:BHProjectName -Verifiable
+        Mock -CommandName Invoke-Logging -ModuleName $env:BHProjectName
     }
 
-    It 'Allows when rule matches with Allow effect' {
-        $result = Test-FeatureFlag -FeatureFlag $script:featureFlag -PropertySet $script:propertySet -Context $script:context
-        $result | Should -BeTrue
+    Context 'Effect paths' {
+        It 'Allow rule that matches returns $true' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'AllowFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(@{ Name = 'AllowRule'; Effect = 'Allow'; Conditions = $script:matchCond })
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeTrue
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Allow' } -Times 1 -Exactly
+        }
 
-        Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName -ParameterFilter {
-            $Effect -eq 'Allow'
-        } -Times 1
+        It 'Deny rule that matches returns $false' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'DenyFlag'; DefaultEffect = 'Allow'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(@{ Name = 'DenyRule'; Effect = 'Deny'; Conditions = $script:matchCond })
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeFalse
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Deny' } -Times 1 -Exactly
+        }
+
+        It 'Audit rule matches, logs, continues; subsequent Allow still wins' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'AuditFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(
+                    @{ Name = 'AuditRule'; Effect = 'Audit'; Conditions = $script:matchCond }
+                    @{ Name = 'AllowRule'; Effect = 'Allow'; Conditions = $script:matchCond }
+                )
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeTrue
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Audit' } -Times 1 -Exactly
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Allow' } -Times 1 -Exactly
+        }
+
+        It 'Warn rule matches, logs, continues; subsequent Allow still wins' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'WarnFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(
+                    @{ Name = 'WarnRule'; Effect = 'Warn'; Conditions = $script:matchCond }
+                    @{ Name = 'AllowRule'; Effect = 'Allow'; Conditions = $script:matchCond }
+                )
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeTrue
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Warn' } -Times 1 -Exactly
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Allow' } -Times 1 -Exactly
+        }
     }
 
-    It 'Rejects a wildcard feature flag path' {
-        {
-            Test-FeatureFlag -FeatureFlag (Join-Path $TestDrive '*.json') -PropertySet $script:propertySet -Context $script:context
-        } | Should -Throw -ExpectedMessage '*wildcard*'
+    Context 'Ordering — first-match-wins' {
+        It 'Deny before matching Allow returns $false (Deny wins)' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'DenyFirstFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(
+                    @{ Name = 'DenyFirst';   Effect = 'Deny';  Conditions = $script:matchCond }
+                    @{ Name = 'AllowSecond'; Effect = 'Allow'; Conditions = $script:matchCond }
+                )
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeFalse
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Deny' } -Times 1 -Exactly
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Allow' } -Times 0 -Exactly
+        }
+
+        It 'Allow before matching Deny returns $true (Allow wins)' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'AllowFirstFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(
+                    @{ Name = 'AllowFirst'; Effect = 'Allow'; Conditions = $script:matchCond }
+                    @{ Name = 'DenySecond'; Effect = 'Deny';  Conditions = $script:matchCond }
+                )
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeTrue
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Allow' } -Times 1 -Exactly
+            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+                -ParameterFilter { $Effect -eq 'Deny' } -Times 0 -Exactly
+        }
     }
 
-    It 'Rejects a non-JSON feature flag path' {
-        $notJson = Join-Path $TestDrive 'flag.txt'
-        'not json' | Set-Content -LiteralPath $notJson
-        {
-            Test-FeatureFlag -FeatureFlag $notJson -PropertySet $script:propertySet -Context $script:context
-        } | Should -Throw -ExpectedMessage '*must point to a .json file*'
+    Context 'DefaultEffect fallback — no rule matches' {
+        It 'DefaultEffect Allow returns $true when no rule matches' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'AllowDefaultFlag'; DefaultEffect = 'Allow'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(@{ Name = 'DenyNoMatch'; Effect = 'Deny'; Conditions = $script:noMatchCond })
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeTrue
+        }
+
+        It 'DefaultEffect Deny returns $false when no rule matches' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'DenyDefaultFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(@{ Name = 'AllowNoMatch'; Effect = 'Allow'; Conditions = $script:noMatchCond })
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeFalse
+        }
+
+        It 'Empty rules with DefaultEffect Allow returns $true' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'EmptyAllowFlag'; DefaultEffect = 'Allow'; Version = '1.0.0'; Author = 'Test'
+                Rules = @()
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeTrue
+        }
+
+        It 'Empty rules with DefaultEffect Deny returns $false' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'EmptyDenyFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @()
+            })
+            $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeFalse
+        }
+    }
+
+    Context 'Pipeline and input types' {
+        It 'Single flag via pipeline evaluates correctly' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'PipelineFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(@{ Name = 'AllowRule'; Effect = 'Allow'; Conditions = $script:matchCond })
+            })
+            $result = $flag | Test-FeatureFlag -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeTrue
+        }
+
+        It 'Multiple flags each evaluate independently' {
+            $allowFlag = [FeatureFlag]::new(@{
+                Name = 'AllowFlag'; DefaultEffect = 'Allow'; Version = '1.0.0'; Author = 'Test'
+                Rules = @()
+            })
+            $denyFlag = [FeatureFlag]::new(@{
+                Name = 'DenyFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @()
+            })
+            $allowResult = Test-FeatureFlag -FeatureFlag $allowFlag -PropertySet $script:propertySet -Context $script:context
+            $denyResult  = Test-FeatureFlag -FeatureFlag $denyFlag  -PropertySet $script:propertySet -Context $script:context
+            $allowResult | Should -BeTrue
+            $denyResult  | Should -BeFalse
+        }
+
+        It 'Hashtable input via FeatureFlagTransformAttribute evaluates correctly' {
+            $ht = @{
+                Name = 'HtFlag'; DefaultEffect = 'Allow'; Version = '1.0.0'; Author = 'Test'
+                Rules = @()
+            }
+            $result = Test-FeatureFlag -FeatureFlag $ht -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeTrue
+        }
+
+        It 'File path string input via FeatureFlagTransformAttribute evaluates correctly' {
+            $result = Test-FeatureFlag -FeatureFlag "$PSScriptRoot\fixtures\FeatureFlag.json" `
+                -PropertySet $script:propertySet -Context $script:context
+            $result | Should -BeTrue
+        }
+    }
+
+    Context 'Path validation' {
+        It 'Rejects a wildcard feature flag path' {
+            {
+                Test-FeatureFlag -FeatureFlag (Join-Path $TestDrive '*.json') -PropertySet $script:propertySet -Context $script:context
+            } | Should -Throw -ExpectedMessage '*wildcard*'
+        }
+
+        It 'Rejects a non-JSON feature flag path' {
+            $notJson = Join-Path $TestDrive 'flag.txt'
+            'not json' | Set-Content -LiteralPath $notJson
+            {
+                Test-FeatureFlag -FeatureFlag $notJson -PropertySet $script:propertySet -Context $script:context
+            } | Should -Throw -ExpectedMessage '*must point to a .json file*'
+        }
     }
 }
