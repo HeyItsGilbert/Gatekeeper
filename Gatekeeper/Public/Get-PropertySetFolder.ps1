@@ -1,5 +1,30 @@
 #requires -Module Configuration
 function Get-PropertySetFolder {
+    <#
+    .SYNOPSIS
+    Returns the configured directory where property set JSON files are stored.
+
+    .DESCRIPTION
+    Retrieves the property set folder path from the active Gatekeeper configuration.
+    If no path has been configured, a default location is created under the machine-wide
+    configuration path and saved automatically via Export-GatekeeperConfig.
+
+    Use Export-GatekeeperConfig to set the path explicitly and avoid the auto-create
+    behavior on first run.
+
+    .OUTPUTS
+    System.String
+
+    .EXAMPLE
+    $folder = Get-PropertySetFolder
+    Get-ChildItem -Path $folder -Filter '*.json'
+
+    Returns the property set folder path and lists all JSON files in it.
+
+    .NOTES
+    On first run, if no path is configured, this function creates the default directory
+    and persists the path to configuration automatically.
+    #>
     [CmdletBinding()]
     param ()
 

@@ -1,4 +1,34 @@
 function Import-GatekeeperConfig {
+    <#
+    .SYNOPSIS
+    Loads the Gatekeeper module configuration with multi-level precedence.
+
+    .DESCRIPTION
+    Imports the Gatekeeper configuration using the Configuration module's precedence
+    chain: module defaults, machine-wide settings, enterprise roaming settings, and
+    user local settings. The result is cached in module scope so subsequent calls
+    return quickly without re-reading disk.
+
+    Logging scripts defined in the configuration are parsed and stored in
+    $script:GatekeeperLogging. Scripts may be inline scriptblocks, inline PowerShell
+    strings, or paths to local .ps1 files. UNC and remote paths are rejected.
+
+    .PARAMETER ForceReload
+    Clears the module-scope cache and re-reads configuration from disk.
+
+    .OUTPUTS
+    System.Collections.Hashtable
+
+    .EXAMPLE
+    Import-GatekeeperConfig
+
+    Returns the cached configuration, loading from disk on first call.
+
+    .EXAMPLE
+    Import-GatekeeperConfig -ForceReload
+
+    Discards the cached configuration and reloads from disk.
+    #>
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $false)]

@@ -1,5 +1,30 @@
 #requires -Module Configuration
 function Get-FeatureFlagFolder {
+    <#
+    .SYNOPSIS
+    Returns the configured directory where feature flag JSON files are stored.
+
+    .DESCRIPTION
+    Retrieves the feature flag folder path from the active Gatekeeper configuration.
+    If no path has been configured, a default location is created under the machine-wide
+    configuration path and saved automatically via Export-GatekeeperConfig.
+
+    Use Export-GatekeeperConfig to set the path explicitly and avoid the auto-create
+    behavior on first run.
+
+    .OUTPUTS
+    System.String
+
+    .EXAMPLE
+    $folder = Get-FeatureFlagFolder
+    Get-ChildItem -Path $folder -Filter '*.json'
+
+    Returns the feature flag folder path and lists all JSON files in it.
+
+    .NOTES
+    On first run, if no path is configured, this function creates the default directory
+    and persists the path to configuration automatically.
+    #>
     [CmdletBinding()]
     param ()
 
