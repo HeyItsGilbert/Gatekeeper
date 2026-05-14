@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- `Invoke-Logging` now reads the pre-parsed scriptblock from
+  `$script:GatekeeperLogging` (populated by `Import-GatekeeperConfig`) instead
+  of re-creating the scriptblock from raw configuration on every call. This
+  eliminates redundant compilation overhead and preserves any closure context
+  that would have been lost by stringifying an existing scriptblock through
+  `[scriptblock]::Create()`.
+
 ## [0.3.2] 2026-01-30
 
 ### Fixed
