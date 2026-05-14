@@ -8,7 +8,7 @@ schema: 2.0.0
 # Import-GatekeeperConfig
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Load and cache the Gatekeeper module configuration.
 
 ## SYNTAX
 
@@ -17,21 +17,31 @@ Import-GatekeeperConfig [-ForceReload] [-ProgressAction <ActionPreference>] [<Co
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Reads the Gatekeeper configuration from disk using the Configuration module and caches
+it in the module-scoped `$GatekeeperConfiguration` variable. Subsequent calls return the
+cached copy unless `-ForceReload` is specified. Also parses and compiles the logging
+configuration into ready-to-invoke script blocks.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+Import-GatekeeperConfig
 ```
 
-{{ Add example description here }}
+Loads the Gatekeeper configuration from disk and caches it for the session.
+
+### Example 2
+```powershell
+Import-GatekeeperConfig -ForceReload
+```
+
+Discards the cached configuration and reloads it from disk.
 
 ## PARAMETERS
 
 ### -ForceReload
-{{ Fill ForceReload Description }}
+Clears the cached configuration and reloads it from disk.
 
 ```yaml
 Type: SwitchParameter
@@ -69,7 +79,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### System.Collections.Hashtable
+
+The loaded configuration hashtable.
+
 ## NOTES
 
 ## RELATED LINKS
