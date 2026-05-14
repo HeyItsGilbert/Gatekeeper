@@ -24,8 +24,13 @@
     Test-FeatureFlag -FeatureFlag $flag -PropertySet $propertySet -Context $context
 
     This will test if the current device will pass the feature flag rules.
+
+    .OUTPUTS
+    System.Boolean
+    Returns $true if an Allow rule matches, $false otherwise.
     #>
     [CmdletBinding()]
+    [OutputType([bool])]
     param (
         [Parameter(Mandatory, ValueFromPipeline)]
         [FeatureFlag]
