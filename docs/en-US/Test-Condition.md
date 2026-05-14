@@ -51,7 +51,7 @@ Accept wildcard characters: False
 ```
 
 ### -PropertySet
-{{ Fill PropertySet Description }}
+The PropertySet that defines the valid properties and their types for the given context.
 
 ```yaml
 Type: PropertySet
@@ -101,6 +101,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ## OUTPUTS
+
+### System.Boolean
+
+Returns $true if the condition matches the given context, $false otherwise.
 
 ## NOTES
 

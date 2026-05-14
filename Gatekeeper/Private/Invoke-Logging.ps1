@@ -1,4 +1,5 @@
 function Invoke-Logging {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         [Effect]

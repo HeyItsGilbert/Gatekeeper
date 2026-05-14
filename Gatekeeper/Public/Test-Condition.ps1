@@ -28,7 +28,13 @@ function Test-Condition {
     Test-Condition -Context $context -PropertySet $propertySet -Condition $rule
 
     This would return a true/false
+
+    .OUTPUTS
+    System.Boolean
+    Returns $true if the condition matches the given context, $false otherwise.
     #>
+    [CmdletBinding()]
+    [OutputType([bool])]
     param (
         [Parameter(Mandatory)]
         [hashtable]
@@ -88,7 +94,6 @@ function Test-Condition {
 
     $meta = $PropertySet.GetProperty($propName)
     $propType = $meta.Type
-    $validation = $meta.Validation
 
     $actual = Convert-ToTypedValue -Type $propType -Value $Context[$propName]
     $valid = $meta.Validate($actual)
