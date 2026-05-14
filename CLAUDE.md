@@ -56,7 +56,7 @@ The module follows a standard PowerShell module layout:
   - **Classes/**: PowerShell class definitions (Property.ps1, FeatureFlag.ps1)
   - **Enums/**: Enumeration definitions (Effect.ps1)
   - **Public/**: Exported functions (Test-FeatureFlag, New-FeatureFlag, etc.)
-  - **Private/**: Internal helper functions (Convert-ToTypeValue, Test-TypedValue)
+  - **Private/**: Internal helper functions (Convert-ToTypedValue)
   - **Schemas/**: JSON schemas for validation (FeatureFlag.json, Properties.json)
   - **Configuration.psd1**: Default module configuration
   - **Gatekeeper.psm1**: Module loader that dot-sources all functions and registers type accelerators
