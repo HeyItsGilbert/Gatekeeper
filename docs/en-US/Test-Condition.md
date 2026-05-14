@@ -102,6 +102,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### System.Boolean
+
+Returns $true if the condition matches the given context, $false otherwise.
+
 ## NOTES
 
 ## RELATED LINKS

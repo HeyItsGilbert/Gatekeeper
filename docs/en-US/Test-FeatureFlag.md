@@ -101,6 +101,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### System.Boolean
+
+Returns $true if an Allow rule matches, $false otherwise.
+
 ## NOTES
 
 ## RELATED LINKS
