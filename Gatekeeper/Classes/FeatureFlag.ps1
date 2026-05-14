@@ -209,7 +209,9 @@ class FeatureFlag {
             $jsonParams['EnumsAsStrings'] = $true
         }
         $json = $this | ConvertTo-Json @jsonParams
-        Set-Content -Path $this.FilePath -Value $json
+        $tmpPath = "$($this.FilePath).tmp"
+        Set-Content -Path $tmpPath -Value $json
+        Move-Item -Path $tmpPath -Destination $this.FilePath -Force
     }
 }
 
