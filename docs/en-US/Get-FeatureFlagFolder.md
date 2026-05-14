@@ -8,7 +8,7 @@ schema: 2.0.0
 # Get-FeatureFlagFolder
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Return the folder path where feature flag JSON files are stored.
 
 ## SYNTAX
 
@@ -17,16 +17,19 @@ Get-FeatureFlagFolder [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Returns the configured folder path for feature flag JSON files. If no path has been
+configured yet, a default path is created under the machine-wide configuration
+location and saved to the Gatekeeper configuration.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+$folder = Get-FeatureFlagFolder
+Get-ChildItem -Path $folder -Filter '*.json'
 ```
 
-{{ Add example description here }}
+Returns the feature flag folder path and lists all flag files in it.
 
 ## PARAMETERS
 
@@ -54,7 +57,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### System.String
+
+The absolute path to the feature flag folder.
+
 ## NOTES
 
 ## RELATED LINKS

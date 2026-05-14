@@ -51,7 +51,7 @@ Accept wildcard characters: False
 ```
 
 ### -PropertySet
-{{ Fill PropertySet Description }}
+The PropertySet that defines the valid properties and their types for the given context.
 
 ```yaml
 Type: PropertySet
