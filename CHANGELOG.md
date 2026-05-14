@@ -5,16 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [0.4.0] 2026-05-14
 
 ### Changed
 
-- `Invoke-Logging` now reads the pre-parsed scriptblock from
-  `$script:GatekeeperLogging` (populated by `Import-GatekeeperConfig`) instead
-  of re-creating the scriptblock from raw configuration on every call. This
-  eliminates redundant compilation overhead and preserves any closure context
-  that would have been lost by stringifying an existing scriptblock through
-  `[scriptblock]::Create()`.
+- Logging configuration key renamed from `Warning` to `Warn` to match
+  the `Effect` enum. Update any `Configuration.psd1` logging section
+  that uses `Warning = @{ ... }` to `Warn = @{ ... }`.
+- `FunctionsToExport` in the module manifest now enumerates all 19
+  public functions explicitly instead of using a wildcard.
+- `ConvertFrom-JsonToHashtable` moved to `ScriptsToProcess` to
+  eliminate circular class-loading dependencies.
+
+### Fixed
+
+- `Test-Condition` now captures the result of property validation,
+  enforcing the fail-closed contract — a context value violating
+  constraints now correctly returns `$false` instead of continuing
+  evaluation.
+- `PropertyValidation` threshold fields (`Minimum`, `Maximum`,
+  `MinLength`, `MaxLength`) changed to `Nullable[int]` so an unconfigured
+  constraint is no longer treated as zero.
+- `PropertyValidation.ToHashtable` now omits null/unset fields to
+  prevent invalid entries in serialized JSON during Save/FromFile
+  round-trips.
+- `ConditionGroup` constructor now treats JSON-serialized null-valued
+  keys as absent, and uses `Property` presence (not `Operator`) as the
+  canonical discriminator for leaf vs. group conditions.
+- `FeatureFlag` constructor now handles `Version` deserialized as a
+  dictionary from `ConvertTo-Json` round-trips.
+- `Convert-ToTypedValue` now correctly coerces string values to boolean.
+- `PropertyDefinition.Validate` now applies a regex timeout to prevent
+  catastrophic backtracking on untrusted input.
+- Argument transform attributes (`FeatureFlagTransformAttribute`,
+  `PropertySetTransformAttribute`) now reject path traversal sequences.
+- Logging script execution hardened against misconfigured or missing
+  scripts in `Configuration.psd1`.
+- `ConditionGroup` now exposes a `FromJson` static method, enabling
+  round-trip deserialization from JSON.
+- `ConditionGroup` now detects when two or more mutually exclusive
+  group keys (`AllOf`, `AnyOf`, `Not`) are set simultaneously.
+- `PropertySet.AddProperty` now keys the property hashtable by name
+  correctly.
+- `PropertySet` uses `GetFileNameWithoutExtension` instead of `.BaseName`
+  on string paths for cross-platform compatibility.
+- `New-FeatureFlag` `$Rules` parameter is no longer `Mandatory`, allowing
+  flags to be created without initial rules.
+- Feature flag evaluation now applies `DefaultEffect` when no terminal
+  (`Allow`/`Deny`) rule fires, instead of always returning `$false`.
+- Feature flag evaluation uses a labeled `break` to exit the rule loop
+  on `Allow`/`Deny`, preventing spurious continued evaluation.
+- `Convert-ToTypedValue` source file renamed to match the function name.
+- `psake` dependency updated to 5.0.4.
 
 ## [0.3.2] 2026-01-30
 
