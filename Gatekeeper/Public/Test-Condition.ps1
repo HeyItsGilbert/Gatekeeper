@@ -89,7 +89,6 @@ function Test-Condition {
 
     $meta = $PropertySet.GetProperty($propName)
     $propType = $meta.Type
-    $validation = $meta.Validation
 
     $actual = Convert-ToTypedValue -Type $propType -Value $Context[$propName]
     $valid = $meta.Validate($actual)
