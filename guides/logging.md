@@ -76,7 +76,7 @@ If a rule's conditions don't match, its logging script is never called.
 $config = Import-GatekeeperConfig
 $config.Logging.Allow.Enabled  = $true
 $config.Logging.Deny.Enabled   = $true
-$config.Logging.Warn.Enabled = $true
+$config.Logging.Warn.Enabled   = $true
 $config.Logging.Audit.Enabled  = $true
 Export-GatekeeperConfig -Configuration $config
 ```
