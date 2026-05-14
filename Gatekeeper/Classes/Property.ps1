@@ -184,7 +184,9 @@ class PropertySet {
         }
         # Convert to JSON with a depth of 10 to handle nested objects
         $json = $hashtable | ConvertTo-Json -Depth 10
-        Set-Content -Path $this.FilePath -Value $json
+        $tmpPath = "$($this.FilePath).tmp"
+        Set-Content -Path $tmpPath -Value $json
+        Move-Item -Path $tmpPath -Destination $this.FilePath -Force
     }
 }
 
