@@ -83,6 +83,34 @@ Describe 'ConditionGroup' {
             $cg.Value = $null
             $cg.IsValid() | Should -BeFalse
         }
+
+        It 'Returns $true for an AllOf group condition' {
+            $cg = [ConditionGroup]::new(@{
+                AllOf = @(
+                    @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
+                )
+            })
+            $cg.IsValid() | Should -BeTrue
+        }
+
+        It 'Returns $true for an AnyOf group condition' {
+            $cg = [ConditionGroup]::new(@{
+                AnyOf = @(
+                    @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Staging' },
+                    @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
+                )
+            })
+            $cg.IsValid() | Should -BeTrue
+        }
+
+        It 'Returns $true for a Not group condition' {
+            $cg = [ConditionGroup]::new(@{
+                Not = @(
+                    @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
+                )
+            })
+            $cg.IsValid() | Should -BeTrue
+        }
     }
 
     Describe 'ToString' {

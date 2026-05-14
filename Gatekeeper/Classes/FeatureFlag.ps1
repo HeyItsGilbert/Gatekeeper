@@ -80,12 +80,8 @@ class ConditionGroup {
     }
 
     [boolean]IsValid() {
-        # This check if for the top level condition group
-        # For nested condition groups (AllOf, AnyOf, Not) the validity is not checked.
-        if ($null -ne $this.Property -and $null -ne $this.Operator -and $null -ne $this.Value) {
-            return $true
-        }
-        return $false
+        if ($null -ne $this.AllOf -or $null -ne $this.AnyOf -or $null -ne $this.Not) { return $true }
+        return $null -ne $this.Property -and $null -ne $this.Operator -and $null -ne $this.Value
     }
     [string]ToString() {
         $sb = [System.Text.StringBuilder]::new()
