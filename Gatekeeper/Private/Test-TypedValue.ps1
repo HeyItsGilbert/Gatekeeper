@@ -1,4 +1,5 @@
 function Test-TypedValue {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         $Value,

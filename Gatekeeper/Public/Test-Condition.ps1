@@ -29,6 +29,7 @@ function Test-Condition {
 
     This would return a true/false
     #>
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         [hashtable]

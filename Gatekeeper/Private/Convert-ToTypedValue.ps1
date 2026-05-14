@@ -1,4 +1,5 @@
 function Convert-ToTypedValue {
+    [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
         [string]
