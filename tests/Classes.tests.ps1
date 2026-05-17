@@ -11,11 +11,11 @@ BeforeDiscovery {
     Import-Module -Name $outputModVerManifest -Verbose:$false -ErrorAction Stop
 }
 
-Describe 'ConditionGroup' {
+Describe 'Condition' {
     Describe 'constructor - mutual exclusion' {
         It 'Throws when AllOf and AnyOf are both specified' {
             {
-                [ConditionGroup]::new(@{
+                [Condition]::new(@{
                     AllOf = @(@{ Property = 'A'; Operator = 'Equals'; Value = 'B' })
                     AnyOf = @(@{ Property = 'A'; Operator = 'Equals'; Value = 'B' })
                 })
@@ -24,7 +24,7 @@ Describe 'ConditionGroup' {
 
         It 'Throws when AllOf and Not are both specified' {
             {
-                [ConditionGroup]::new(@{
+                [Condition]::new(@{
                     AllOf = @(@{ Property = 'A'; Operator = 'Equals'; Value = 'B' })
                     Not   = @(@{ Property = 'A'; Operator = 'Equals'; Value = 'B' })
                 })
@@ -33,7 +33,7 @@ Describe 'ConditionGroup' {
 
         It 'Throws when AnyOf and Not are both specified' {
             {
-                [ConditionGroup]::new(@{
+                [Condition]::new(@{
                     AnyOf = @(@{ Property = 'A'; Operator = 'Equals'; Value = 'B' })
                     Not   = @(@{ Property = 'A'; Operator = 'Equals'; Value = 'B' })
                 })
@@ -42,19 +42,19 @@ Describe 'ConditionGroup' {
 
         It 'Throws when Property is present without Operator and Value' {
             {
-                [ConditionGroup]::new(@{ Property = 'Environment' })
+                [Condition]::new(@{ Property = 'Environment' })
             } | Should -Throw -ExpectedMessage '*Operator and Value*'
         }
 
         It 'Throws when Property is present without Value' {
             {
-                [ConditionGroup]::new(@{ Property = 'Environment'; Operator = 'Equals' })
+                [Condition]::new(@{ Property = 'Environment'; Operator = 'Equals' })
             } | Should -Throw -ExpectedMessage '*Operator and Value*'
         }
 
         It 'Throws when AllOf is combined with flat Property/Operator/Value fields' {
             {
-                [ConditionGroup]::new(@{
+                [Condition]::new(@{
                     AllOf    = @(@{ Property = 'A'; Operator = 'Equals'; Value = 'B' })
                     Property = 'Environment'
                     Operator = 'Equals'
@@ -66,7 +66,7 @@ Describe 'ConditionGroup' {
 
     Describe 'IsValid' {
         It 'Returns $true for a flat leaf condition' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 Property = 'Environment'
                 Operator = 'Equals'
                 Value    = 'Production'
@@ -75,7 +75,7 @@ Describe 'ConditionGroup' {
         }
 
         It 'Returns $false when Value is cleared after construction' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 Property = 'Environment'
                 Operator = 'Equals'
                 Value    = 'Production'
@@ -85,7 +85,7 @@ Describe 'ConditionGroup' {
         }
 
         It 'Returns $true for an AllOf group condition' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 AllOf = @(
                     @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
                 )
@@ -94,7 +94,7 @@ Describe 'ConditionGroup' {
         }
 
         It 'Returns $true for an AnyOf group condition' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 AnyOf = @(
                     @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Staging' },
                     @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
@@ -104,7 +104,7 @@ Describe 'ConditionGroup' {
         }
 
         It 'Returns $true for a Not group condition' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 Not = @(
                     @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
                 )
@@ -115,7 +115,7 @@ Describe 'ConditionGroup' {
 
     Describe 'ToString' {
         It 'Returns flat condition string' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 Property = 'Environment'
                 Operator = 'Equals'
                 Value    = 'Staging'
@@ -124,7 +124,7 @@ Describe 'ConditionGroup' {
         }
 
         It 'Returns AllOf string' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 AllOf = @(
                     @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Staging' },
                     @{ Property = 'IsCompliant'; Operator = 'Equals'; Value = 'true' }
@@ -134,7 +134,7 @@ Describe 'ConditionGroup' {
         }
 
         It 'Returns AnyOf string' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 AnyOf = @(
                     @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Staging' },
                     @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
@@ -144,7 +144,7 @@ Describe 'ConditionGroup' {
         }
 
         It 'Returns Not string' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 Not = @(
                     @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
                 )
@@ -153,7 +153,7 @@ Describe 'ConditionGroup' {
         }
 
         It 'Returns nested AllOf+AnyOf string' {
-            $cg = [ConditionGroup]::new(@{
+            $cg = [Condition]::new(@{
                 AllOf = @(
                     @{
                         AnyOf = @(
@@ -169,9 +169,11 @@ Describe 'ConditionGroup' {
     }
 }
 
-Describe 'ConditionGroupTransformAttribute' {
+Describe 'ConditionTransformAttribute' {
     BeforeAll {
-        $script:propertySet = Read-PropertySet -File "$PSScriptRoot\fixtures\Properties.json"
+        $script:propertySet = InModuleScope $env:BHProjectName {
+            Read-PropertySet -FilePath "$PSScriptRoot\fixtures\Properties.json"
+        }
         $script:context = @{
             Percentage  = 30
             Environment = 'Production'
@@ -179,7 +181,7 @@ Describe 'ConditionGroupTransformAttribute' {
         }
     }
 
-    It 'Converts a hashtable to ConditionGroup via Test-Condition' {
+    It 'Converts a hashtable to Condition via Test-Condition' {
         $ht = @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
         { Test-Condition -Condition $ht -PropertySet $script:propertySet -Context $script:context } |
             Should -Not -Throw
@@ -187,13 +189,13 @@ Describe 'ConditionGroupTransformAttribute' {
             Should -BeTrue
     }
 
-    It 'Passes through an existing ConditionGroup via Test-Condition' {
-        $cg = [ConditionGroup]::new(@{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' })
+    It 'Passes through an existing Condition via Test-Condition' {
+        $cg = [Condition]::new(@{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' })
         Test-Condition -Condition $cg -PropertySet $script:propertySet -Context $script:context |
             Should -BeTrue
     }
 
-    It 'Converts a JSON file path string to ConditionGroup via Test-Condition' {
+    It 'Converts a JSON file path string to Condition via Test-Condition' {
         $conditionPath = Join-Path $TestDrive 'Condition.json'
         @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' } |
             ConvertTo-Json | Set-Content -Path $conditionPath
@@ -208,14 +210,14 @@ Describe 'ConditionGroupTransformAttribute' {
     }
 }
 
-Describe 'PropertyDefinition.Validate' {
+Describe 'Property.Validate' {
     It 'Returns $true when no validation is configured' {
-        $pd = [PropertyDefinition]::new('Env', @{ Type = 'string' })
+        $pd = [Property]::new('Env', @{ Type = 'string' })
         $pd.Validate('anything') | Should -BeTrue
     }
 
     It 'Returns $true for a valid integer within range' {
-        $pd = [PropertyDefinition]::new('Count', @{
+        $pd = [Property]::new('Count', @{
             Type       = 'integer'
             Validation = @{ Minimum = 0; Maximum = 100 }
         })
@@ -223,7 +225,7 @@ Describe 'PropertyDefinition.Validate' {
     }
 
     It 'Returns $false and emits warning when integer is below minimum' {
-        $pd = [PropertyDefinition]::new('Count', @{
+        $pd = [Property]::new('Count', @{
             Type       = 'integer'
             Validation = @{ Minimum = 10; Maximum = 100 }
         })
@@ -233,7 +235,7 @@ Describe 'PropertyDefinition.Validate' {
     }
 
     It 'Returns $false when integer exceeds maximum' {
-        $pd = [PropertyDefinition]::new('Count', @{
+        $pd = [Property]::new('Count', @{
             Type       = 'integer'
             Validation = @{ Minimum = 0; Maximum = 10 }
         })
@@ -241,7 +243,7 @@ Describe 'PropertyDefinition.Validate' {
     }
 
     It 'Returns $false when string is below MinLength' {
-        $pd = [PropertyDefinition]::new('Code', @{
+        $pd = [Property]::new('Code', @{
             Type       = 'string'
             Validation = @{ MinLength = 5; MaxLength = 20 }
         })
@@ -249,7 +251,7 @@ Describe 'PropertyDefinition.Validate' {
     }
 
     It 'Returns $false when string exceeds MaxLength' {
-        $pd = [PropertyDefinition]::new('Code', @{
+        $pd = [Property]::new('Code', @{
             Type       = 'string'
             Validation = @{ MinLength = 1; MaxLength = 5 }
         })
@@ -257,7 +259,7 @@ Describe 'PropertyDefinition.Validate' {
     }
 
     It 'Returns $false when string does not match pattern' {
-        $pd = [PropertyDefinition]::new('ZipCode', @{
+        $pd = [Property]::new('ZipCode', @{
             Type       = 'string'
             Validation = @{ Pattern = '^\d{5}$' }
         })
@@ -265,7 +267,7 @@ Describe 'PropertyDefinition.Validate' {
     }
 
     It 'Returns $true when string matches pattern' {
-        $pd = [PropertyDefinition]::new('ZipCode', @{
+        $pd = [Property]::new('ZipCode', @{
             Type       = 'string'
             Validation = @{ Pattern = '^\d{5}$' }
         })
@@ -277,31 +279,31 @@ Describe 'PropertySet' {
     Describe 'AddProperty' {
         It 'Adds entry keyed by property Name' {
             $ps = [PropertySet]::new('TestSet')
-            $pd = [PropertyDefinition]::new('Environment', @{ Type = 'string' })
+            $pd = [Property]::new('Environment', @{ Type = 'string' })
             $ps.AddProperty($pd)
             $ps.Properties.ContainsKey('Environment') | Should -BeTrue
         }
 
         It 'Returns $this for method chaining' {
             $ps = [PropertySet]::new('TestSet')
-            $pd = [PropertyDefinition]::new('Environment', @{ Type = 'string' })
+            $pd = [Property]::new('Environment', @{ Type = 'string' })
             $result = $ps.AddProperty($pd)
             $result | Should -Be $ps
         }
 
         It 'Supports chaining multiple AddProperty calls' {
             $ps = [PropertySet]::new('TestSet')
-            $ps.AddProperty([PropertyDefinition]::new('Env', @{ Type = 'string' })).AddProperty(
-                [PropertyDefinition]::new('Score', @{ Type = 'integer' })
+            $ps.AddProperty([Property]::new('Env', @{ Type = 'string' })).AddProperty(
+                [Property]::new('Score', @{ Type = 'integer' })
             ) | Out-Null
             $ps.Properties.Keys.Count | Should -Be 2
         }
     }
 
     Describe 'GetProperty' {
-        It 'Returns the correct PropertyDefinition by name' {
+        It 'Returns the correct Property by name' {
             $ps = [PropertySet]::new('TestSet')
-            $pd = [PropertyDefinition]::new('Environment', @{ Type = 'string' })
+            $pd = [Property]::new('Environment', @{ Type = 'string' })
             $ps.AddProperty($pd)
             $result = $ps.GetProperty('Environment')
             $result | Should -Be $pd
@@ -312,7 +314,7 @@ Describe 'PropertySet' {
     Describe 'ContainsKey' {
         BeforeAll {
             $script:ps = [PropertySet]::new('TestSet')
-            $script:ps.AddProperty([PropertyDefinition]::new('Environment', @{ Type = 'string' }))
+            $script:ps.AddProperty([Property]::new('Environment', @{ Type = 'string' }))
         }
 
         It 'Returns $true for an existing property' {
@@ -341,11 +343,11 @@ Describe 'PropertySet' {
     Describe 'Save and FromFile round-trip' {
         It 'Preserves properties and validation constraints' {
             $original = [PropertySet]::new('RoundTrip')
-            $original.AddProperty([PropertyDefinition]::new('Score', @{
+            $original.AddProperty([Property]::new('Score', @{
                 Type       = 'integer'
                 Validation = @{ Minimum = 5; Maximum = 100 }
             }))
-            $original.AddProperty([PropertyDefinition]::new('Label', @{
+            $original.AddProperty([Property]::new('Label', @{
                 Type = 'string'
             }))
 

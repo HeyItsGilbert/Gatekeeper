@@ -57,7 +57,7 @@
             "required": [
                 "Name",
                 "Effect",
-                "Conditions"
+                "Condition"
             ],
             "properties": {
                 "Name": {
@@ -69,13 +69,13 @@
                 "Effect": {
                     "$ref": "#/$defs/effect"
                 },
-                "Conditions": {
-                    "$ref": "#/$defs/conditionGroup"
+                "Condition": {
+                    "$ref": "#/$defs/condition"
                 }
             },
             "additionalProperties": false
         },
-        "conditionGroup": {
+        "condition": {
             "type": "object",
             "description": "A condition group may be logical or a flat condition",
             "oneOf": [
@@ -87,7 +87,7 @@
                         "AllOf": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/$defs/conditionGroup"
+                                "$ref": "#/$defs/condition"
                             },
                             "minItems": 1
                         }
@@ -102,7 +102,7 @@
                         "AnyOf": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/$defs/conditionGroup"
+                                "$ref": "#/$defs/condition"
                             },
                             "minItems": 1
                         }
@@ -115,7 +115,7 @@
                     ],
                     "properties": {
                         "Not": {
-                            "$ref": "#/$defs/conditionGroup"
+                            "$ref": "#/$defs/condition"
                         }
                     },
                     "additionalProperties": false

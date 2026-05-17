@@ -19,10 +19,10 @@ Export-ModuleMember -Function $public.Basename
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
     [PropertySet],
-    [PropertyDefinition],
+    [Property],
     [FeatureFlag],
     [Rule],
-    [ConditionGroup],
+    [Condition],
     [Effect]
 )
 # Get the internal TypeAccelerators class to use its static methods.

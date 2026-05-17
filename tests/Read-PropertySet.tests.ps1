@@ -5,17 +5,20 @@ BeforeDiscovery {
     $outputModVerDir = Join-Path -Path $outputModDir -ChildPath $manifest.ModuleVersion
     $outputModVerManifest = Join-Path -Path $outputModVerDir -ChildPath "$($env:BHProjectName).psd1"
 
-    # Get module commands
-    # Remove all versions of the module from the session. Pester can't handle multiple versions.
     Get-Module $env:BHProjectName | Remove-Module -Force -ErrorAction Ignore
     Import-Module -Name $outputModVerManifest -Verbose:$false -ErrorAction Stop
 }
 Describe 'Read-PropertySet' {
     BeforeAll {
-        $script:actual = Read-PropertySet -FilePath "$PSScriptRoot\fixtures\Properties.json"
+        $fixturePath = "$PSScriptRoot\fixtures\Properties.json"
+        $script:actual = InModuleScope $env:BHProjectName -Parameters @{ Path = $fixturePath } {
+            param($Path)
+            Read-PropertySet -FilePath $Path
+        }
     }
     It 'Throws file path error' {
-        { Read-PropertySet -FilePath 'fakepath.json' } | Should -Throw -ExpectedMessage 'File path given did not exist*'
+        { InModuleScope $env:BHProjectName { Read-PropertySet -FilePath 'fakepath.json' } } |
+            Should -Throw -ExpectedMessage 'File path given did not exist*'
     }
     It 'Returns a PropertySet object' {
         $script:actual | Should -BeOfType 'PropertySet'

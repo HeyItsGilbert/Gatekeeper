@@ -26,7 +26,7 @@ function New-PropertySet {
         [String]
         $Name,
         [Parameter(ValueFromPipeline)]
-        [PropertyDefinition[]]
+        [Property[]]
         $Properties
     )
     begin {

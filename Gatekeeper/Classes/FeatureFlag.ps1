@@ -10,7 +10,7 @@ enum Operator {
     In
     NotIn
 }
-class ConditionGroup {
+class Condition {
     [object]$AllOf
     [object]$AnyOf
     [object]$Not
@@ -18,29 +18,24 @@ class ConditionGroup {
     [Operator]$Operator
     [object]$Value
 
-    ConditionGroup([hashtable]$data) {
+    Condition([hashtable]$data) {
         if ($null -eq $data) {
             throw "Data cannot be null."
         }
-        # Treat keys present but null as non-present (handles JSON round-trips where all
-        # class fields are serialized including null/default ones).
         $groupKeys = @('AllOf', 'AnyOf', 'Not') | Where-Object { $data.ContainsKey($_) -and $null -ne $data[$_] }
         if ($groupKeys.Count -gt 1) {
-            throw "ConditionGroup may only define one of: AllOf, AnyOf, Not. Got: $($groupKeys -join ', ')"
+            throw "Condition may only define one of: AllOf, AnyOf, Not. Got: $($groupKeys -join ', ')"
         }
-        # Property presence (non-null) is the canonical signal for a flat/leaf condition.
-        # Operator is excluded from this check because its enum default ("Equals") is always
-        # serialized as a non-null string in JSON round-trips, making it unreliable as a signal.
         $hasGroup = $groupKeys.Count -gt 0
         $hasProperty = $data.ContainsKey('Property') -and $null -ne $data['Property']
         if ($hasGroup -and $hasProperty) {
-            throw "ConditionGroup with AllOf, AnyOf, or Not cannot also have Property, Operator, and Value defined."
+            throw "Condition with AllOf, AnyOf, or Not cannot also have Property, Operator, and Value defined."
         }
         if ($hasProperty) {
             $hasOperator = $data.ContainsKey('Operator') -and $null -ne $data['Operator']
             $hasValue = $data.ContainsKey('Value') -and $null -ne $data['Value']
             if (-not $hasOperator -or -not $hasValue) {
-                throw "ConditionGroup with Property must also have Operator and Value defined."
+                throw "Condition with Property must also have Operator and Value defined."
             }
         }
         if ($hasProperty) {
@@ -53,30 +48,30 @@ class ConditionGroup {
             $this.Value = $data.Value
         }
         if ($data.ContainsKey('AllOf') -and $null -ne $data['AllOf']) {
-            $this.AllOf = $data.AllOf | ForEach-Object { [ConditionGroup]::new($_) }
+            $this.AllOf = $data.AllOf | ForEach-Object { [Condition]::new($_) }
         }
         if ($data.ContainsKey('AnyOf') -and $null -ne $data['AnyOf']) {
-            $this.AnyOf = $data.AnyOf | ForEach-Object { [ConditionGroup]::new($_) }
+            $this.AnyOf = $data.AnyOf | ForEach-Object { [Condition]::new($_) }
         }
         if ($data.ContainsKey('Not') -and $null -ne $data['Not']) {
-            $this.Not = $data.Not | ForEach-Object { [ConditionGroup]::new($_) }
+            $this.Not = $data.Not | ForEach-Object { [Condition]::new($_) }
         }
     }
-    # Constructor for creating a new sub group
-    ConditionGroup([string]$operator, [object[]]$conditions) {
+
+    Condition([string]$operator, [object[]]$conditions) {
         switch ($operator) {
             'AllOf' { $this.AllOf = $conditions }
             'AnyOf' { $this.AnyOf = $conditions }
-            'Not' { $this.Not = $conditions }
+            'Not'   { $this.Not = $conditions }
             default {
                 throw "Unknown operator: $operator"
             }
         }
     }
 
-    static [ConditionGroup] FromJson([string]$json) {
+    static [Condition] FromJson([string]$json) {
         $data = ConvertFrom-JsonToHashtable -InputObject $json
-        return [ConditionGroup]::new($data)
+        return [Condition]::new($data)
     }
 
     [boolean]IsValid() {
@@ -123,7 +118,7 @@ class Rule {
     [string]$Name
     [string]$Description
     [Effect]$Effect
-    [ConditionGroup]$Conditions
+    [Condition]$Condition
 
     Rule([string]$Name) {
         $this.Name = $Name
@@ -133,14 +128,13 @@ class Rule {
         $this.Name = $data.Name
         $this.Description = $data.Description
         $this.Effect = $data.Effect
-        if ($data.ContainsKey('Conditions')) {
-            # Check if it's a condition group
-            if ($data.Conditions -is [ConditionGroup]) {
-                $this.Conditions = $data.Conditions
-            } elseif ($data.Conditions -is [hashtable]) {
-                $this.Conditions = [ConditionGroup]::new($data.Conditions)
+        if ($data.ContainsKey('Condition')) {
+            if ($data.Condition -is [Condition]) {
+                $this.Condition = $data.Condition
+            } elseif ($data.Condition -is [hashtable]) {
+                $this.Condition = [Condition]::new($data.Condition)
             } else {
-                throw "Unknown type for Conditions: $($data.Conditions.GetType().FullName)"
+                throw "Unknown type for Condition: $($data.Condition.GetType().FullName)"
             }
         }
     }
@@ -178,9 +172,6 @@ class FeatureFlag {
         $this.Rules = $data.Rules | ForEach-Object { [Rule]::new($_) }
     }
 
-    # Example usage:
-    # $json = Get-Content -Raw -Path 'd:\Gatekeeper\Gatekeeper\featureFlag.json'
-    # $featureFlag = [FeatureFlag]::FromJson($json)
     static [FeatureFlag] FromJson([string]$json) {
         $data = ConvertFrom-JsonToHashtable -InputObject $json
         return [FeatureFlag]::new($data)
@@ -202,9 +193,6 @@ class FeatureFlag {
         }
         Write-Verbose "Saving FeatureFlag to file: $($this.FilePath)"
         $jsonParams = @{ Depth = 10 }
-        # -EnumsAsStrings was introduced in PowerShell 7.2; on older hosts
-        # (e.g. Windows PowerShell 5.1) enums serialize as their integer value,
-        # which still round-trips back to the enum on load.
         if ((Get-Command ConvertTo-Json).Parameters.ContainsKey('EnumsAsStrings')) {
             $jsonParams['EnumsAsStrings'] = $true
         }
@@ -216,11 +204,6 @@ class FeatureFlag {
 }
 
 class GatekeeperPath {
-    # Validates a user-supplied string as a safe path to an existing JSON file.
-    # Rejects wildcard patterns, non-.json files, and UNC paths (unless enabled
-    # via the Security.AllowUncPaths configuration setting) so callers that accept
-    # untrusted flag names cannot be redirected to read arbitrary files. Returns
-    # the resolved provider path on success and throws otherwise.
     static [string] ResolveJsonFilePath([string]$Path) {
         if ([string]::IsNullOrWhiteSpace($Path)) {
             throw "File path cannot be empty."
@@ -252,11 +235,8 @@ class GatekeeperPath {
 
 class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
 
-    ## Override the abstract method "Transform". This is where the user
-    ## provided value will be inspected and transformed if possible.
     [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
         $item = switch ($inputData.GetType().FullName) {
-            # Return the existing item if it's already a FeatureFlag
             'FeatureFlag' { $inputData }
             'System.Collections.Hashtable' {
                 [FeatureFlag]::new($inputData)
@@ -278,30 +258,27 @@ class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTrans
     }
 }
 
-class ConditionGroupTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
+class ConditionTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
 
-    ## Override the abstract method "Transform". This is where the user
-    ## provided value will be inspected and transformed if possible.
     [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
         $item = switch ($inputData.GetType().FullName) {
-            # Return the existing item if it's already a ConditionGroup
-            'ConditionGroup' { $inputData }
+            'Condition' { $inputData }
             'System.Collections.Hashtable' {
-                [ConditionGroup]::new($inputData)
+                [Condition]::new($inputData)
             }
             'System.String' {
                 $resolvedPath = [GatekeeperPath]::ResolveJsonFilePath($inputData)
                 $json = Get-Content -Raw -LiteralPath $resolvedPath
-                [ConditionGroup]::FromJson($json)
+                [Condition]::FromJson($json)
             }
             default {
-                throw "Cannot convert type to ConditionGroup: $($inputData.GetType().FullName)"
+                throw "Cannot convert type to Condition: $($inputData.GetType().FullName)"
             }
         }
         return $item
     }
 
     [string] ToString() {
-        return '[ConditionGroupTransformAttribute()]'
+        return '[ConditionTransformAttribute()]'
     }
 }

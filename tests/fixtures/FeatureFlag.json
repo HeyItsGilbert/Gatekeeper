@@ -13,7 +13,7 @@
         {
             "Name": "Audit staging",
             "Effect": "Audit",
-            "Conditions": {
+            "Condition": {
                 "Property": "Environment",
                 "Operator": "Equals",
                 "Value": "Staging"
@@ -22,7 +22,7 @@
         {
             "Name": "Warn Production",
             "Effect": "Warn",
-            "Conditions": {
+            "Condition": {
                 "Property": "Environment",
                 "Operator": "Equals",
                 "Value": "Production"
@@ -31,7 +31,7 @@
         {
             "Name": "Allow Staging and Complaint or 10%",
             "Effect": "Allow",
-            "Conditions": {
+            "Condition": {
                 "AllOf": [
                     {
                         "AnyOf": [

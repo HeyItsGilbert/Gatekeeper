@@ -1,22 +1,19 @@
-function Get-DefaultContext {
+function New-Context {
     <#
     .SYNOPSIS
-    Get a hashtable of all the properties.
+    Create an empty context from a PropertySet.
 
     .DESCRIPTION
-    Return a hash table of all the keys for the properties with null values.
+    Constructs a hashtable with all keys from the PropertySet, each set to $null.
+    The caller populates the values before passing the context to Test-FeatureFlag.
 
     .PARAMETER PropertySet
-    The PropertySet or file path to your properties.
+    The PropertySet that defines which keys the context should contain.
 
     .EXAMPLE
-    $context = Get-DefaultContext -Properties .\props.json
-    $context.Hostname = $(hostname)
-
-    Get all the property keys and then set the hostname using the hostname command.
-    .NOTES
-    If you don't pass in Properties explicitly you will be prompted to for a
-    properties file.
+    $context = New-Context -PropertySet $propertySet
+    $context.Hostname = $env:COMPUTERNAME
+    Test-FeatureFlag -FeatureFlag $flag -PropertySet $propertySet -Context $context
     #>
     [CmdletBinding()]
     [OutputType('System.Collections.Hashtable')]
@@ -26,7 +23,6 @@ function Get-DefaultContext {
         [PropertySetTransformAttribute()]
         $PropertySet
     )
-    # PropertySet has a Properties item
     $hashtable = @{}
     foreach ($property in $PropertySet.Properties.Keys) {
         Write-Verbose "Adding property: $property"

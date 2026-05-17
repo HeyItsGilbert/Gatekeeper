@@ -12,7 +12,11 @@ BeforeDiscovery {
 
 Describe 'Test-FeatureFlag' {
     BeforeAll {
-        $script:propertySet = Read-PropertySet -File "$PSScriptRoot\fixtures\Properties.json"
+        $fixturePath = "$PSScriptRoot\fixtures\Properties.json"
+        $script:propertySet = InModuleScope $env:BHProjectName -Parameters @{ Path = $fixturePath } {
+            param($Path)
+            Read-PropertySet -FilePath $Path
+        }
         $script:context = @{
             Percentage  = 30
             Environment = 'Staging'

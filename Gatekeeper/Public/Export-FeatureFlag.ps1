@@ -1,22 +1,23 @@
-function Save-FeatureFlag {
+function Export-FeatureFlag {
     <#
     .SYNOPSIS
-    Save a FeatureFlag to a file.
+    Save a FeatureFlag to a JSON file.
 
     .DESCRIPTION
-    Save a FeatureFlag to a specified file path in JSON format. This cmdlet
-    allows you to persist the FeatureFlag for later use or sharing.
+    Persists a FeatureFlag to disk at the specified path, or at the path already
+    stored on the FeatureFlag object.
 
     .PARAMETER FeatureFlag
-    The FeatureFlag to save.
+    The FeatureFlag to export.
 
     .PARAMETER FilePath
-    The file path to save the FeatureFlag to.
+    The file path to write to. Overrides the FeatureFlag's existing FilePath.
 
     .EXAMPLE
-    Save-FeatureFlag -FeatureFlag $myFeatureFlag -FilePath "C:\path\to\file.json"
+    Export-FeatureFlag -FeatureFlag $myFeatureFlag -FilePath "C:\flags\MyFeature.json"
 
-    Save the FeatureFlag to a JSON file at the specified path.
+    .EXAMPLE
+    $myFeatureFlag | Export-FeatureFlag
     #>
     [CmdletBinding()]
     param (
@@ -30,7 +31,7 @@ function Save-FeatureFlag {
 
     process {
         if ($PSBoundParameters.ContainsKey('FilePath')) {
-            Write-Verbose "Saving FeatureFlag to file: $FilePath"
+            Write-Verbose "Exporting FeatureFlag to file: $FilePath"
             $FeatureFlag.FilePath = $FilePath
         } else {
             Write-Verbose "No FilePath specified, using FeatureFlag's existing FilePath."

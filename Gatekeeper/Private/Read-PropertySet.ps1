@@ -1,23 +1,7 @@
 function Read-PropertySet {
     <#
     .SYNOPSIS
-    Read the properties from disk.
-
-    .DESCRIPTION
-    Reads the properties json file from disk and convert it to a property set.
-
-    .PARAMETER Name
-    The name of the property set to read from the default property set folder
-    path.
-
-    .PARAMETER FilePath
-    The file path to the json.
-
-    .EXAMPLE
-    Read-PropertySet -FilePath 'C:\foo\properties.json'
-
-    This would return a PropertySet object that contains all of the properties
-    to evaluate.
+    Read a PropertySet from disk. Private I/O primitive — callers should use Get-PropertySet.
     #>
     [CmdletBinding()]
     [OutputType([System.Collections.Generic.List[PropertySet]])]
@@ -46,7 +30,6 @@ function Read-PropertySet {
             )
         }
     }
-
     end {
         return $propertySets
     }

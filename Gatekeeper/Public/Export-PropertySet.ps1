@@ -1,22 +1,23 @@
-function Save-PropertySet {
+function Export-PropertySet {
     <#
     .SYNOPSIS
-    Save a PropertySet to a file.
+    Save a PropertySet to a JSON file.
 
     .DESCRIPTION
-    Save a PropertySet to a specified file path in JSON format. This cmdlet
-    allows you to persist the PropertySet for later use or sharing.
+    Persists a PropertySet to disk at the specified path, or at the path already
+    stored on the PropertySet object.
 
     .PARAMETER PropertySet
-    The PropertySet to save.
+    The PropertySet to export.
 
     .PARAMETER FilePath
-    The file path to save the PropertySet to.
+    The file path to write to. Overrides the PropertySet's existing FilePath.
 
     .EXAMPLE
-    Save-PropertySet -PropertySet $myPropertySet -FilePath "C:\path\to\file.json"
+    Export-PropertySet -PropertySet $myPropertySet -FilePath "C:\props\MySet.json"
 
-    Save the PropertySet to a JSON file at the specified path.
+    .EXAMPLE
+    $myPropertySet | Export-PropertySet
     #>
     [CmdletBinding()]
     param (
@@ -30,7 +31,7 @@ function Save-PropertySet {
 
     process {
         if ($PSBoundParameters.ContainsKey('FilePath')) {
-            Write-Verbose "Saving PropertySet to file: $FilePath"
+            Write-Verbose "Exporting PropertySet to file: $FilePath"
             $PropertySet.FilePath = $FilePath
         } else {
             Write-Verbose "No FilePath specified, using PropertySet's existing FilePath."

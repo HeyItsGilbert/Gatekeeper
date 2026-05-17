@@ -42,32 +42,30 @@ Describe 'File Creations' {
         # Override the default file path for testing
         $global:GatekeeperConfiguration = @{
             FilePaths = @{
-                #Schemas          = Join-Path (Get-PSDrive TestDrive).Root 'Schemas'
                 FeatureFlags = Join-Path (Get-PSDrive TestDrive).Root 'FeatureFlags'
                 PropertySet  = Join-Path (Get-PSDrive TestDrive).Root 'PropertySet'
             }
         }
     }
-    # I'm doing a no-no IMO, but this is probably fine.
+
     It 'can create a condition' {
         $condition = New-Condition -Property 'UserRole' -Operator 'Equals' -Value 'Admin'
-        $condition | Should -BeOfType ConditionGroup
+        $condition | Should -BeOfType Condition
     }
 
     It 'can create a rule' {
         $condition = New-Condition -Property 'UserRole' -Operator 'Equals' -Value 'Admin'
-        $rule = New-Rule -Name 'AdminAccessRule' -Description 'Rule for admin access' -Effect Allow -Conditions $condition
+        $rule = New-Rule -Name 'AdminAccessRule' -Description 'Rule for admin access' -Effect Allow -Condition $condition
         $rule | Should -BeOfType Rule
     }
 
     Context 'Feature Flag Creation' {
         BeforeAll {
-            # Mock the Get-FeatureFlagFolder to return a test path
             Mock Get-FeatureFlagFolder -ModuleName $env:BHProjectName {
                 return (Get-PSDrive TestDrive).Root
             }
             $condition = New-Condition -Property 'UserRole' -Operator 'Equals' -Value 'Admin'
-            $rule = New-Rule -Name 'AdminAccessRule' -Description 'Rule for admin access' -Effect Allow -Conditions $condition
+            $rule = New-Rule -Name 'AdminAccessRule' -Description 'Rule for admin access' -Effect Allow -Condition $condition
             $script:featureFlag = New-FeatureFlag -Name 'AdminFeature' -Description 'Feature for admin users' -DefaultEffect Allow -Rules $rule
         }
         It 'can create a feature flag' {
@@ -75,15 +73,15 @@ Describe 'File Creations' {
             $script:featureFlag.Name | Should -Be 'AdminFeature'
         }
 
-        It 'can save the feature flag to a file' {
-            $script:featureFlag | Save-FeatureFlag
+        It 'can export the feature flag to a file' {
+            $script:featureFlag | Export-FeatureFlag
             $filePath = $script:featureFlag.FilePath
             Test-Path $filePath | Should -BeTrue
         }
 
-        It 'round-trips: saved feature flag can be read back with correct values' {
+        It 'round-trips: exported feature flag can be read back with correct values' {
             $filePath = $script:featureFlag.FilePath
-            $loaded = Read-FeatureFlag -FilePath $filePath
+            $loaded = [FeatureFlag]::FromFile($filePath)
             $loaded | Should -BeOfType FeatureFlag
             $loaded.Name | Should -Be $script:featureFlag.Name
             $loaded.DefaultEffect | Should -Be $script:featureFlag.DefaultEffect
@@ -91,9 +89,9 @@ Describe 'File Creations' {
     }
 
     Context 'New-Property' {
-        It 'returns a PropertyDefinition object' {
+        It 'returns a Property object' {
             $result = New-Property -Name 'TestProp' -Type 'string'
-            $result | Should -BeOfType PropertyDefinition
+            $result | Should -BeOfType Property
         }
 
         It 'populates Name and Type fields' {
@@ -131,7 +129,7 @@ Describe 'File Creations' {
         }
     }
 
-    Context 'Save-PropertySet' {
+    Context 'Export-PropertySet' {
         BeforeAll {
             $p = New-Property -Name 'Region' -Type 'string'
             $script:savedSet = $p | New-PropertySet -Name 'SaveTest'
@@ -139,12 +137,15 @@ Describe 'File Creations' {
         }
 
         It 'creates the file at the expected path' {
-            Save-PropertySet -PropertySet $script:savedSet -FilePath $script:savedPath
+            Export-PropertySet -PropertySet $script:savedSet -FilePath $script:savedPath
             Test-Path $script:savedPath | Should -BeTrue
         }
 
-        It 'round-trips: saved PropertySet can be read back with correct properties' {
-            $loaded = Read-PropertySet -FilePath $script:savedPath
+        It 'round-trips: exported PropertySet can be read back with correct properties' {
+            $loaded = InModuleScope $env:BHProjectName -Parameters @{ Path = $script:savedPath } {
+                param($Path)
+                Read-PropertySet -FilePath $Path
+            }
             $loaded | Should -BeOfType PropertySet
             $loaded.Properties.ContainsKey('Region') | Should -BeTrue
             $loaded.Properties['Region'].Type | Should -Be 'string'
