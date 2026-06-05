@@ -12,7 +12,7 @@
         {
             "Name": "Audit staging",
             "Effect": "Audit",
-            "Conditions": {
+            "Condition": {
                 "Property": "Environment",
                 "Operator": "Equals",
                 "Value": "Staging"
@@ -21,7 +21,7 @@
         {
             "Name": "Warn Tier 0",
             "Effect": "Warn",
-            "Conditions": {
+            "Condition": {
                 "Property": "Tier",
                 "Operator": "Equals",
                 "Value": 0
@@ -30,7 +30,7 @@
         {
             "Name": "Allow Prod Tier 1",
             "Effect": "Allow",
-            "Conditions": {
+            "Condition": {
                 "AllOf": [
                     {
                         "AnyOf": [

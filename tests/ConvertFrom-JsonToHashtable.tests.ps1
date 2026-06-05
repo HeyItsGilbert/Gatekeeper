@@ -12,26 +12,34 @@ BeforeDiscovery {
 
 Describe 'ConvertFrom-JsonToHashtable' {
     It 'converts a JSON object to a hashtable with correct keys' {
-        $result = ConvertFrom-JsonToHashtable -InputObject '{"key":"value","count":42}'
+        $result = InModuleScope $env:BHProjectName {
+            ConvertFrom-JsonToHashtable -InputObject '{"key":"value","count":42}'
+        }
         $result | Should -BeOfType [hashtable]
         $result['key'] | Should -Be 'value'
         $result['count'] | Should -Be 42
     }
 
     It 'converts nested JSON objects to nested hashtables' {
-        $result = ConvertFrom-JsonToHashtable -InputObject '{"outer":{"inner":"data"}}'
+        $result = InModuleScope $env:BHProjectName {
+            ConvertFrom-JsonToHashtable -InputObject '{"outer":{"inner":"data"}}'
+        }
         $result['outer'] | Should -BeOfType [hashtable]
         $result['outer']['inner'] | Should -Be 'data'
     }
 
     It 'converts a JSON array to an array' {
-        $result = ConvertFrom-JsonToHashtable -InputObject '[1,2,3]'
+        $result = InModuleScope $env:BHProjectName {
+            ConvertFrom-JsonToHashtable -InputObject '[1,2,3]'
+        }
         $result | Should -HaveCount 3
         $result[0] | Should -Be 1
         $result[2] | Should -Be 3
     }
 
     It 'throws on invalid JSON' {
-        { ConvertFrom-JsonToHashtable -InputObject 'not valid json {{{' } | Should -Throw
+        { InModuleScope $env:BHProjectName {
+            ConvertFrom-JsonToHashtable -InputObject 'not valid json {{{'
+        } } | Should -Throw
     }
 }

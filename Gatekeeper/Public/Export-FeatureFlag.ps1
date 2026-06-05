@@ -16,8 +16,12 @@ function Export-FeatureFlag {
     .EXAMPLE
     Export-FeatureFlag -FeatureFlag $myFeatureFlag -FilePath "C:\flags\MyFeature.json"
 
+    Saves the feature flag to the specified path.
+
     .EXAMPLE
     $myFeatureFlag | Export-FeatureFlag
+
+    Saves the feature flag to the path stored on the object.
     #>
     [CmdletBinding()]
     param (

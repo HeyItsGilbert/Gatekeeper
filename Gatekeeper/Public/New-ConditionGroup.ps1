@@ -22,6 +22,8 @@ function New-ConditionGroup {
         (New-Condition -Property 'IsCompliant' -Operator 'Equals' -Value $true)
     )
 
+    Creates a condition that requires both Environment equals Production and IsCompliant equals true.
+
     .EXAMPLE
     $condition = New-ConditionGroup -AnyOf @(
         (New-Condition -Property 'Region' -Operator 'Equals' -Value 'US'),

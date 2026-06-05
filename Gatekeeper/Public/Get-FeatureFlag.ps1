@@ -14,8 +14,12 @@ function Get-FeatureFlag {
     .EXAMPLE
     $flag = Get-FeatureFlag -Name 'MyFeature'
 
+    Retrieves the feature flag named 'MyFeature' from the configured folder.
+
     .EXAMPLE
     $allFlags = Get-FeatureFlag
+
+    Returns all feature flags from the configured folder.
     #>
     [CmdletBinding()]
     [OutputType([FeatureFlag])]

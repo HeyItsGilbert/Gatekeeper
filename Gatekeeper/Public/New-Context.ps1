@@ -14,6 +14,8 @@ function New-Context {
     $context = New-Context -PropertySet $propertySet
     $context.Hostname = $env:COMPUTERNAME
     Test-FeatureFlag -FeatureFlag $flag -PropertySet $propertySet -Context $context
+
+    Creates a blank context from the property set, populates it, then evaluates the flag.
     #>
     [CmdletBinding()]
     [OutputType('System.Collections.Hashtable')]

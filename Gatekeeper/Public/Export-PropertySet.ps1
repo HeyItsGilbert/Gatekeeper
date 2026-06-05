@@ -16,8 +16,12 @@ function Export-PropertySet {
     .EXAMPLE
     Export-PropertySet -PropertySet $myPropertySet -FilePath "C:\props\MySet.json"
 
+    Saves the property set to the specified path.
+
     .EXAMPLE
     $myPropertySet | Export-PropertySet
+
+    Saves the property set to the path stored on the object.
     #>
     [CmdletBinding()]
     param (

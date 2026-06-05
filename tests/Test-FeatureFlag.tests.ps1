@@ -33,7 +33,7 @@ Describe 'Test-FeatureFlag' {
         It 'Allow rule that matches returns $true' {
             $flag = [FeatureFlag]::new(@{
                 Name = 'AllowFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
-                Rules = @(@{ Name = 'AllowRule'; Effect = 'Allow'; Conditions = $script:matchCond })
+                Rules = @(@{ Name = 'AllowRule'; Effect = 'Allow'; Condition = $script:matchCond })
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeTrue
@@ -44,7 +44,7 @@ Describe 'Test-FeatureFlag' {
         It 'Deny rule that matches returns $false' {
             $flag = [FeatureFlag]::new(@{
                 Name = 'DenyFlag'; DefaultEffect = 'Allow'; Version = '1.0.0'; Author = 'Test'
-                Rules = @(@{ Name = 'DenyRule'; Effect = 'Deny'; Conditions = $script:matchCond })
+                Rules = @(@{ Name = 'DenyRule'; Effect = 'Deny'; Condition = $script:matchCond })
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeFalse
@@ -56,8 +56,8 @@ Describe 'Test-FeatureFlag' {
             $flag = [FeatureFlag]::new(@{
                 Name = 'AuditFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
                 Rules = @(
-                    @{ Name = 'AuditRule'; Effect = 'Audit'; Conditions = $script:matchCond }
-                    @{ Name = 'AllowRule'; Effect = 'Allow'; Conditions = $script:matchCond }
+                    @{ Name = 'AuditRule'; Effect = 'Audit'; Condition = $script:matchCond }
+                    @{ Name = 'AllowRule'; Effect = 'Allow'; Condition = $script:matchCond }
                 )
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
@@ -72,8 +72,8 @@ Describe 'Test-FeatureFlag' {
             $flag = [FeatureFlag]::new(@{
                 Name = 'WarnFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
                 Rules = @(
-                    @{ Name = 'WarnRule'; Effect = 'Warn'; Conditions = $script:matchCond }
-                    @{ Name = 'AllowRule'; Effect = 'Allow'; Conditions = $script:matchCond }
+                    @{ Name = 'WarnRule'; Effect = 'Warn'; Condition = $script:matchCond }
+                    @{ Name = 'AllowRule'; Effect = 'Allow'; Condition = $script:matchCond }
                 )
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
@@ -90,8 +90,8 @@ Describe 'Test-FeatureFlag' {
             $flag = [FeatureFlag]::new(@{
                 Name = 'DenyFirstFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
                 Rules = @(
-                    @{ Name = 'DenyFirst';   Effect = 'Deny';  Conditions = $script:matchCond }
-                    @{ Name = 'AllowSecond'; Effect = 'Allow'; Conditions = $script:matchCond }
+                    @{ Name = 'DenyFirst';   Effect = 'Deny';  Condition = $script:matchCond }
+                    @{ Name = 'AllowSecond'; Effect = 'Allow'; Condition = $script:matchCond }
                 )
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
@@ -106,8 +106,8 @@ Describe 'Test-FeatureFlag' {
             $flag = [FeatureFlag]::new(@{
                 Name = 'AllowFirstFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
                 Rules = @(
-                    @{ Name = 'AllowFirst'; Effect = 'Allow'; Conditions = $script:matchCond }
-                    @{ Name = 'DenySecond'; Effect = 'Deny';  Conditions = $script:matchCond }
+                    @{ Name = 'AllowFirst'; Effect = 'Allow'; Condition = $script:matchCond }
+                    @{ Name = 'DenySecond'; Effect = 'Deny';  Condition = $script:matchCond }
                 )
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
@@ -123,7 +123,7 @@ Describe 'Test-FeatureFlag' {
         It 'DefaultEffect Allow returns $true when no rule matches' {
             $flag = [FeatureFlag]::new(@{
                 Name = 'AllowDefaultFlag'; DefaultEffect = 'Allow'; Version = '1.0.0'; Author = 'Test'
-                Rules = @(@{ Name = 'DenyNoMatch'; Effect = 'Deny'; Conditions = $script:noMatchCond })
+                Rules = @(@{ Name = 'DenyNoMatch'; Effect = 'Deny'; Condition = $script:noMatchCond })
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeTrue
@@ -132,7 +132,7 @@ Describe 'Test-FeatureFlag' {
         It 'DefaultEffect Deny returns $false when no rule matches' {
             $flag = [FeatureFlag]::new(@{
                 Name = 'DenyDefaultFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
-                Rules = @(@{ Name = 'AllowNoMatch'; Effect = 'Allow'; Conditions = $script:noMatchCond })
+                Rules = @(@{ Name = 'AllowNoMatch'; Effect = 'Allow'; Condition = $script:noMatchCond })
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeFalse
@@ -161,7 +161,7 @@ Describe 'Test-FeatureFlag' {
         It 'Single flag via pipeline evaluates correctly' {
             $flag = [FeatureFlag]::new(@{
                 Name = 'PipelineFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
-                Rules = @(@{ Name = 'AllowRule'; Effect = 'Allow'; Conditions = $script:matchCond })
+                Rules = @(@{ Name = 'AllowRule'; Effect = 'Allow'; Condition = $script:matchCond })
             })
             $result = $flag | Test-FeatureFlag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeTrue

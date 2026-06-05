@@ -25,6 +25,8 @@ function New-Rule {
     $condition = New-Condition -Property 'Environment' -Operator 'Equals' -Value 'Production'
     $rule = New-Rule -Name 'ProductionRule' -Effect 'Allow' -Condition $condition
 
+    Creates a rule that allows access when the Environment equals Production.
+
     .EXAMPLE
     $condition = New-ConditionGroup -AllOf @(
         (New-Condition -Property 'Environment' -Operator 'Equals' -Value 'Production'),
