@@ -4,27 +4,35 @@ function New-Rule {
     Create a new rule for a feature flag.
 
     .DESCRIPTION
-    Create a new rule that can be used to define conditions under which a feature flag is applied.
+    Create a new rule that pairs a Condition with an Effect. When the Condition
+    matches a Context, the Effect is applied. The Condition must be fully
+    constructed before being passed — use New-Condition or New-ConditionGroup to
+    build it.
 
     .PARAMETER Name
     The name of the rule.
 
     .PARAMETER Description
     A brief description of the rule.
-    This is optional and can be used to provide additional context about the rule.
 
     .PARAMETER Effect
-    The effect of the rule (e.g., allow, deny).
+    The effect to apply when the Condition matches (Allow, Deny, Audit, Warn).
 
-    .PARAMETER Conditions
-    The conditions under which the rule applies.
+    .PARAMETER Condition
+    The Condition to evaluate. Must be a single pre-built Condition object.
 
     .EXAMPLE
-    $condition1 = New-Condition -Property 'Environment' -Operator 'Equals' -Value 'Production'
-    $condition2 = New-Condition -Property 'Region' -Operator 'In' -Value @('US', 'EU')
-    $rule = New-Rule -Name 'ProductionRule' -Effect 'Allow' -Conditions $condition1, $condition2
+    $condition = New-Condition -Property 'Environment' -Operator 'Equals' -Value 'Production'
+    $rule = New-Rule -Name 'ProductionRule' -Effect 'Allow' -Condition $condition
 
-    This would create a new rule named 'ProductionRule' that allows the feature flag in production environments and specific regions.
+    Creates a rule that allows access when the Environment equals Production.
+
+    .EXAMPLE
+    $condition = New-ConditionGroup -AllOf @(
+        (New-Condition -Property 'Environment' -Operator 'Equals' -Value 'Production'),
+        (New-Condition -Property 'Region' -Operator 'In' -Value @('US', 'EU'))
+    )
+    $rule = New-Rule -Name 'ProductionUS-EU' -Effect 'Allow' -Condition $condition
     #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([Rule])]
@@ -38,32 +46,17 @@ function New-Rule {
         [ValidateNotNullOrEmpty()]
         [Effect]
         $Effect,
-        [Parameter(Mandatory, ValueFromPipeline)]
-        [ConditionGroup]
-        $Conditions
+        [Parameter(Mandatory)]
+        [Condition]
+        [ConditionTransformAttribute()]
+        $Condition
     )
-    begin {
+
+    if ($PSCmdlet.ShouldProcess($Name, "Create new rule with effect: $Effect")) {
         $rule = [Rule]::new($Name)
         $rule.Description = $Description
         $rule.Effect = $Effect
-        $conditionList = @()
-    }
-    process {
-        foreach ($condition in $Conditions) {
-            if ($PSCmdlet.ShouldProcess($condition.Property, "Add condition: $($condition.Property) with operator: $($condition.Operator)")) {
-                $conditionList += $condition
-            }
-        }
-    }
-    end {
-        # Join all the conditions into a single ConditionGroup
-        if ($conditionList.Count -eq 0) {
-            Write-Warning "No conditions were provided for the rule '$($rule.Name)'. The rule will apply the default effect to all cases!"
-        } else {
-            $rule.Conditions = [ConditionGroup]::new('AllOf', $conditionList)
-        }
-        if ($PSCmdlet.ShouldProcess($rule.Name, "Create new rule with effect: $($rule.Effect)")) {
-            return $rule
-        }
+        $rule.Condition = $Condition
+        return $rule
     }
 }

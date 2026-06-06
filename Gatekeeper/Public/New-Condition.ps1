@@ -22,7 +22,7 @@ function New-Condition {
     General notes
     #>
     [CmdletBinding(SupportsShouldProcess)]
-    [OutputType([ConditionGroup])]
+    [OutputType([Condition])]
     [Alias('New-ConditionDefinition')]
     param (
         [Parameter(Mandatory)]
@@ -48,6 +48,6 @@ function New-Condition {
     if ($PSCmdlet.ShouldProcess("Condition", "Create new condition for property: $Property with operator: $Operator")) {
         Write-Verbose "Creating condition for property '$Property' with operator '$Operator' and value '$Value'."
 
-        return [ConditionGroup]::new(@{Property = $Property; Operator = $Operator; Value = $Value })
+        return [Condition]::new(@{Property = $Property; Operator = $Operator; Value = $Value })
     }
 }

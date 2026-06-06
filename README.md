@@ -31,17 +31,19 @@ $props = New-PropertySet -Name 'MyProps' -Properties @(
 )
 
 # Create a rule: allow only compliant staging devices
-$conditions = New-ConditionGroup -Operator AllOf -Conditions @(
+$condition = New-ConditionGroup -AllOf @(
     (New-Condition -Property 'Environment' -Operator Equals -Value 'Staging')
     (New-Condition -Property 'IsCompliant' -Operator Equals -Value 'true')
 )
-$rule = New-Rule -Name 'Compliant Staging' -Effect Allow -Conditions $conditions
+$rule = New-Rule -Name 'Compliant Staging' -Effect Allow -Condition $condition
 
 # Create the flag (deny by default)
 $flag = New-FeatureFlag -Name 'NewDashboard' -DefaultEffect Deny -Rules $rule
 
 # Evaluate against a device's context
-$context = @{ Environment = 'Staging'; IsCompliant = $true }
+$context = New-Context -PropertySet $props
+$context.Environment = 'Staging'
+$context.IsCompliant = $true
 Test-FeatureFlag -FeatureFlag $flag -PropertySet $props -Context $context
 # Returns: True
 ```
@@ -73,6 +75,39 @@ scripts) writable only by trusted users. See
 | [Configuration](https://heyitsgilbert.github.io/Gatekeeper/guides/configuration/) | Multi-level configuration system |
 | [Logging](https://heyitsgilbert.github.io/Gatekeeper/guides/logging/) | Audit and warning script setup |
 | [Command Reference](https://heyitsgilbert.github.io/Gatekeeper/en-US/) | All exported cmdlets |
+
+## Migrating from 0.4.0 to 1.0.0
+
+1.0.0 contains breaking renames. Use the prompt below with an AI assistant
+to update your codebase automatically, or apply the changes manually.
+
+**Migration prompt:**
+
+```
+I'm upgrading the Gatekeeper PowerShell module from 0.4.x to 1.0.0.
+Apply the following breaking changes to my code:
+
+FUNCTION RENAMES (find and replace):
+- Save-FeatureFlag   → Export-FeatureFlag
+- Save-PropertySet   → Export-PropertySet
+- Get-DefaultContext → New-Context
+- Read-FeatureFlag   → use Get-FeatureFlag instead (handles caching)
+- Read-PropertySet   → remove direct calls (now internal)
+
+PARAMETER RENAMES:
+- New-Rule -Conditions  → New-Rule -Condition  (singular)
+- New-ConditionGroup -Operator AllOf -Conditions @(...)
+    → New-ConditionGroup -AllOf @(...)
+- New-ConditionGroup -Operator AnyOf -Conditions @(...)
+    → New-ConditionGroup -AnyOf @(...)
+- New-ConditionGroup -Operator Not -Conditions @(...)
+    → New-ConditionGroup -Not @(...)
+
+JSON SCHEMA CHANGE:
+- Rules[*].Conditions → Rules[*].Condition  (singular) in all .json flag files
+
+Please scan my codebase for uses of the old names and update them.
+```
 
 ## Contributing
 

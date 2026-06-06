@@ -5,17 +5,20 @@ BeforeDiscovery {
     $outputModVerDir = Join-Path -Path $outputModDir -ChildPath $manifest.ModuleVersion
     $outputModVerManifest = Join-Path -Path $outputModVerDir -ChildPath "$($env:BHProjectName).psd1"
 
-    # Get module commands
-    # Remove all versions of the module from the session. Pester can't handle multiple versions.
     Get-Module $env:BHProjectName | Remove-Module -Force -ErrorAction Ignore
     Import-Module -Name $outputModVerManifest -Verbose:$false -ErrorAction Stop
 }
 Describe 'Read-FeatureFlag' {
     BeforeAll {
-        $script:actual = Read-FeatureFlag -FilePath "$PSScriptRoot\fixtures\FeatureFlag.json"
+        $fixturePath = "$PSScriptRoot\fixtures\FeatureFlag.json"
+        $script:actual = InModuleScope $env:BHProjectName -Parameters @{ Path = $fixturePath } {
+            param($Path)
+            Read-FeatureFlag -FilePath $Path
+        }
     }
     It 'Throws file path error' {
-        { Read-FeatureFlag -FilePath 'fakePath.json' } | Should -Throw -ExpectedMessage 'File not found: fakePath.json'
+        { InModuleScope $env:BHProjectName { Read-FeatureFlag -FilePath 'fakePath.json' } } |
+            Should -Throw -ExpectedMessage 'File not found: fakePath.json'
     }
     It 'Returns a FeatureFlag object' {
         $script:actual | Should -BeOfType 'FeatureFlag'

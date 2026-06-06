@@ -12,14 +12,21 @@ BeforeDiscovery {
 }
 Describe 'Test-Condition' {
     BeforeAll {
-        $script:propertySet = Read-PropertySet -File "$PSScriptRoot\fixtures\Properties.json"
+        $fixturePath = "$PSScriptRoot\fixtures\Properties.json"
+        $script:propertySet = InModuleScope $env:BHProjectName -Parameters @{ Path = $fixturePath } {
+            param($Path)
+            Read-PropertySet -FilePath $Path
+        }
         $script:context = @{
             Percentage = 30
             Environment = 'Production'
             IsCompliant = $true
         }
         # load feature flag
-        $json = Get-Content -Path "$PSScriptRoot\fixtures\Updawg.json" -Raw | ConvertFrom-JsonToHashtable
+        $rawJson = Get-Content -Path "$PSScriptRoot\fixtures\Updawg.json" -Raw
+        $json = InModuleScope $env:BHProjectName -Parameters @{ Raw = $rawJson } {
+            param($Raw) ConvertFrom-JsonToHashtable -InputObject $Raw
+        }
         $script:rules = $json.Rules
         $script:testConditionSplat = @{
             Context = $script:context
@@ -288,25 +295,25 @@ Describe 'Test-Condition' {
         }
         Test-Condition @script:testConditionSplat -Condition $condition | Should -BeFalse
     }
-    It 'Accepts a file path string via ConditionGroupTransformAttribute' {
+    It 'Accepts a file path string via ConditionTransformAttribute' {
         $conditionPath = Join-Path $TestDrive 'Condition.json'
         @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' } |
             ConvertTo-Json | Set-Content -Path $conditionPath
         Test-Condition @script:testConditionSplat -Condition $conditionPath | Should -BeTrue
     }
-    It 'Rejects a wildcard path via ConditionGroupTransformAttribute' {
+    It 'Rejects a wildcard path via ConditionTransformAttribute' {
         {
             Test-Condition @script:testConditionSplat -Condition (Join-Path $TestDrive '*.json')
         } | Should -Throw -ExpectedMessage '*wildcard*'
     }
-    It 'Rejects a non-JSON file path via ConditionGroupTransformAttribute' {
+    It 'Rejects a non-JSON file path via ConditionTransformAttribute' {
         $notJson = Join-Path $TestDrive 'condition.txt'
         'not json' | Set-Content -LiteralPath $notJson
         {
             Test-Condition @script:testConditionSplat -Condition $notJson
         } | Should -Throw -ExpectedMessage '*must point to a .json file*'
     }
-    It 'Rejects a missing file path via ConditionGroupTransformAttribute' {
+    It 'Rejects a missing file path via ConditionTransformAttribute' {
         {
             Test-Condition @script:testConditionSplat -Condition (Join-Path $TestDrive 'missing.json')
         } | Should -Throw -ExpectedMessage '*File not found:*'

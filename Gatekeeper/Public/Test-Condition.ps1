@@ -17,13 +17,13 @@ function Test-Condition {
     A condition to test which are part of rules.
 
     .EXAMPLE
-    $propertySet = Read-PropertySet -Path .\props.json
+    $propertySet = Get-PropertySet -Name props
     $rule = New-Rule -Name 'MyRule' -Conditions @{
         AllOf = @(
             @{ Property = 'Hostname'; Operator = 'Equals'; Value = $env:COMPUTERNAME }
         )
     }
-    $context = Get-DefaultContext -PropertySet $propertySet
+    $context = New-Context -PropertySet $propertySet
     $context.Hostname = $env:COMPUTERNAME
     Test-Condition -Context $context -PropertySet $propertySet -Condition $rule
 
@@ -44,8 +44,8 @@ function Test-Condition {
         [PropertySetTransformAttribute()]
         $PropertySet,
         [Parameter(Mandatory)]
-        [ConditionGroup]
-        [ConditionGroupTransformAttribute()]
+        [Condition]
+        [ConditionTransformAttribute()]
         $Condition
     )
 

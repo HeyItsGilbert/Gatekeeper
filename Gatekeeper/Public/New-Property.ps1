@@ -26,7 +26,7 @@ function New-Property {
     This would create a new property object and create a new set with that property.
     #>
     [CmdletBinding(SupportsShouldProcess)]
-    [OutputType([PropertyDefinition])]
+    [OutputType([Property])]
     param (
         [Parameter(Mandatory)]
         [String]
@@ -47,6 +47,6 @@ function New-Property {
     if ($Validation) { $data['Validation'] += $Validation }
 
     if ($PSCmdlet.ShouldProcess("Name", "Create new Property Definition")) {
-        [PropertyDefinition]::new($Name, $Data)
+        [Property]::new($Name, $Data)
     }
 }

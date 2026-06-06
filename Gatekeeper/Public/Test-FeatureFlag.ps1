@@ -17,9 +17,9 @@
     The context to use to test against.
 
     .EXAMPLE
-    $propertySet = Read-PropertySet -Path .\props.json
+    $propertySet = Get-PropertySet -Name props
     $flag = New-FeatureFlag -Name 'MyFeature'
-    $context = Get-DefaultContext -PropertySet $propertySet
+    $context = New-Context -PropertySet $propertySet
     $context.Hostname = $env:COMPUTERNAME
     Test-FeatureFlag -FeatureFlag $flag -PropertySet $propertySet -Context $context
 
@@ -57,7 +57,7 @@
             $testConditionSplat = @{
                 Context = $Context
                 PropertySet = $PropertySet
-                Condition = $rule.Conditions
+                Condition = $rule.Condition
             }
             if (Test-Condition @testConditionSplat) {
                 Write-Verbose "✅ Rule [$($rule.Name)] matched. Effect: $($rule.Effect)"

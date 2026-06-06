@@ -24,13 +24,13 @@ class PropertyValidation {
     }
 }
 
-class PropertyDefinition {
+class Property {
     [string]$Name
     [string]$Type
     [object[]]$Enum
     [PropertyValidation]$Validation
 
-    PropertyDefinition([string]$name, [hashtable]$data) {
+    Property([string]$name, [hashtable]$data) {
         $this.Name = $name
         $this.Type = $data.Type
 
@@ -94,15 +94,12 @@ class PropertyDefinition {
                 }
             }
         }
-        #
         return $true
     }
 }
 
 class PropertySet {
-    # TODO: Should this class have more properties?
     [string]$Name
-    # FilePath is used to save the PropertySet to a file.
     [string]$FilePath
     [hashtable]$Properties
 
@@ -115,7 +112,7 @@ class PropertySet {
         foreach ($key in $rawData.Keys) {
             if ($key -eq '$schema') { continue }
             Write-Verbose "Saving key: $key"
-            $this.Properties[$key] = [PropertyDefinition]::new($key, $rawData[$key])
+            $this.Properties[$key] = [Property]::new($key, $rawData[$key])
         }
     }
 
@@ -123,8 +120,6 @@ class PropertySet {
         if (-not (Test-Path -Path $FilePath)) {
             throw "File path given did not exist: $FilePath"
         }
-        # Only validate JSON schema in PS 7+ (Test-Json -SchemaFile not available in PS 5.1)
-        # PSVersionTable is not available in class static methods. Detect if Test-Json command is available.
         if (Get-Command -Name Test-Json -ErrorAction SilentlyContinue) {
             $testJsonSplat = @{
                 Path = $FilePath
@@ -150,12 +145,12 @@ class PropertySet {
         return [PropertySet]::new($data)
     }
 
-    [PropertySet]AddProperty([PropertyDefinition]$Property) {
+    [PropertySet]AddProperty([Property]$Property) {
         $this.Properties.Add($Property.Name, $Property)
         return $this
     }
 
-    [PropertyDefinition]GetProperty([string]$name) {
+    [Property]GetProperty([string]$name) {
         return $this.Properties[$name]
     }
 
@@ -174,15 +169,12 @@ class PropertySet {
         if (-not (Test-Path -Path (Split-Path -Path $this.FilePath -Parent))) {
             New-Item -ItemType Directory -Path (Split-Path -Path $this.FilePath -Parent) | Out-Null
         }
-        # Convert the properties to a hashtable and then to JSON
-        # Use -Depth 10 to ensure nested objects are fully serialized
         $hashtable = @{
             '$schema' = 'https://raw.githubusercontent.com/PowerShell/Gatekeeper/main/Schemas/Properties.json'
         }
         foreach ($property in $this.Properties.Keys) {
             $hashtable[$property] = $this.Properties[$property].ToHashtable()
         }
-        # Convert to JSON with a depth of 10 to handle nested objects
         $json = $hashtable | ConvertTo-Json -Depth 10
         $tmpPath = "$($this.FilePath).tmp"
         Set-Content -Path $tmpPath -Value $json
@@ -190,17 +182,13 @@ class PropertySet {
     }
 }
 
-# Argument Transformer
 class PropertySetTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
 
-    ## Override the abstract method "Transform". This is where the user
-    ## provided value will be inspected and transformed if possible.
     [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
         if ($null -eq $inputData) {
             return $(Read-PropertySet)
         }
         $item = switch ($inputData.GetType().FullName) {
-            # Return the existing item if it's already a PropertySet
             'PropertySet' { $inputData }
             'System.Collections.Hashtable' {
                 [PropertySet]::new($inputData)

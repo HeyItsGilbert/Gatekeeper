@@ -12,7 +12,7 @@
     RootModule = 'Gatekeeper.psm1'
 
     # Version number of this module.
-    ModuleVersion = '0.4.0'
+    ModuleVersion = '1.0.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -62,7 +62,7 @@
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    ScriptsToProcess = @('Enums\Effect.ps1', 'Public\ConvertFrom-JsonToHashtable.ps1', 'Classes\Property.ps1', 'Classes\FeatureFlag.ps1')
+    ScriptsToProcess = @('Enums\Effect.ps1', 'Private\ConvertTo-Hashtable.ps1', 'Private\ConvertFrom-JsonToHashtable.ps1', 'Classes\Property.ps1', 'Classes\FeatureFlag.ps1')
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()
@@ -75,23 +75,21 @@
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport = @(
-        'ConvertFrom-JsonToHashtable',
+        'Export-FeatureFlag',
         'Export-GatekeeperConfig',
-        'Get-DefaultContext',
+        'Export-PropertySet',
+        'Get-FeatureFlag',
         'Get-FeatureFlagFolder',
         'Get-PropertySet',
         'Get-PropertySetFolder',
         'Import-GatekeeperConfig',
         'New-Condition',
         'New-ConditionGroup',
+        'New-Context',
         'New-FeatureFlag',
         'New-Property',
         'New-PropertySet',
         'New-Rule',
-        'Read-FeatureFlag',
-        'Read-PropertySet',
-        'Save-FeatureFlag',
-        'Save-PropertySet',
         'Test-Condition',
         'Test-FeatureFlag'
     )

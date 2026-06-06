@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.0] 2026-06-05
+
+### Added
+
+- `Get-FeatureFlag` — retrieves feature flags from the configured folder
+  with module-scope caching; replaces direct `Read-FeatureFlag` calls.
+- `New-Context` — creates an empty context hashtable from a PropertySet;
+  replaces `Get-DefaultContext`.
+- `Export-FeatureFlag` — persists a FeatureFlag to disk; replaces
+  `Save-FeatureFlag`.
+- `Export-PropertySet` — persists a PropertySet to disk; replaces
+  `Save-PropertySet`.
+- Comprehensive comment-based help with examples for all public functions.
+- ADR `adr/0001-rule-accepts-single-condition.md` documenting the
+  single-Condition-per-Rule design decision.
+
+### Changed
+
+- `Rule.Conditions` JSON key renamed to `Rule.Condition` (singular) in
+  feature flag definition files. Update any existing `.json` flag files
+  that use `"Conditions": { ... }` to `"Condition": { ... }`.
+- Type accelerator registration is now idempotent: existing accelerators
+  are replaced on re-import instead of throwing.
+- `adr/` folder moved to the project root (was `docs/adr/`).
+
+### Removed
+
+- `Save-FeatureFlag` — use `Export-FeatureFlag` instead.
+- `Save-PropertySet` — use `Export-PropertySet` instead.
+- `Get-DefaultContext` — use `New-Context` instead.
+- `Read-FeatureFlag` public export — now private; use `Get-FeatureFlag`.
+- `Read-PropertySet` public export — now private.
+- `ConvertFrom-JsonToHashtable` public export — now private.
+
+### Fixed
+
+- CI: `create_release` and `publish` workflow inputs are now passed
+  through to the reusable `PublishModule` workflow so phases can be
+  skipped on re-run.
+
 ## [0.4.0] 2026-05-14
 
 ### Changed

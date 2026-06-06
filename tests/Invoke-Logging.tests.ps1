@@ -18,7 +18,7 @@ Describe 'Invoke-Logging' {
         $script:testRule = [Rule]::new(@{
             Name        = 'TestRule'
             Effect      = 'Allow'
-            Conditions  = @{ Property = 'IsCompliant'; Operator = 'Equals'; Value = $true }
+            Condition   = @{ Property = 'IsCompliant'; Operator = 'Equals'; Value = $true }
         })
     }
 
