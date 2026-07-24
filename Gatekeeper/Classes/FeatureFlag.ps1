@@ -236,21 +236,18 @@ class GatekeeperPath {
 class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
 
     [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
-        $item = switch ($inputData.GetType().FullName) {
-            'FeatureFlag' { $inputData }
-            'System.Collections.Hashtable' {
-                [FeatureFlag]::new($inputData)
-            }
-            'System.String' {
-                $resolvedPath = [GatekeeperPath]::ResolveJsonFilePath($inputData)
-                $json = Get-Content -Raw -LiteralPath $resolvedPath
-                [FeatureFlag]::FromJson($json)
-            }
-            default {
-                throw "Cannot convert type to FeatureFlag: $($inputData.GetType().FullName)"
-            }
+        if ($inputData -is [FeatureFlag]) {
+            return $inputData
         }
-        return $item
+        if ($inputData -is [System.Collections.IDictionary]) {
+            return [FeatureFlag]::new([hashtable]$inputData)
+        }
+        if ($inputData -is [string]) {
+            $resolvedPath = [GatekeeperPath]::ResolveJsonFilePath($inputData)
+            $json = Get-Content -Raw -LiteralPath $resolvedPath
+            return [FeatureFlag]::FromJson($json)
+        }
+        throw "Cannot convert type to FeatureFlag: $($inputData.GetType().FullName)"
     }
 
     [string] ToString() {
@@ -261,21 +258,18 @@ class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTrans
 class ConditionTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
 
     [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
-        $item = switch ($inputData.GetType().FullName) {
-            'Condition' { $inputData }
-            'System.Collections.Hashtable' {
-                [Condition]::new($inputData)
-            }
-            'System.String' {
-                $resolvedPath = [GatekeeperPath]::ResolveJsonFilePath($inputData)
-                $json = Get-Content -Raw -LiteralPath $resolvedPath
-                [Condition]::FromJson($json)
-            }
-            default {
-                throw "Cannot convert type to Condition: $($inputData.GetType().FullName)"
-            }
+        if ($inputData -is [Condition]) {
+            return $inputData
         }
-        return $item
+        if ($inputData -is [System.Collections.IDictionary]) {
+            return [Condition]::new([hashtable]$inputData)
+        }
+        if ($inputData -is [string]) {
+            $resolvedPath = [GatekeeperPath]::ResolveJsonFilePath($inputData)
+            $json = Get-Content -Raw -LiteralPath $resolvedPath
+            return [Condition]::FromJson($json)
+        }
+        throw "Cannot convert type to Condition: $($inputData.GetType().FullName)"
     }
 
     [string] ToString() {

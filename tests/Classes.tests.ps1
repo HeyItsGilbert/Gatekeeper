@@ -203,9 +203,77 @@ Describe 'ConditionTransformAttribute' {
             Should -BeTrue
     }
 
+    It 'Converts an ordered dictionary (ConvertFrom-Json -AsHashtable) to Condition via Test-Condition' {
+        $ordered = '{ "Property": "Environment", "Operator": "Equals", "Value": "Production" }' |
+            ConvertFrom-Json -AsHashtable
+        $ordered.GetType().FullName | Should -Not -Be 'System.Collections.Hashtable'
+        Test-Condition -Condition $ordered -PropertySet $script:propertySet -Context $script:context |
+            Should -BeTrue
+    }
+
     It 'Throws a useful message for unsupported input type' {
         {
             Test-Condition -Condition 42 -PropertySet $script:propertySet -Context $script:context
+        } | Should -Throw -ExpectedMessage '*Cannot convert type*'
+    }
+}
+
+Describe 'PropertySetTransformAttribute' {
+    BeforeAll {
+        $script:ctx  = @{ Environment = 'Production' }
+        $script:cond = @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
+    }
+
+    It 'Converts an ordered dictionary PropertySet (ConvertFrom-Json -AsHashtable)' {
+        $ordered = '{ "Environment": { "Type": "string" } }' | ConvertFrom-Json -AsHashtable
+        $ordered.GetType().FullName | Should -Not -Be 'System.Collections.Hashtable'
+        Test-Condition -Condition $script:cond -PropertySet $ordered -Context $script:ctx |
+            Should -BeTrue
+    }
+
+    It 'Converts a non-Hashtable IDictionary PropertySet' {
+        $od = [System.Collections.Specialized.OrderedDictionary]::new()
+        $od['Environment'] = @{ Type = 'string' }
+        Test-Condition -Condition $script:cond -PropertySet $od -Context $script:ctx |
+            Should -BeTrue
+    }
+
+    It 'Passes through an existing PropertySet' {
+        $ps = [PropertySet]::new(@{ Environment = @{ Type = 'string' } })
+        Test-Condition -Condition $script:cond -PropertySet $ps -Context $script:ctx |
+            Should -BeTrue
+    }
+
+    It 'Throws a useful message for unsupported input type' {
+        {
+            Test-Condition -Condition $script:cond -PropertySet 42 -Context $script:ctx
+        } | Should -Throw -ExpectedMessage '*Cannot convert type*'
+    }
+}
+
+Describe 'FeatureFlagTransformAttribute' {
+    BeforeAll {
+        Mock -CommandName Invoke-Logging -ModuleName $env:BHProjectName
+    }
+
+    It 'Converts an ordered dictionary FeatureFlag and PropertySet (issue #85 repro)' {
+        $propertySet = '{ "Region": { "Type": "string" } }' | ConvertFrom-Json -AsHashtable
+        $flag = @{
+            Name = 'MyFeature'; DefaultEffect = 'Deny'
+            Rules = @(
+                @{ Name = 'Allow group'; Effect = 'Allow'; Condition = @{ Property = 'Region'; Operator = 'Equals'; Value = 'west' } }
+            )
+        } | ConvertTo-Json -Depth 10 | ConvertFrom-Json -AsHashtable
+        $flag.GetType().FullName | Should -Not -Be 'System.Collections.Hashtable'
+
+        Test-FeatureFlag -FeatureFlag $flag -PropertySet $propertySet -Context @{ Region = 'west' } |
+            Should -BeTrue
+    }
+
+    It 'Throws a useful message for unsupported input type' {
+        $ps = [PropertySet]::new(@{ Region = @{ Type = 'string' } })
+        {
+            Test-FeatureFlag -FeatureFlag 42 -PropertySet $ps -Context @{ Region = 'west' }
         } | Should -Throw -ExpectedMessage '*Cannot convert type*'
     }
 }
