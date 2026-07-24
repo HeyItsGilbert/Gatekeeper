@@ -37,7 +37,7 @@ Describe 'Test-FeatureFlag' {
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeTrue
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Allow' } -Times 1 -Exactly
         }
 
@@ -48,7 +48,7 @@ Describe 'Test-FeatureFlag' {
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeFalse
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Deny' } -Times 1 -Exactly
         }
 
@@ -62,9 +62,9 @@ Describe 'Test-FeatureFlag' {
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeTrue
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Audit' } -Times 1 -Exactly
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Allow' } -Times 1 -Exactly
         }
 
@@ -78,9 +78,9 @@ Describe 'Test-FeatureFlag' {
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeTrue
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Warn' } -Times 1 -Exactly
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Allow' } -Times 1 -Exactly
         }
     }
@@ -96,9 +96,9 @@ Describe 'Test-FeatureFlag' {
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeFalse
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Deny' } -Times 1 -Exactly
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Allow' } -Times 0 -Exactly
         }
 
@@ -112,9 +112,9 @@ Describe 'Test-FeatureFlag' {
             })
             $result = Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
             $result | Should -BeTrue
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Allow' } -Times 1 -Exactly
-            Assert-MockCalled -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
+            Should -Invoke -CommandName Invoke-Logging -ModuleName $env:BHProjectName `
                 -ParameterFilter { $Effect -eq 'Deny' } -Times 0 -Exactly
         }
     }
