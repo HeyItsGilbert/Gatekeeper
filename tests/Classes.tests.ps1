@@ -203,7 +203,7 @@ Describe 'ConditionTransformAttribute' {
             Should -BeTrue
     }
 
-    It 'Converts an ordered dictionary (ConvertFrom-Json -AsHashtable) to Condition via Test-Condition' {
+    It 'Converts an ordered dictionary (ConvertFrom-Json -AsHashtable) to Condition via Test-Condition' -Skip:($PSVersionTable.PSVersion.Major -lt 7) {
         $ordered = '{ "Property": "Environment", "Operator": "Equals", "Value": "Production" }' |
             ConvertFrom-Json -AsHashtable
         $ordered.GetType().FullName | Should -Not -Be 'System.Collections.Hashtable'
