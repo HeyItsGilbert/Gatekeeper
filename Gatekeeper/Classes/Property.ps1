@@ -188,16 +188,13 @@ class PropertySetTransformAttribute : System.Management.Automation.ArgumentTrans
         if ($null -eq $inputData) {
             return $(Read-PropertySet)
         }
-        $item = switch ($inputData.GetType().FullName) {
-            'PropertySet' { $inputData }
-            'System.Collections.Hashtable' {
-                [PropertySet]::new($inputData)
-            }
-            default {
-                throw "Cannot convert type to PropertySet: $($inputData.GetType().FullName)"
-            }
+        if ($inputData -is [PropertySet]) {
+            return $inputData
         }
-        return $item
+        if ($inputData -is [System.Collections.IDictionary]) {
+            return [PropertySet]::new([hashtable]$inputData)
+        }
+        throw "Cannot convert type to PropertySet: $($inputData.GetType().FullName)"
     }
 
     [string] ToString() {
