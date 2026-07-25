@@ -203,7 +203,7 @@ Describe 'ConditionTransformAttribute' {
             Should -BeTrue
     }
 
-    It 'Converts an ordered dictionary (ConvertFrom-Json -AsHashtable) to Condition via Test-Condition' -Skip:($PSVersionTable.PSVersion.Major -lt 7) {
+    It 'Converts an ordered dictionary (ConvertFrom-Json -AsHashtable) to Condition via Test-Condition' -Skip:($PSVersionTable.PSVersion.Major -lt 6) {
         $ordered = '{ "Property": "Environment", "Operator": "Equals", "Value": "Production" }' |
             ConvertFrom-Json -AsHashtable
         $ordered.GetType().FullName | Should -Not -Be 'System.Collections.Hashtable'
@@ -224,7 +224,7 @@ Describe 'PropertySetTransformAttribute' {
         $script:cond = @{ Property = 'Environment'; Operator = 'Equals'; Value = 'Production' }
     }
 
-    It 'Converts an ordered dictionary PropertySet (ConvertFrom-Json -AsHashtable)' {
+    It 'Converts an ordered dictionary PropertySet (ConvertFrom-Json -AsHashtable)' -Skip:($PSVersionTable.PSVersion.Major -lt 6) {
         $ordered = '{ "Environment": { "Type": "string" } }' | ConvertFrom-Json -AsHashtable
         $ordered.GetType().FullName | Should -Not -Be 'System.Collections.Hashtable'
         Test-Condition -Condition $script:cond -PropertySet $ordered -Context $script:ctx |
@@ -256,7 +256,7 @@ Describe 'FeatureFlagTransformAttribute' {
         Mock -CommandName Invoke-Logging -ModuleName $env:BHProjectName
     }
 
-    It 'Converts an ordered dictionary FeatureFlag and PropertySet (issue #85 repro)' {
+    It 'Converts an ordered dictionary FeatureFlag and PropertySet (issue #85 repro)' -Skip:($PSVersionTable.PSVersion.Major -lt 6) {
         $propertySet = '{ "Region": { "Type": "string" } }' | ConvertFrom-Json -AsHashtable
         $flag = @{
             Name = 'MyFeature'; DefaultEffect = 'Deny'
