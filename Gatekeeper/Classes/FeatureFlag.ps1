@@ -236,6 +236,10 @@ class GatekeeperPath {
 class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
 
     [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
+        if ($null -eq $inputData) {
+            throw [System.ArgumentNullException]::new('FeatureFlag',
+                "FeatureFlag cannot be null.")
+        }
         if ($inputData -is [FeatureFlag]) {
             return $inputData
         }
@@ -258,6 +262,10 @@ class FeatureFlagTransformAttribute : System.Management.Automation.ArgumentTrans
 class ConditionTransformAttribute : System.Management.Automation.ArgumentTransformationAttribute {
 
     [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
+        if ($null -eq $inputData) {
+            throw [System.ArgumentNullException]::new('Condition',
+                "Rule has no Condition. Each rule must define a 'Condition'.")
+        }
         if ($inputData -is [Condition]) {
             return $inputData
         }

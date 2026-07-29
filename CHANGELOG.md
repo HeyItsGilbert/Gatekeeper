@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   bind and always threw). `-PropertySet` is now a mandatory parameter on
   `Test-FeatureFlag`, matching `Test-Condition`, so the missing value is
   reported with a clear mandatory-parameter error instead. (#84)
+- `Test-Condition`/`Test-FeatureFlag` no longer throw an opaque
+  "You cannot call a method on a null-valued expression" error when a rule's
+  `Condition` is `$null` (e.g. omitted or misspelled). `ConditionTransformAttribute`
+  now null-guards and raises a clear `ArgumentNullException` explaining that the
+  rule must define a `Condition`. `FeatureFlagTransformAttribute` gained the same
+  guard for a null `FeatureFlag`. (#83)
 
 ## [1.0.0] 2026-06-05
 

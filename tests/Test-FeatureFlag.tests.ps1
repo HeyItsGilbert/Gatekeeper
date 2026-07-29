@@ -85,6 +85,18 @@ Describe 'Test-FeatureFlag' {
         }
     }
 
+    Context 'Malformed rules' {
+        It 'Rule with a null Condition throws a clear, actionable error' {
+            $flag = [FeatureFlag]::new(@{
+                Name = 'MissingConditionFlag'; DefaultEffect = 'Deny'; Version = '1.0.0'; Author = 'Test'
+                Rules = @(@{ Name = 'Allow group'; Effect = 'Allow' })
+            })
+            {
+                Test-FeatureFlag -FeatureFlag $flag -PropertySet $script:propertySet -Context $script:context
+            } | Should -Throw -ExpectedMessage '*Rule has no Condition*'
+        }
+    }
+
     Context 'Ordering — first-match-wins' {
         It 'Deny before matching Allow returns $false (Deny wins)' {
             $flag = [FeatureFlag]::new(@{
