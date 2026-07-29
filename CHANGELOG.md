@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-07-29
+
 ### Fixed
 
 - Argument transforms (`FeatureFlag`, `PropertySet`, `Condition`) now accept
@@ -234,3 +236,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
     matches the provided context and properties.
   - `Test-FeatureFlag`: Checks if a context passes the rules for a specified
     feature flag.
+
+[Unreleased]: https://github.com/HeyItsGilbert/Gatekeeper/compare/1.0.1...HEAD
+[1.0.1]: https://github.com/HeyItsGilbert/Gatekeeper/compare/1.0.0...1.0.1
+[1.0.0]: https://github.com/HeyItsGilbert/Gatekeeper/compare/0.4.0...1.0.0
+[0.4.0]: https://github.com/HeyItsGilbert/Gatekeeper/compare/0.3.2...0.4.0
+[0.3.2]: https://github.com/HeyItsGilbert/Gatekeeper/compare/1def993...0.3.2
+[0.3.1]: https://github.com/HeyItsGilbert/Gatekeeper/compare/ddef266...1def993
+[0.3.0]: https://github.com/HeyItsGilbert/Gatekeeper/compare/077cb1c...ddef266
+[0.2.0]: https://github.com/HeyItsGilbert/Gatekeeper/compare/80a2507...077cb1c
+[0.1.1]: https://github.com/HeyItsGilbert/Gatekeeper/compare/bfcfee3...80a2507
+[0.1.0]: https://github.com/HeyItsGilbert/Gatekeeper/tree/bfcfee3
