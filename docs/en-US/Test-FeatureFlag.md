@@ -13,7 +13,7 @@ Checks if the current machine's context will pass the feature flag rules.
 ## SYNTAX
 
 ```
-Test-FeatureFlag [-FeatureFlag] <FeatureFlag> [[-PropertySet] <PropertySet>] [-Context] <Hashtable>
+Test-FeatureFlag [-FeatureFlag] <FeatureFlag> [-PropertySet] <PropertySet> [-Context] <Hashtable>
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
@@ -60,7 +60,7 @@ Type: PropertySet
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 2
 Default value: None
 Accept pipeline input: False
