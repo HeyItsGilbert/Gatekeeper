@@ -36,6 +36,7 @@
         [FeatureFlag]
         [FeatureFlagTransformAttribute()]
         $FeatureFlag,
+        [Parameter(Mandatory)]
         [PropertySet]
         [PropertySetTransformAttribute()]
         $PropertySet,

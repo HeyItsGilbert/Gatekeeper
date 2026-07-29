@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   any `IDictionary` instead of only exact `System.Collections.Hashtable`, so
   configuration built via `ConvertFrom-Json -AsHashtable` (which returns an
   `OrderedHashtable`) and other ordered/generic dictionaries bind correctly.
+- `PropertySetTransformAttribute` no longer calls the broken, argument-less
+  `Read-PropertySet` when `-PropertySet` is omitted (that call could never
+  bind and always threw). `-PropertySet` is now a mandatory parameter on
+  `Test-FeatureFlag`, matching `Test-Condition`, so the missing value is
+  reported with a clear mandatory-parameter error instead. (#84)
 
 ## [1.0.0] 2026-06-05
 

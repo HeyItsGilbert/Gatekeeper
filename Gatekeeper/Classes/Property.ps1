@@ -186,7 +186,7 @@ class PropertySetTransformAttribute : System.Management.Automation.ArgumentTrans
 
     [object] Transform([System.Management.Automation.EngineIntrinsics]$engineIntrinsics, [object] $inputData) {
         if ($null -eq $inputData) {
-            return $(Read-PropertySet)
+            return $null
         }
         if ($inputData -is [PropertySet]) {
             return $inputData
