@@ -216,6 +216,12 @@ Describe 'ConditionTransformAttribute' {
             Test-Condition -Condition 42 -PropertySet $script:propertySet -Context $script:context
         } | Should -Throw -ExpectedMessage '*Cannot convert type*'
     }
+
+    It 'Throws a clear, actionable error when Condition is null' {
+        {
+            Test-Condition -Condition $null -PropertySet $script:propertySet -Context $script:context
+        } | Should -Throw -ExpectedMessage "*Rule has no Condition*"
+    }
 }
 
 Describe 'PropertySetTransformAttribute' {
