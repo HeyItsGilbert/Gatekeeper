@@ -22,12 +22,12 @@ A single entry within a `PropertySet`. Describes the type (`string`, `integer`, 
 > Previously named `PropertyDefinition` — the "Definition" suffix added no information. A `PropertySet` contains `Property` objects; `New-Property` returns a `[Property]`.
 
 ## Context
-A hashtable of actual runtime values representing the current device or environment state. Keys must correspond to properties declared in the `PropertySet`. Provided by the caller — Gatekeeper does not own or fetch it.
+A hashtable of actual runtime values representing the current device or environment state. Keys must correspond to properties declared in the `PropertySet`. Provided by the caller — Gatekeeper does not own or fetch it. A key whose value is null is treated exactly as if the key were absent.
 
 > `New-Context` constructs an empty context (all keys present, all values `$null`) from a `PropertySet`. The caller then populates the values. Previously named `Get-DefaultContext` — "default" implied pre-filled values, which was wrong.
 
 ## FeatureFlag
-Defines a feature, its `DefaultEffect`, and an ordered list of `Rules`. Evaluated top-to-bottom; first terminal rule wins.
+Defines a feature, its `DefaultEffect`, and an ordered list of `Rules`. Evaluated top-to-bottom; first terminal rule wins. When no terminal `Rule` matches, the `DefaultEffect` applies: `Allow` yields an Allow **Decision**; `Deny` yields Deny; `Audit`/`Warn` are observed and then yield Deny. An evaluation error never falls through to the `DefaultEffect`.
 
 > Loading pattern: `Get-FeatureFlag` is the public API (module-scoped cache). `Read-FeatureFlag` is the private I/O primitive it delegates to. Mirrors the PropertySet pattern.
 
@@ -41,3 +41,20 @@ The outcome applied when a `Rule` matches. Values: `Allow`, `Deny`, `Audit`, `Wa
 A comparison operator used in a leaf `Condition`. Values: `Equals`, `NotEquals`, `GreaterThan`, `GreaterThanOrEqual`, `LessThan`, `LessThanOrEqual`, `In`, `NotIn`.
 
 > Distinct from **logical connectives** (`AllOf`, `AnyOf`, `Not`), which are grouping modes on a composite `Condition` — not operators. `New-ConditionGroup` exposes these as three distinct parameter sets (`-AllOf`, `-AnyOf`, `-Not`) rather than a single `-Operator` parameter.
+
+---
+
+## Binding
+Checking a `FeatureFlag` against a `PropertySet`: every leaf `Condition` names a `Property` the set declares, and every leaf `Value` is valid for that `Property`'s type and `Operator`. A flag that does not bind cannot be evaluated against that `PropertySet`.
+
+## Decision
+The outcome of evaluating a bound `FeatureFlag` against a valid `Context`: Allow or Deny. Evaluation that reaches a Decision cannot fail.
+
+## Definition error
+The `FeatureFlag` or `PropertySet` is invalid on its own, or the flag does not bind to the `PropertySet`. A fault of the flag author, independent of any `Context`.
+
+## Context error
+The `Context` does not satisfy the `PropertySet` for a `Property` the flag references: the value is absent, cannot be read as the declared type, or violates the `Property`'s constraints. A fault of the caller, not a fact about the device.
+
+## Fail closed
+Any evaluation that does not reach a Decision is treated as "not enabled". No error, in any binding, can ever surface as Allow.
