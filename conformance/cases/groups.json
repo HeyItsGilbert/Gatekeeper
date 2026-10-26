@@ -1,0 +1,91 @@
+[
+    {
+        "name": "allof-all-true",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": {
+            "AllOf": [
+                { "Property": "Environment", "Operator": "Equals", "Value": "Staging" },
+                { "Property": "IsCompliant", "Operator": "Equals", "Value": true }
+            ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true },
+        "expect": { "result": true }
+    },
+    {
+        "name": "allof-short-circuits-on-first-false",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": {
+            "AllOf": [
+                { "Property": "Environment", "Operator": "Equals", "Value": "Production" },
+                { "Property": "IsCompliant", "Operator": "Equals", "Value": true }
+            ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true },
+        "expect": { "result": false }
+    },
+    {
+        "name": "anyof-short-circuits-on-first-true",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": {
+            "AnyOf": [
+                { "Property": "IsCompliant", "Operator": "Equals", "Value": true },
+                { "Property": "Percentage", "Operator": "LessThan", "Value": 11 }
+            ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 90 },
+        "expect": { "result": true }
+    },
+    {
+        "name": "anyof-all-false",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": {
+            "AnyOf": [
+                { "Property": "IsCompliant", "Operator": "Equals", "Value": false },
+                { "Property": "Percentage", "Operator": "LessThan", "Value": 11 }
+            ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 90 },
+        "expect": { "result": false }
+    },
+    {
+        "name": "not-is-nor-over-array",
+        "description": "Not takes an array of 1+ children; it matches only when none of them do (ADR 0003).",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": {
+            "Not": [
+                { "Property": "Environment", "Operator": "Equals", "Value": "Production" },
+                { "Property": "Environment", "Operator": "Equals", "Value": "Dev" }
+            ]
+        },
+        "context": { "Environment": "Staging" },
+        "expect": { "result": true }
+    },
+    {
+        "name": "not-nor-fails-when-any-child-matches",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": {
+            "Not": [
+                { "Property": "Environment", "Operator": "Equals", "Value": "Production" },
+                { "Property": "Environment", "Operator": "Equals", "Value": "Staging" }
+            ]
+        },
+        "context": { "Environment": "Staging" },
+        "expect": { "result": false }
+    },
+    {
+        "name": "nested-allof-anyof",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": "../flags/startup-sound.json",
+        "context": { "Environment": "Staging", "IsCompliant": false, "Percentage": 5 },
+        "expect": {
+            "decision": { "effect": "Allow", "result": true, "ruleName": "Allow Staging and Compliant or Low Percentage", "isDefault": false }
+        }
+    }
+]

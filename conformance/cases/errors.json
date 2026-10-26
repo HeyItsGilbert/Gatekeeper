@@ -1,0 +1,76 @@
+[
+    {
+        "name": "context-missing-property",
+        "description": "A null/absent context value for a referenced property is context.missing (CONTEXT.md: 'A key whose value is null is treated exactly as if the key were absent').",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Environment", "Operator": "Equals", "Value": "Staging" },
+        "context": {},
+        "expect": { "error": { "pairs": [ { "code": "context.missing", "property": "Environment" } ] } }
+    },
+    {
+        "name": "context-constraint-violation",
+        "description": "A value outside the Property's Validation bounds is a context error, never a false leaf (closes the Not/NotIn/AnyOf leak from issue #96).",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Percentage", "Operator": "GreaterThan", "Value": 10 },
+        "context": { "Percentage": 150 },
+        "expect": { "error": { "pairs": [ { "code": "context.constraint", "property": "Percentage" } ] } }
+    },
+    {
+        "name": "context-wrong-type",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Environment", "Operator": "Equals", "Value": "Staging" },
+        "context": { "Environment": 123 },
+        "expect": { "error": { "pairs": [ { "code": "context.type", "property": "Environment" } ] } }
+    },
+    {
+        "name": "context-validation-collects-every-violation",
+        "description": "All referenced properties are validated up front, flag-scoped; every violation is reported, not just the first.",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "MultiErrorFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Deny",
+            "Rules": [
+                {
+                    "Name": "RequiresBoth",
+                    "Effect": "Allow",
+                    "Condition": {
+                        "AllOf": [
+                            { "Property": "Environment", "Operator": "Equals", "Value": "Staging" },
+                            { "Property": "Percentage", "Operator": "LessThan", "Value": 50 }
+                        ]
+                    }
+                }
+            ]
+        },
+        "context": { "Percentage": 150 },
+        "expect": {
+            "error": {
+                "pairs": [
+                    { "code": "context.missing", "property": "Environment" },
+                    { "code": "context.constraint", "property": "Percentage" }
+                ]
+            }
+        }
+    },
+    {
+        "name": "definition-unknown-property-reference",
+        "description": "A leaf Property the bound PropertySet doesn't declare fails at bind time, before any Context is touched. This is the shape of the historical fixtures/FeatureFlag.json 'Percent' vs 'Percentage' bug.",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": "../flags/broken-property-ref.json",
+        "context": {},
+        "expect": { "error": { "pairs": [ { "code": "definition.unknown-property", "property": "Percent" } ] } }
+    },
+    {
+        "name": "definition-schema-empty-allof",
+        "description": "AllOf requires at least one child; an empty array is schema-invalid, caught at mandatory load-time schema validation (ADR 0005).",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "AllOf": [] },
+        "context": {},
+        "expect": { "error": { "pairs": [ { "code": "definition.schema", "property": null } ] } }
+    }
+]

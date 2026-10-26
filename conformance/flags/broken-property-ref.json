@@ -1,0 +1,19 @@
+{
+    "$schema": "../../Gatekeeper/Schemas/FeatureFlag.json",
+    "Name": "Broken Property Reference",
+    "Description": "Deliberately references a property the bound PropertySet does not declare. Exists to pin definition.unknown-property as a conformance case; this is the shape of the historical Percent/Percentage fixture bug (see Gatekeeper issue #92), kept on purpose instead of silently fixed away.",
+    "Version": "1.0.0",
+    "Author": "Conformance suite",
+    "DefaultEffect": "Deny",
+    "Rules": [
+        {
+            "Name": "Allow low rollout",
+            "Effect": "Allow",
+            "Condition": {
+                "Property": "Percent",
+                "Operator": "LessThan",
+                "Value": 11
+            }
+        }
+    ]
+}

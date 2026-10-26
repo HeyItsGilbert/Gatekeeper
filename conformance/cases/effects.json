@@ -1,0 +1,161 @@
+[
+    {
+        "name": "allow-rule-matches",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "AllowFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Deny",
+            "Rules": [ { "Name": "AllowRule", "Effect": "Allow", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } } ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Allow", "result": true, "ruleName": "AllowRule", "isDefault": false },
+            "events": [ { "ruleName": "AllowRule", "effect": "Allow", "isDefault": false } ]
+        }
+    },
+    {
+        "name": "deny-rule-matches",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "DenyFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Allow",
+            "Rules": [ { "Name": "DenyRule", "Effect": "Deny", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } } ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Deny", "result": false, "ruleName": "DenyRule", "isDefault": false }
+        }
+    },
+    {
+        "name": "audit-is-observed-and-non-terminal",
+        "description": "Audit logs and evaluation continues; the later Allow still wins the Decision.",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "AuditFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Deny",
+            "Rules": [
+                { "Name": "AuditRule", "Effect": "Audit", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } },
+                { "Name": "AllowRule", "Effect": "Allow", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } }
+            ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Allow", "result": true, "ruleName": "AllowRule", "isDefault": false },
+            "events": [
+                { "ruleName": "AuditRule", "effect": "Audit", "isDefault": false },
+                { "ruleName": "AllowRule", "effect": "Allow", "isDefault": false }
+            ]
+        }
+    },
+    {
+        "name": "warn-is-observed-and-non-terminal",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "WarnFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Deny",
+            "Rules": [
+                { "Name": "WarnRule", "Effect": "Warn", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } },
+                { "Name": "AllowRule", "Effect": "Allow", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } }
+            ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Allow", "result": true, "ruleName": "AllowRule", "isDefault": false }
+        }
+    },
+    {
+        "name": "deny-before-allow-wins",
+        "description": "First-match-wins ordering: an earlier Deny beats a later matching Allow.",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "DenyFirstFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Deny",
+            "Rules": [
+                { "Name": "DenyFirst", "Effect": "Deny", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } },
+                { "Name": "AllowSecond", "Effect": "Allow", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } }
+            ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Deny", "result": false, "ruleName": "DenyFirst", "isDefault": false }
+        }
+    },
+    {
+        "name": "allow-before-deny-wins",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "AllowFirstFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Deny",
+            "Rules": [
+                { "Name": "AllowFirst", "Effect": "Allow", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } },
+                { "Name": "DenySecond", "Effect": "Deny", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": true } }
+            ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Allow", "result": true, "ruleName": "AllowFirst", "isDefault": false }
+        }
+    },
+    {
+        "name": "default-effect-allow-no-rule-matches",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "AllowDefaultFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Allow",
+            "Rules": [ { "Name": "DenyNoMatch", "Effect": "Deny", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": false } } ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Allow", "result": true, "ruleName": null, "isDefault": true },
+            "events": [ { "ruleName": null, "effect": "Allow", "isDefault": true } ]
+        }
+    },
+    {
+        "name": "default-effect-deny-no-rule-matches",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "DenyDefaultFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Deny",
+            "Rules": [ { "Name": "AllowNoMatch", "Effect": "Allow", "Condition": { "Property": "IsCompliant", "Operator": "Equals", "Value": false } } ]
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Deny", "result": false, "ruleName": null, "isDefault": true }
+        }
+    },
+    {
+        "name": "default-effect-warn-no-rule-matches-still-denies",
+        "description": "An Audit/Warn DefaultEffect is observed, then gives Deny (issue #96).",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": {
+            "Name": "WarnDefaultFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Warn",
+            "Rules": []
+        },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Deny", "result": false, "ruleName": null, "isDefault": true },
+            "events": [ { "ruleName": null, "effect": "Warn", "isDefault": true } ]
+        }
+    },
+    {
+        "name": "empty-rules-default-allow",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": { "Name": "EmptyAllowFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Allow", "Rules": [] },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Allow", "result": true, "ruleName": null, "isDefault": true }
+        }
+    },
+    {
+        "name": "empty-rules-default-deny",
+        "kind": "flag",
+        "propertySet": "../property-sets/basic.json",
+        "flag": { "Name": "EmptyDenyFlag", "Version": "1.0.0", "Author": "Test", "DefaultEffect": "Deny", "Rules": [] },
+        "context": { "Environment": "Staging", "IsCompliant": true, "Percentage": 30 },
+        "expect": {
+            "decision": { "effect": "Deny", "result": false, "ruleName": null, "isDefault": true }
+        }
+    }
+]

@@ -1,0 +1,76 @@
+[
+    {
+        "name": "equals-string-match",
+        "description": "Equals is ordinal and case-sensitive on strings (ADR 0002).",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Environment", "Operator": "Equals", "Value": "Staging" },
+        "context": { "Environment": "Staging" },
+        "expect": { "result": true }
+    },
+    {
+        "name": "equals-string-case-sensitive-no-match",
+        "description": "A differently-cased value must not match under Equals.",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Environment", "Operator": "Equals", "Value": "staging" },
+        "context": { "Environment": "Staging" },
+        "expect": { "result": false }
+    },
+    {
+        "name": "notequals-string",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Environment", "Operator": "NotEquals", "Value": "Production" },
+        "context": { "Environment": "Staging" },
+        "expect": { "result": true }
+    },
+    {
+        "name": "greaterthan-integer",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Percentage", "Operator": "GreaterThan", "Value": 10 },
+        "context": { "Percentage": 30 },
+        "expect": { "result": true }
+    },
+    {
+        "name": "greaterthanorequal-integer-boundary",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Percentage", "Operator": "GreaterThanOrEqual", "Value": 30 },
+        "context": { "Percentage": 30 },
+        "expect": { "result": true }
+    },
+    {
+        "name": "lessthan-integer",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Percentage", "Operator": "LessThan", "Value": 11 },
+        "context": { "Percentage": 30 },
+        "expect": { "result": false }
+    },
+    {
+        "name": "lessthanorequal-integer-boundary",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Percentage", "Operator": "LessThanOrEqual", "Value": 30 },
+        "context": { "Percentage": 30 },
+        "expect": { "result": true }
+    },
+    {
+        "name": "in-string-list-match",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Environment", "Operator": "In", "Value": ["Production", "Staging"] },
+        "context": { "Environment": "Staging" },
+        "expect": { "result": true }
+    },
+    {
+        "name": "notin-string-list",
+        "kind": "condition",
+        "propertySet": "../property-sets/basic.json",
+        "condition": { "Property": "Environment", "Operator": "NotIn", "Value": ["Production", "Dev"] },
+        "context": { "Environment": "Staging" },
+        "expect": { "result": true }
+    }
+]

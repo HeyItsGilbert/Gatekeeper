@@ -1,0 +1,28 @@
+{
+    "$schema": "../../Gatekeeper/Schemas/Properties.json",
+    "Environment": {
+        "Type": "string",
+        "Enum": [
+            "Production",
+            "Staging",
+            "Dev"
+        ]
+    },
+    "IsCompliant": {
+        "Type": "boolean"
+    },
+    "Percentage": {
+        "Type": "integer",
+        "Validation": {
+            "Minimum": 0,
+            "Maximum": 99
+        }
+    },
+    "Tier": {
+        "Type": "integer",
+        "Validation": {
+            "Minimum": 0,
+            "Maximum": 3
+        }
+    }
+}
