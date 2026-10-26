@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Gatekeeper Rust: exit-code &amp; observation-event prototype</title>
+<style>
+  :root { --accent: #3a6df0; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, Segoe UI, Helvetica, Arial, sans-serif; max-width: 920px; margin: 2rem auto; padding: 0 1.25rem; line-height: 1.5; color: #1a1a1a; }
+  h1 { font-size: 1.3rem; }
+  h2 { font-size: 1.05rem; margin-top: 2rem; }
+  .intro { background: #f4f6fb; border-left: 4px solid var(--accent); padding: 0.9rem 1.1rem; border-radius: 4px; }
+  .panel { border: 1px solid #ddd; border-radius: 8px; padding: 1rem 1.2rem; margin: 1rem 0; }
+  .state-grid { display: grid; grid-template-columns: 160px 1fr; row-gap: 0.4rem; column-gap: 0.75rem; font-size: 0.95rem; }
+  .state-grid dt { font-weight: 600; color: #555; }
+  .state-grid dd { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .events { margin-top: 0.75rem; }
+  .event { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem; background: #fafafa; border: 1px solid #eee; border-radius: 4px; padding: 0.4rem 0.6rem; margin-bottom: 0.35rem; }
+  .event.error { border-color: #e0a0a0; background: #fff6f6; }
+  .exit0 { color: #1a7a3a; } .exit1 { color: #b05a00; } .exit2 { color: #a33; } .exit3 { color: #a33; }
+  .changed { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button { cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 6px; padding: 0.45rem 0.8rem; font-size: 0.9rem; margin: 0.2rem 0.3rem 0.2rem 0; }
+  button:hover { border-color: var(--accent); }
+  .tabs { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .tabs button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .scenario-desc { font-size: 0.9rem; color: #444; margin-bottom: 0.6rem; }
+  .step-list { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .step-list button.done { background: #e8f0ff; }
+  footer { margin-top: 2.5rem; font-size: 0.8rem; color: #888; }
+</style>
+</head>
+<body>
+  <h1>Gatekeeper Rust — exit codes &amp; observation events</h1>
+  <div class="intro">
+    <strong>Question this prototype answers (issue #101):</strong> how do the four
+    <code>Effect</code> values (Allow/Deny/Audit/Warn) and the two fail-closed error classes
+    (Definition/Context) show up on the CLI — as a process exit code, as stdout, and as the
+    observation-hook events on stderr? This is the part that's easy to get wrong on paper:
+    mid-list Audit/Warn never terminate, but a <code>DefaultEffect</code> of Audit/Warn
+    <em>does</em> resolve to a final Deny (settled in #96) — so does that still count as
+    "exit code 1", or does it need its own code? Click through the scenarios below.
+  </div>
+
+  <h2>Current state</h2>
+  <div class="panel">
+    <dl class="state-grid" id="state"></dl>
+    <div class="events" id="events"></div>
+  </div>
+
+  <h2>Free play</h2>
+  <div class="panel" id="freeplay"></div>
+
+  <h2>Guided walkthroughs</h2>
+  <div class="panel">
+    <div class="tabs" id="scenario-tabs"></div>
+    <div class="scenario-desc" id="scenario-desc"></div>
+    <div class="step-list" id="scenario-steps"></div>
+  </div>
+
+  <footer>Throwaway prototype for issue #101 — not the real gatekeeper-rs crate. See PROTOTYPE.md.</footer>
+
+<script>
+// ---- pure module: lift into the real CLI's exit-code mapping once validated ----
+// state shape: { decision: 'Allow'|'Deny'|null, errorClass: 'Context'|'Definition'|null,
+//                exitCode: number|null, stdout: string, events: [{kind,...}] }
+
+const initialState = () => ({ decision: null, errorClass: null, exitCode: null, stdout: '(none yet)', events: [] });
+
+function reduce(state, action) {
+  switch (action.type) {
+    case 'RESET':
+      return initialState();
+
+    // A rule mid-list fires Audit/Warn: observed, evaluation CONTINUES to the next rule.
+    case 'RULE_AUDIT_CONTINUE':
+      return { ...state, events: [...state.events, { kind: 'decision', effect: 'Audit', ruleName: action.ruleName, isDefault: false, terminal: false }] };
+    case 'RULE_WARN_CONTINUE':
+      return { ...state, events: [...state.events, { kind: 'decision', effect: 'Warn', ruleName: action.ruleName, isDefault: false, terminal: false }] };
+
+    // A rule fires Allow/Deny: terminal, this IS the final Decision.
+    case 'RULE_ALLOW_MATCH':
+      return finish(state, 'Allow', { kind: 'decision', effect: 'Allow', ruleName: action.ruleName, isDefault: false, terminal: true });
+    case 'RULE_DENY_MATCH':
+      return finish(state, 'Deny', { kind: 'decision', effect: 'Deny', ruleName: action.ruleName, isDefault: false, terminal: true });
+
+    // No rule matched: DefaultEffect fires. Allow/Deny are themselves the Decision.
+    // Audit/Warn are observed, then RESOLVE TO DENY (settled in #96) — still exit 1.
+    case 'DEFAULT_ALLOW':
+      return finish(state, 'Allow', { kind: 'decision', effect: 'Allow', ruleName: null, isDefault: true, terminal: true });
+    case 'DEFAULT_DENY':
+      return finish(state, 'Deny', { kind: 'decision', effect: 'Deny', ruleName: null, isDefault: true, terminal: true });
+    case 'DEFAULT_AUDIT':
+      return finish(state, 'Deny', { kind: 'decision', effect: 'Audit', ruleName: null, isDefault: true, terminal: true });
+    case 'DEFAULT_WARN':
+      return finish(state, 'Deny', { kind: 'decision', effect: 'Warn', ruleName: null, isDefault: true, terminal: true });
+
+    // Bind-time Definition error: distinct event variant, never shaped like a Decision.
+    case 'DEFINITION_ERROR':
+      return finishError(state, 'Definition', [
+        { kind: 'error', code: 'definition.unknown-property', property: 'Tier' },
+      ]);
+
+    // Context error: collects ALL violations, not just the first (#96).
+    case 'CONTEXT_ERROR_MULTI':
+      return finishError(state, 'Context', [
+        { kind: 'error', code: 'context.missing', property: 'Percentage' },
+        { kind: 'error', code: 'context.constraint', property: 'Region' },
+      ]);
+
+    // A hook that throws must never change the exit code — isolation (#99).
+    case 'HOOK_THROWS_THEN_DENY_MATCH': {
+      const withBrokenHook = { ...state, events: [...state.events, { kind: 'hook-panic', note: 'observer threw — caught at the call site, evaluation unaffected' }] };
+      return finish(withBrokenHook, 'Deny', { kind: 'decision', effect: 'Deny', ruleName: action.ruleName, isDefault: false, terminal: true });
+    }
+    default:
+      return state;
+  }
+}
+
+function finish(state, decision, finalEvent) {
+  const exitCode = decision === 'Allow' ? 0 : 1;
+  return {
+    ...state,
+    decision,
+    errorClass: null,
+    exitCode,
+    stdout: JSON.stringify({ decision }),
+    events: [...state.events, finalEvent],
+  };
+}
+
+function finishError(state, errorClass, violationEvents) {
+  const exitCode = errorClass === 'Context' ? 2 : 3;
+  return {
+    ...state,
+    decision: null,
+    errorClass,
+    exitCode,
+    stdout: '(nothing — errors never write to stdout, only to stderr)',
+    events: [...state.events, ...violationEvents],
+  };
+}
+
+// ---- thin page shell below: DOM only, calls into reduce() ----
+
+let state = initialState();
+
+function render() {
+  const el = document.getElementById('state');
+  const exitClass = state.exitCode === null ? '' : `exit${state.exitCode}`;
+  el.innerHTML = `
+    <dt>Decision</dt><dd>${state.decision ?? '—'}</dd>
+    <dt>Error class</dt><dd>${state.errorClass ?? '—'}</dd>
+    <dt>Exit code</dt><dd class="${exitClass}">${state.exitCode ?? '—'}</dd>
+    <dt>stdout</dt><dd>${state.stdout}</dd>
+  `;
+  const ev = document.getElementById('events');
+  ev.innerHTML = '<strong style="font-size:0.85rem;color:#555">stderr — observation events (chronological)</strong>' +
+    state.events.map(e => {
+      if (e.kind === 'decision') {
+        return `<div class="event">{"effect":"${e.effect}","rule":${e.ruleName ? `"${e.ruleName}"` : 'null'},"is_default":${e.isDefault},"terminal":${e.terminal}}</div>`;
+      }
+      if (e.kind === 'error') {
+        return `<div class="event error">{"code":"${e.code}","property":"${e.property}"}</div>`;
+      }
+      return `<div class="event error">⚠ ${e.note}</div>`;
+    }).join('') || '<div style="color:#999;font-size:0.85rem">(none)</div>';
+}
+
+function dispatch(action) {
+  state = reduce(state, action);
+  render();
+  document.getElementById('state').classList.add('changed');
+  setTimeout(() => document.getElementById('state').classList.remove('changed'), 300);
+}
+
+const freeplayActions = [
+  ['Reset', { type: 'RESET' }],
+  ['Rule fires Audit (continues)', { type: 'RULE_AUDIT_CONTINUE', ruleName: 'beta-cohort' }],
+  ['Rule fires Warn (continues)', { type: 'RULE_WARN_CONTINUE', ruleName: 'legacy-tenant' }],
+  ['Rule fires Allow (terminal)', { type: 'RULE_ALLOW_MATCH', ruleName: 'internal-users' }],
+  ['Rule fires Deny (terminal)', { type: 'RULE_DENY_MATCH', ruleName: 'blocklist' }],
+  ['No rule matched, DefaultEffect=Allow', { type: 'DEFAULT_ALLOW' }],
+  ['No rule matched, DefaultEffect=Deny', { type: 'DEFAULT_DENY' }],
+  ['No rule matched, DefaultEffect=Audit', { type: 'DEFAULT_AUDIT' }],
+  ['No rule matched, DefaultEffect=Warn', { type: 'DEFAULT_WARN' }],
+  ['Definition error (unknown property)', { type: 'DEFINITION_ERROR' }],
+  ['Context error (2 violations)', { type: 'CONTEXT_ERROR_MULTI' }],
+  ['Hook throws, Deny still matches', { type: 'HOOK_THROWS_THEN_DENY_MATCH', ruleName: 'blocklist' }],
+];
+
+document.getElementById('freeplay').innerHTML = '';
+for (const [label, action] of freeplayActions) {
+  const btn = document.createElement('button');
+  btn.textContent = label;
+  btn.onclick = () => dispatch(action);
+  document.getElementById('freeplay').appendChild(btn);
+}
+
+const scenarios = [
+  {
+    name: 'Happy path: Allow',
+    desc: 'A rule matches Allow on the first try. Exit 0, one event, stdout carries the decision.',
+    steps: [['Reset', { type: 'RESET' }], ['Rule fires Allow (terminal)', { type: 'RULE_ALLOW_MATCH', ruleName: 'internal-users' }]],
+  },
+  {
+    name: 'Audit then Deny',
+    desc: 'The edge case from the intro: two rules fire before one terminates. The Audit rule logs and falls through; only the Deny rule produces the exit code. Watch: TWO events, ONE exit code.',
+    steps: [
+      ['Reset', { type: 'RESET' }],
+      ['Rule fires Audit (continues)', { type: 'RULE_AUDIT_CONTINUE', ruleName: 'beta-cohort' }],
+      ['Rule fires Deny (terminal)', { type: 'RULE_DENY_MATCH', ruleName: 'blocklist' }],
+    ],
+  },
+  {
+    name: 'DefaultEffect=Warn, no rule matched',
+    desc: 'Nothing matched. Per #96, a Warn default is observed then resolves to Deny — same exit code (1) as an explicit Deny rule, distinguishable only via the event\'s is_default:true.',
+    steps: [['Reset', { type: 'RESET' }], ['No rule matched, DefaultEffect=Warn', { type: 'DEFAULT_WARN' }]],
+  },
+  {
+    name: 'Illegal-looking case: error vs. Deny',
+    desc: 'A Context error must NOT look like a Deny on exit status — this is the thing a naive exit-code scheme gets wrong. Compare this scenario\'s exit code (2) against the previous one\'s (1).',
+    steps: [['Reset', { type: 'RESET' }], ['Context error (2 violations)', { type: 'CONTEXT_ERROR_MULTI' }]],
+  },
+  {
+    name: 'Hook isolation',
+    desc: 'The observer throws partway through. The spec requires this NEVER changes the Decision or the exit code — only an extra diagnostic event shows up on stderr.',
+    steps: [['Reset', { type: 'RESET' }], ['Hook throws, Deny still matches', { type: 'HOOK_THROWS_THEN_DENY_MATCH', ruleName: 'blocklist' }]],
+  },
+];
+
+let activeScenario = 0;
+let scenarioStep = 0;
+
+function renderScenario() {
+  const tabs = document.getElementById('scenario-tabs');
+  tabs.innerHTML = '';
+  scenarios.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.textContent = s.name;
+    b.className = i === activeScenario ? 'active' : '';
+    b.onclick = () => { activeScenario = i; scenarioStep = 0; dispatch({ type: 'RESET' }); renderScenario(); };
+    tabs.appendChild(b);
+  });
+  document.getElementById('scenario-desc').textContent = scenarios[activeScenario].desc;
+  const stepsEl = document.getElementById('scenario-steps');
+  stepsEl.innerHTML = '';
+  scenarios[activeScenario].steps.forEach(([label, action], i) => {
+    const b = document.createElement('button');
+    b.textContent = `${i + 1}. ${label}`;
+    if (i < scenarioStep) b.classList.add('done');
+    b.disabled = i !== scenarioStep;
+    b.onclick = () => { dispatch(action); scenarioStep++; renderScenario(); };
+    stepsEl.appendChild(b);
+  });
+}
+
+renderScenario();
+render();
+</script>
+</body>
+</html>
