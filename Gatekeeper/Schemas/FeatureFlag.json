@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://example.com/schema/rule-schema.json",
+    "$id": "https://heyitsgilbert.github.io/Gatekeeper/schema/1.0.0/FeatureFlag.json",
     "title": "Evaluation Rule Set",
     "type": "object",
     "required": [
@@ -38,8 +38,7 @@
             "type": "array",
             "items": {
                 "$ref": "#/$defs/rule"
-            },
-            "minItems": 1
+            }
         }
     },
     "$defs": {
@@ -115,7 +114,11 @@
                     ],
                     "properties": {
                         "Not": {
-                            "$ref": "#/$defs/condition"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/condition"
+                            },
+                            "minItems": 1
                         }
                     },
                     "additionalProperties": false
@@ -136,12 +139,18 @@
                                 "Equals",
                                 "NotEquals",
                                 "GreaterThan",
+                                "GreaterThanOrEqual",
                                 "LessThan",
+                                "LessThanOrEqual",
                                 "In",
                                 "NotIn"
                             ]
                         },
-                        "Value": {}
+                        "Value": {
+                            "not": {
+                                "type": "null"
+                            }
+                        }
                     },
                     "additionalProperties": false
                 }
