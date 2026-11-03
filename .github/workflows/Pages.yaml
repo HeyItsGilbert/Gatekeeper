@@ -15,4 +15,5 @@ jobs:
       additional_copies: |
         static/:docs/assets/images/
         guides/:docs/guides/
+        Gatekeeper/Schemas/:docs/schema/1.0.0/
 
