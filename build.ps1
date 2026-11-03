@@ -49,19 +49,29 @@ if ($Bootstrap.IsPresent) {
     Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
     if ((Test-Path -Path ./requirements.psd1)) {
-        $psDependVersion = (Import-PowerShellDataFile -Path ./requirements.psd1).PSDepend.Version
-        $psDependBaseVersion, $psDependPrerelease = $psDependVersion -split '-', 2
-        $psDependInstalled = Get-Module -Name PSDepend -ListAvailable | Where-Object {
-            $candidateVersion = "$($_.Version)"
-            if ($_.PrivateData.PSData.Prerelease) { $candidateVersion += "-$($_.PrivateData.PSData.Prerelease)" }
-            $candidateVersion -eq $psDependVersion
+        $requirements = Import-PowerShellDataFile -Path ./requirements.psd1
+
+        $psDependVersion = $requirements.PSDepend.Version
+        $psDependPrerelease = ($psDependVersion -split '-', 2)[1]
+        $matchPSDepend = {
+            Get-Module -Name PSDepend -ListAvailable | Where-Object {
+                $candidateVersion = "$($_.Version)"
+                if ($_.PrivateData.PSData.Prerelease) { $candidateVersion += "-$($_.PrivateData.PSData.Prerelease)" }
+                $candidateVersion -eq $psDependVersion
+            } | Select-Object -First 1
         }
-        if (-not $psDependInstalled) {
+        $psDependModule = & $matchPSDepend
+        if (-not $psDependModule) {
             $psDependInstallParams = @{ RequiredVersion = $psDependVersion }
             if ($psDependPrerelease) { $psDependInstallParams.AllowPrerelease = $true }
             Install-Module -Name PSDepend -Repository PSGallery -Scope CurrentUser -Force @psDependInstallParams
+            $psDependModule = & $matchPSDepend
         }
-        Import-Module -Name PSDepend -RequiredVersion $psDependBaseVersion -Verbose:$false
+        # Import by the matched module's own manifest path, not just its numeric base version:
+        # -RequiredVersion drops the prerelease label, so if a differently-labeled (or stable)
+        # module sharing that same numeric version ever appears earlier on $env:PSModulePath,
+        # Import-Module could resolve to that one instead of the prerelease actually pinned.
+        Import-Module -Name $psDependModule.Path -Verbose:$false
 
         # PowerShellBuild (installed below via requirements.psd1) declares `Pester >= 5.6.1` as
         # its own RequiredModules dependency, with no upper bound. Install-Module always
@@ -74,13 +84,22 @@ if ($Bootstrap.IsPresent) {
         # copy collides with the Pester.dll our own pinned import already loaded in-process.
         # Installing (and importing) our pin first means PowerShellGet already finds it
         # satisfying PowerShellBuild's constraint and never reaches for anything else.
-        $pesterVersion = (Import-PowerShellDataFile -Path ./requirements.psd1).Pester.Version
+        $pesterVersion = $requirements.Pester.Version
         if (-not (Get-Module -Name Pester -ListAvailable | Where-Object Version -eq [version]$pesterVersion)) {
             Install-Module -Name Pester -RequiredVersion $pesterVersion -Scope CurrentUser -Force -SkipPublisherCheck
         }
         Import-Module -Name Pester -RequiredVersion $pesterVersion -Global -Force -Verbose:$false
 
-        Invoke-PSDepend -Path './requirements.psd1' -Install -Import -Force -WarningAction SilentlyContinue
+        # Invoke-PSDepend's own PSGalleryModule handler compares an installed module's
+        # $_.Version.ToString() (which drops any prerelease label) against the full
+        # 'X.Y.Z-prerelease' requirement string above, so it never recognizes our pin as already
+        # satisfied and would redundantly re-query/reinstall PSDepend from the gallery on every
+        # single bootstrap run. We've already installed and imported the exact pinned version
+        # above, so hand Invoke-PSDepend every *other* declared dependency instead of
+        # reprocessing this self-referential entry.
+        $otherDependencies = $requirements.Clone()
+        $otherDependencies.Remove('PSDepend')
+        Invoke-PSDepend -InputObject $otherDependencies -Install -Import -Force -WarningAction SilentlyContinue
 
         # Defense in depth: prune any stray Pester version that still slipped onto disk (e.g. a
         # concurrent PSDepend install) and reassert our pin at global scope.
