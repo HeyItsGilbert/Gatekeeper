@@ -1,5 +1,6 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://heyitsgilbert.github.io/Gatekeeper/schema/1.0.0/Properties.json",
     "title": "Property Metadata Schema",
     "type": "object",
     "properties": {
@@ -29,10 +30,10 @@
                 "type": "object",
                 "properties": {
                     "Minimum": {
-                        "type": "number"
+                        "type": "integer"
                     },
                     "Maximum": {
-                        "type": "number"
+                        "type": "integer"
                     },
                     "MinLength": {
                         "type": "integer"
@@ -48,6 +49,57 @@
                 "additionalProperties": false
             }
         },
-        "additionalProperties": false
-    }
+        "additionalProperties": false,
+        "if": {
+            "properties": {
+                "Type": {
+                    "const": "integer"
+                }
+            }
+        },
+        "then": {
+            "properties": {
+                "Validation": {
+                    "properties": {
+                        "MinLength": false,
+                        "MaxLength": false,
+                        "Pattern": false
+                    }
+                }
+            }
+        },
+        "else": {
+            "if": {
+                "properties": {
+                    "Type": {
+                        "const": "string"
+                    }
+                }
+            },
+            "then": {
+                "properties": {
+                    "Validation": {
+                        "properties": {
+                            "Minimum": false,
+                            "Maximum": false
+                        }
+                    }
+                }
+            },
+            "else": {
+                "properties": {
+                    "Validation": {
+                        "properties": {
+                            "Minimum": false,
+                            "Maximum": false,
+                            "MinLength": false,
+                            "MaxLength": false,
+                            "Pattern": false
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "$comment": "Minimum > Maximum on the same property is not enforced here: JSON Schema cannot compare two sibling values declaratively (no $data support in Test-Json or the default jsonschema validators). That check is bind-time PowerShell work tracked by ADR 0007 / issue #103 item 21."
 }
