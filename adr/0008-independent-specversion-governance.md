@@ -1,0 +1,7 @@
+# specVersion evolves independently of the PowerShell module's semver
+
+The normative spec (`spec/`) and the PowerShell module ship on separate clocks. `specVersion` bumps when the spec's own normative text changes — major for a schema `$id`-moving change, minor/patch for additive or editorial change — never automatically because the PS module cut a release. A PS major bump doesn't require a `specVersion` bump (it may be unrelated to the spec, e.g. dropping PS 5.1 support), and the spec is allowed to run ahead of every implementation, including during this exact transition where known PS divergences (tracked for hand-off in issue #103) haven't been fixed yet.
+
+The link between the two is causal, not lockstep: when a spec change breaks existing implementation behavior (e.g. strict-typed comparisons), the PS fix that catches up is itself a breaking PS change and earns its own major bump under the module's own semver rules — but that's the PS module reacting to the spec, not the two versions moving in formation. `spec/index.md` carries a `Compatibility` table (implementation → version → spec version it conforms to) so readers aren't misled into assuming "published" means "universally implemented."
+
+We considered coupling the two (PS major ⇒ specVersion major) for simplicity, but rejected it: it would force either the spec to wait on PS module work to publish, or the PS module to bump major for changes with no normative content — both false signals.
