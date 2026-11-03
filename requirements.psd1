@@ -1,6 +1,9 @@
 @{
     PSDepend = @{
-        Version = '0.4.1'
+        Version = '0.7.0-beta1'
+        Parameters = @{
+            AllowPrerelease = $true
+        }
     }
     PSDependOptions = @{
         Target = 'CurrentUser'

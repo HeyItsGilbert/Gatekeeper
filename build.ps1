@@ -49,11 +49,44 @@ if ($Bootstrap.IsPresent) {
     Get-PackageProvider -Name Nuget -ForceBootstrap | Out-Null
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
     if ((Test-Path -Path ./requirements.psd1)) {
-        if (-not (Get-Module -Name PSDepend -ListAvailable)) {
-            Install-Module -Name PSDepend -Repository PSGallery -Scope CurrentUser -Force
+        $psDependVersion = (Import-PowerShellDataFile -Path ./requirements.psd1).PSDepend.Version
+        $psDependBaseVersion, $psDependPrerelease = $psDependVersion -split '-', 2
+        $psDependInstalled = Get-Module -Name PSDepend -ListAvailable | Where-Object {
+            $candidateVersion = "$($_.Version)"
+            if ($_.PrivateData.PSData.Prerelease) { $candidateVersion += "-$($_.PrivateData.PSData.Prerelease)" }
+            $candidateVersion -eq $psDependVersion
         }
-        Import-Module -Name PSDepend -Verbose:$false
+        if (-not $psDependInstalled) {
+            $psDependInstallParams = @{ RequiredVersion = $psDependVersion }
+            if ($psDependPrerelease) { $psDependInstallParams.AllowPrerelease = $true }
+            Install-Module -Name PSDepend -Repository PSGallery -Scope CurrentUser -Force @psDependInstallParams
+        }
+        Import-Module -Name PSDepend -RequiredVersion $psDependBaseVersion -Verbose:$false
+
+        # PowerShellBuild (installed below via requirements.psd1) declares `Pester >= 5.6.1` as
+        # its own RequiredModules dependency, with no upper bound. Install-Module always
+        # auto-resolves a target's RequiredModules, independently of whatever this repo's own
+        # `Pester` entry pins - and if our pin isn't on disk yet when PowerShellBuild gets
+        # installed, PowerShellGet fetches whatever's newest on PSGallery as a second, stray
+        # copy. PowerShellBuild's bundled Test task later calls `Import-Module Pester
+        # -MinimumVersion 5.0.0` (no exact pin), which always resolves to the HIGHEST matching
+        # version found on $env:PSModulePath - not whatever's already loaded - so that stray
+        # copy collides with the Pester.dll our own pinned import already loaded in-process.
+        # Installing (and importing) our pin first means PowerShellGet already finds it
+        # satisfying PowerShellBuild's constraint and never reaches for anything else.
+        $pesterVersion = (Import-PowerShellDataFile -Path ./requirements.psd1).Pester.Version
+        if (-not (Get-Module -Name Pester -ListAvailable | Where-Object Version -eq [version]$pesterVersion)) {
+            Install-Module -Name Pester -RequiredVersion $pesterVersion -Scope CurrentUser -Force -SkipPublisherCheck
+        }
+        Import-Module -Name Pester -RequiredVersion $pesterVersion -Global -Force -Verbose:$false
+
         Invoke-PSDepend -Path './requirements.psd1' -Install -Import -Force -WarningAction SilentlyContinue
+
+        # Defense in depth: prune any stray Pester version that still slipped onto disk (e.g. a
+        # concurrent PSDepend install) and reassert our pin at global scope.
+        Get-Module -Name Pester -ListAvailable | Where-Object { $_.Version -ne [version]$pesterVersion } |
+            ForEach-Object { Remove-Item -LiteralPath $_.ModuleBase -Recurse -Force -ErrorAction SilentlyContinue }
+        Import-Module -Name Pester -RequiredVersion $pesterVersion -Global -Force -Verbose:$false
     } else {
         Write-Warning 'No [requirements.psd1] found. Skipping build dependency installation.'
     }
