@@ -38,7 +38,7 @@ BeforeAll {
     }
 }
 
-Describe 'FeatureFlag.json' {
+Describe 'FeatureFlag.json' -Skip:($PSVersionTable.PSVersion.Major -lt 7) {
     Context 'Rules cardinality' {
         It 'Validates an empty Rules array with only a DefaultEffect' {
             $json = @{
@@ -117,7 +117,7 @@ Describe 'FeatureFlag.json' {
     }
 }
 
-Describe 'Properties.json' {
+Describe 'Properties.json' -Skip:($PSVersionTable.PSVersion.Major -lt 7) {
     Context 'Validation keys applicable per Type' -ForEach @(
         @{ Type = 'integer'; Validation = @{ Minimum = 0; Maximum = 10 }; Expected = $true }
         @{ Type = 'integer'; Validation = @{ MinLength = 1 }; Expected = $false }
