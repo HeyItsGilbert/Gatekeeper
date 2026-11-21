@@ -1,7 +1,4 @@
 BeforeDiscovery {
-    if ($env:BHPSModuleManifest -eq $null -or $env:BHProjectPath -eq $null -or $env:BHProjectName -eq $null) {
-        . $PSScriptRoot\..\build.ps1 -Task Build
-    }
     $manifest = Import-PowerShellDataFile -Path $env:BHPSModuleManifest
     $outputDir = Join-Path -Path $env:BHProjectPath -ChildPath 'Output'
     $outputModDir = Join-Path -Path $outputDir -ChildPath $env:BHProjectName
