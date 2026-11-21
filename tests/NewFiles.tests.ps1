@@ -36,21 +36,6 @@ Describe 'File Creations' {
         Mock -CommandName 'Get-FeatureFlagFolder' -ModuleName $env:BHProjectName {
             return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'FeatureFlags')
         }
-        Mock -CommandName 'Get-ConfigurationPath' -ModuleName $env:BHProjectName {
-            return (Join-Path -Path (Get-PSDrive TestDrive).Root -ChildPath 'Configuration')
-        }
-        # Override the default file path for testing. Must be set in module scope
-        # (not $global:) since that's what Get-FeatureFlagFolder/Get-PropertySetFolder
-        # actually read; otherwise this has no effect once the folder mocks above are
-        # removed and the real auto-create path runs.
-        InModuleScope $env:BHProjectName {
-            $script:GatekeeperConfiguration = @{
-                FilePaths = @{
-                    FeatureFlags = Join-Path (Get-PSDrive TestDrive).Root 'FeatureFlags'
-                    PropertySet  = Join-Path (Get-PSDrive TestDrive).Root 'PropertySet'
-                }
-            }
-        }
     }
 
     It 'can create a condition' {
