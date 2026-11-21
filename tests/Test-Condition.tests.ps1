@@ -335,7 +335,6 @@ Describe 'Test-Condition' {
     It 'Throws on context missing property' {
         $condition = @{
             Property = "Tier"
-            # Not a real operator
             Operator = "GreaterThanOrEqual"
             Value = 1
         }
@@ -346,7 +345,6 @@ Describe 'Test-Condition' {
     It 'Throws on PropertySet missing property in context' {
         $condition = @{
             Property = "Tier"
-            # Not a real operator
             Operator = "Equals"
             Value = 'Top'
         }

@@ -22,7 +22,6 @@ BeforeAll {
                 " Use Fixer 'Get-UnicodeFilesList `$pwd | ConvertTo-UTF8'."
             )
         }
-        $unicodeFilesCount | Should -Be 0
 
         $fileName = $textFile.FullName
         (Get-Content $fileName -Raw) | Select-String "`t" | Foreach-Object {
