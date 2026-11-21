@@ -29,14 +29,31 @@ $ExportableTypes = @(
 $TypeAcceleratorsClass = [PSObject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
 )
-# Add type accelerators, replacing any stale registrations from prior module loads.
-foreach ($Type in $ExportableTypes) {
-    [void]$TypeAcceleratorsClass::Remove($Type.FullName)
-    $TypeAcceleratorsClass::Add($Type.FullName, $Type)
+# TypeAccelerators is process-wide, shared across every runspace in this
+# process (confirmed under Pester 6 Run.Parallel, which runs each test file's
+# worker in its own runspace but the same process). Its underlying store isn't
+# thread-safe, so concurrent Add/Remove from two runspaces importing or
+# removing this module at the same time corrupts it. $TypeAcceleratorsClass is
+# the same singleton Type object in every runspace in this process, so locking
+# on it serializes access across all of them.
+[System.Threading.Monitor]::Enter($TypeAcceleratorsClass)
+try {
+    # Add type accelerators, replacing any stale registrations from prior module loads.
+    foreach ($Type in $ExportableTypes) {
+        [void]$TypeAcceleratorsClass::Remove($Type.FullName)
+        $TypeAcceleratorsClass::Add($Type.FullName, $Type)
+    }
+} finally {
+    [System.Threading.Monitor]::Exit($TypeAcceleratorsClass)
 }
 # Remove type accelerators when the module is removed.
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
-    foreach ($Type in $ExportableTypes) {
-        [void]$TypeAcceleratorsClass::Remove($Type.FullName)
+    [System.Threading.Monitor]::Enter($TypeAcceleratorsClass)
+    try {
+        foreach ($Type in $ExportableTypes) {
+            [void]$TypeAcceleratorsClass::Remove($Type.FullName)
+        }
+    } finally {
+        [System.Threading.Monitor]::Exit($TypeAcceleratorsClass)
     }
 }.GetNewClosure()
