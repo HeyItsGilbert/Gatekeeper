@@ -1,5 +1,20 @@
 BeforeAll {
     $modulePath = Join-Path -Path $env:BHProjectPath -ChildPath $env:BHProjectName
+    # The 'Class pattern consistency' and 'Effect enum matches configuration'
+    # contexts below resolve [Effect]/'FeatureFlag' -as [type] via reflection
+    # against the compiled module types, unlike the original text-grepping
+    # version of this file, which never needed the module imported at all.
+    # Import explicitly so this file is correct in isolation, matching every
+    # other test file's own import, rather than relying on some other file
+    # (or the build's own GenerateMarkdown/BuildHelp steps) having already
+    # imported it earlier in this process.
+    $manifest = Import-PowerShellDataFile -Path $env:BHPSModuleManifest
+    $outputDir = Join-Path -Path $env:BHProjectPath -ChildPath 'Output'
+    $outputModDir = Join-Path -Path $outputDir -ChildPath $env:BHProjectName
+    $outputModVerDir = Join-Path -Path $outputModDir -ChildPath $manifest.ModuleVersion
+    $outputModVerManifest = Join-Path -Path $outputModVerDir -ChildPath "$($env:BHProjectName).psd1"
+    Get-Module $env:BHProjectName | Remove-Module -Force -ErrorAction Ignore
+    Import-Module -Name $outputModVerManifest -Verbose:$false -ErrorAction Stop
 }
 
 Describe 'Architecture' {
