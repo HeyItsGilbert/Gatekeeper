@@ -62,7 +62,7 @@
     # RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    ScriptsToProcess = @('Enums\Effect.ps1', 'Private\ConvertTo-Hashtable.ps1', 'Private\ConvertFrom-JsonToHashtable.ps1', 'Classes\Property.ps1', 'Classes\FeatureFlag.ps1')
+    ScriptsToProcess = @('Classes\CompiledTypes.ps1', 'Enums\Effect.ps1', 'Private\ConvertTo-Hashtable.ps1', 'Private\ConvertFrom-JsonToHashtable.ps1', 'Classes\Property.ps1', 'Classes\FeatureFlag.ps1')
 
     # Type files (.ps1xml) to be loaded when importing this module
     # TypesToProcess = @()

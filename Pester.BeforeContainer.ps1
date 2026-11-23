@@ -22,10 +22,26 @@
 # "already exists" on the second writer unless -Force makes it an idempotent
 # overwrite instead. Both writers compute the same value from the same
 # explicit -Path, so the redundant write is harmless.
-if (-not $env:BHProjectPath) {
-    if (-not (Get-Module -Name BuildHelpers -ListAvailable)) {
-        throw 'BuildHelpers module is required to bootstrap the build environment for tests.'
+#
+# The whole block is additionally serialized with a Monitor lock on a
+# process-wide singleton Type (the same trick Classes/CompiledTypes.ps1 uses):
+# `Get-Module -ListAvailable` was observed, under full 17-worker concurrency,
+# to transiently return nothing even though BuildHelpers is genuinely
+# installed and other concurrent workers find it fine in the same run - a
+# module-discovery cache race, not a real missing dependency. Serializing
+# discovery (not just the later Set-BuildEnvironment write) avoids it.
+$script:PesterBeforeContainerLock = [PSObject].Assembly.GetType(
+    'System.Management.Automation.TypeAccelerators'
+)
+[System.Threading.Monitor]::Enter($script:PesterBeforeContainerLock)
+try {
+    if (-not $env:BHProjectPath) {
+        if (-not (Get-Module -Name BuildHelpers -ListAvailable)) {
+            throw 'BuildHelpers module is required to bootstrap the build environment for tests.'
+        }
+        Import-Module -Name BuildHelpers -Force -Verbose:$false
+        BuildHelpers\Set-BuildEnvironment -Path $PSScriptRoot -Force -ErrorAction Stop
     }
-    Import-Module -Name BuildHelpers -Force -Verbose:$false
-    BuildHelpers\Set-BuildEnvironment -Path $PSScriptRoot -Force -ErrorAction Stop
+} finally {
+    [System.Threading.Monitor]::Exit($script:PesterBeforeContainerLock)
 }

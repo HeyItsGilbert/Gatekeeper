@@ -16,28 +16,33 @@ Describe 'Architecture' {
     }
 
     Context 'Class pattern consistency' {
-        It 'Primary classes with new([hashtable]) also define static FromJson and FromFile' {
-            $classFiles = Get-ChildItem (Join-Path $modulePath 'Classes') -Filter '*.ps1'
-            foreach ($className in @('FeatureFlag', 'PropertySet')) {
-                $file = $classFiles |
-                    Where-Object { (Get-Content $_.FullName -Raw) -match "class $className\b" } |
-                    Select-Object -First 1
-                $content = Get-Content $file.FullName -Raw
-                $content | Should -Match 'static\s+\[.+\]\s+FromJson\s*\(\s*\[string\]' `
-                    -Because "$className must have a static FromJson([string]) method"
-                $content | Should -Match 'static\s+\[.+\]\s+FromFile\s*\(\s*\[string\]' `
-                    -Because "$className must have a static FromFile([string]) method"
+        It 'Primary types with a Hashtable constructor also define static FromJson([string]) and FromFile([string])' {
+            # FeatureFlag/PropertySet moved from PowerShell `class` definitions to
+            # C#-compiled types (Classes/CompiledTypes.ps1) so every runspace under
+            # Pester 6 Run.Parallel shares one identical Type instead of each
+            # importing runspace compiling its own. The INTENT this test guards -
+            # every primary domain type exposes a discoverable static
+            # FromJson([string])/FromFile([string]) pair - still applies; it's
+            # just verified via reflection against the actual compiled surface now,
+            # since that surface no longer exists as PowerShell `class` source text.
+            foreach ($typeName in @('FeatureFlag', 'PropertySet')) {
+                $type = $typeName -as [type]
+                $type | Should -Not -BeNullOrEmpty -Because "$typeName must be a resolvable type"
+                $fromJson = $type.GetMethod('FromJson', [Reflection.BindingFlags]'Public,Static', $null, [type[]]@([string]), $null)
+                $fromFile = $type.GetMethod('FromFile', [Reflection.BindingFlags]'Public,Static', $null, [type[]]@([string]), $null)
+                $fromJson | Should -Not -BeNullOrEmpty -Because "$typeName must have a static FromJson([string]) method"
+                $fromFile | Should -Not -BeNullOrEmpty -Because "$typeName must have a static FromFile([string]) method"
             }
         }
     }
 
     Context 'Effect enum matches configuration' {
         It 'Effect enum values match Configuration.psd1 Logging keys exactly' {
-            $enumFile    = Join-Path $modulePath 'Enums\Effect.ps1'
-            $enumValues  = (Get-Content $enumFile -Raw) -split '\r?\n' |
-                Where-Object { $_ -match '^\s+[A-Z]\w*\s*$' } |
-                ForEach-Object { $_.Trim() } |
-                Sort-Object
+            # Effect moved from a PowerShell `enum` (Enums/Effect.ps1) to a
+            # C#-compiled enum (Classes/CompiledTypes.ps1); read its values via
+            # reflection on the compiled type instead of grepping file text, which
+            # no longer contains the definition.
+            $enumValues = [System.Enum]::GetNames([Effect]) | Sort-Object
 
             $configFile  = Join-Path $modulePath 'Configuration.psd1'
             $configKeys  = (& ([scriptblock]::Create((Get-Content $configFile -Raw)))).Logging.Keys | Sort-Object

@@ -11,39 +11,23 @@ Task Default -depends Test
 
 Task Test -FromModule PowerShellBuild -minimumVersion '0.6.1'
 
-# NOT VIABLE as currently architected. Root-caused via bisection, not guessed:
+# RESOLVED via a full migration (previously NOT VIABLE - see git history on
+# this file for the original root-cause analysis). Every Gatekeeper domain
+# type (Effect, Operator, Condition, PropertyValidation, Property,
+# PropertySet, Rule, FeatureFlag, GatekeeperPath, and the three
+# ArgumentTransformationAttribute classes) was converted from PowerShell
+# `class`/`enum` definitions to C#-compiled types (Classes/CompiledTypes.ps1,
+# registered once per process via Add-Type, not re-compiled per runspace) -
+# see that file for the full design and the TOCTOU/PSObject-unwrapping/
+# exception-wrapping/stream-redirection pitfalls that came with it.
 #
-# 1. Pester 6 Run.Parallel runs each file's worker in its own runspace, but
-#    *in the same process* (confirmed empirically - workers share $env: and
-#    the CLR's process-wide TypeAccelerators table; this is not separate
-#    child processes). See Pester.BeforeContainer.ps1 for the env-var
-#    implication of that.
-# 2. Gatekeeper.psm1 registers [PropertySet]/[FeatureFlag]/[Rule]/[Condition]/
-#    etc. as type accelerators pointing at this module's `class` definitions.
-#    Every runspace that imports the module compiles its *own distinct* CLR
-#    Type for each `class`, and PowerShell `class` types are not shared
-#    across separately-imported module instances. The accelerator table is
-#    one shared, process-wide slot per name, so whichever runspace imports
-#    last wins that slot - and every *other* runspace's objects, which were
-#    built from a now-orphaned, no-longer-accelerator-bound Type, start
-#    failing `-is`/`Should -BeOfType`/argument-transformation checks against
-#    the type name with errors like "Cannot convert type to FeatureFlag:
-#    FeatureFlag" and "Expected type [Rule] ... but got Rule with type
-#    [Rule]" - identical name, no relation, because they're genuinely
-#    different compiled types.
-#
-# A per-import lock (see Gatekeeper.psm1) fixes real corruption from
-# concurrent, unsynchronized Add/Remove on that shared table (a genuine
-# thread-safety bug independent of Pester), but does not and cannot fix this:
-# the problem isn't corruption, it's that two valid, distinct Types are
-# legitimately competing for one shared name slot. Fixing it for real needs
-# an architecture change (e.g. Add-Type-based C# types, which - unlike
-# PowerShell `class` - compile once per AppDomain and are shared correctly
-# across runspaces), or running every module-importing file (which is nearly
-# all of them) with `#pester:no-parallel`, which leaves nothing meaningful
-# to parallelize. Neither is in scope here; left documented so the next
-# person doesn't have to re-derive this from scratch.
-Task TestParallel -depends Build -description 'NOT VIABLE (architectural, not a test bug) - see comment above task' {
+# Verified via repeated fresh-session full-suite parallel runs: 399 passed,
+# 0 failed, 5 skipped - identical to the sequential Test task, 3 consecutive
+# clean runs after also fixing a BuildHelpers module-discovery race (see
+# Pester.BeforeContainer.ps1 - `Get-Module -ListAvailable` transiently found
+# nothing under 17-way concurrency even though BuildHelpers was genuinely
+# installed; serialized with the same Monitor-lock pattern).
+Task TestParallel -depends Build -description 'Execute Pester tests with each file in its own runspace (experimental, Pester 6 Run.Parallel)' {
     Import-Module -Name Pester -MinimumVersion 6.0.0 -Force -Verbose:$false
 
     $config = New-PesterConfiguration
