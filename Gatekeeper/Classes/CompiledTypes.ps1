@@ -369,7 +369,16 @@ namespace Gatekeeper
             }
             if (data.ContainsKey("Operator") && data["Operator"] != null)
             {
-                Operator = data["Operator"].ToString();
+                // Validated eagerly, same as Effect (see Rule.ParseEffect): the
+                // original PowerShell `class Condition` declared [Operator]$Operator,
+                // so an invalid value threw immediately at construction time via
+                // PowerShell's own enum coercion. The initial C# port missed this
+                // (kept Operator as a plain string with no validation) - caught by
+                // code review, not by any test (no test constructs a Condition with
+                // a bad Operator directly; the one existing bad-operator test only
+                // checks a generic Should -Throw via Test-Condition's own evaluation-
+                // time switch, so moving validation earlier doesn't break it).
+                Operator = ParseOperator(data["Operator"]).ToString();
             }
             if (data.ContainsKey("Value") && data["Value"] != null)
             {
@@ -405,6 +414,15 @@ namespace Gatekeeper
                 case "Not": Not = list; break;
                 default: throw new ArgumentException("Unknown operator: " + connective);
             }
+        }
+
+        // Fully-qualified Gatekeeper.Operator (the enum type), not the bare
+        // name: inside this class, unqualified `Operator` resolves to the
+        // instance field above (string), which would shadow the enum type.
+        private static Gatekeeper.Operator ParseOperator(object value)
+        {
+            if (value is Gatekeeper.Operator o) { return o; }
+            return (Gatekeeper.Operator)System.Enum.Parse(typeof(Gatekeeper.Operator), value.ToString(), true);
         }
 
         // Accepts items that are already Condition instances (the
