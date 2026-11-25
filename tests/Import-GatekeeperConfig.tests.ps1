@@ -33,8 +33,11 @@ Describe 'Import-GatekeeperConfig' {
 
     It 'uses cached config on second call without -ForceReload' {
         Mock -CommandName 'Import-Configuration' -ModuleName $env:BHProjectName { $script:minConfig }
+        # Establish the cache ourselves rather than relying on a prior test's
+        # cold load, so this test is correct in isolation and regardless of order.
+        Import-GatekeeperConfig -ForceReload
         Import-GatekeeperConfig
-        Should -Invoke 'Import-Configuration' -ModuleName $env:BHProjectName -Times 0
+        Should -Invoke 'Import-Configuration' -ModuleName $env:BHProjectName -Times 1 -Exactly
     }
 
     It '-ForceReload bypasses cache and calls Import-Configuration' {

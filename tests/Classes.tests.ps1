@@ -1,7 +1,4 @@
 BeforeDiscovery {
-    if ($env:BHPSModuleManifest -eq $null -or $env:BHProjectPath -eq $null -or $env:BHProjectName -eq $null) {
-        . $PSScriptRoot\..\build.ps1 -Task Build
-    }
     $manifest = Import-PowerShellDataFile -Path $env:BHPSModuleManifest
     $outputDir = Join-Path -Path $env:BHProjectPath -ChildPath 'Output'
     $outputModDir = Join-Path -Path $outputDir -ChildPath $env:BHProjectName
@@ -61,6 +58,19 @@ Describe 'Condition' {
                     Value    = 'Staging'
                 })
             } | Should -Throw -ExpectedMessage '*Property, Operator, and Value*'
+        }
+    }
+
+    Describe 'Operator validation' {
+        It 'Throws at construction time when Operator is not a recognized value' {
+            {
+                [Condition]::new(@{ Property = 'Environment'; Operator = 'GreaterThanOrEquals'; Value = 'Staging' })
+            } | Should -Throw
+        }
+
+        It 'Accepts a valid Operator regardless of casing and normalizes it' {
+            $cg = [Condition]::new(@{ Property = 'Percentage'; Operator = 'greaterthanorequal'; Value = 10 })
+            $cg.Operator | Should -Be 'GreaterThanOrEqual'
         }
     }
 

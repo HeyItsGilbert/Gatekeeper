@@ -25,9 +25,19 @@ function Read-PropertySet {
             $FilePath = Join-Path $folder "$Name.json"
         }
         foreach ($file in $FilePath) {
-            $propertySets.Add(
-                ([PropertySet]::FromFile($file))
-            )
+            # PropertySet.FromFile is now a C#-compiled method (not a
+            # PowerShell `class` method), so PowerShell wraps any exception it
+            # throws in a MethodInvocationException when called directly like
+            # this. Unwrap it so callers (and existing error-message
+            # contracts/tests) keep seeing the original, unwrapped message.
+            try {
+                $propertySets.Add(([PropertySet]::FromFile($file)))
+            } catch {
+                if ($_.Exception.InnerException) {
+                    throw $_.Exception.InnerException.Message
+                }
+                throw
+            }
         }
     }
     end {
