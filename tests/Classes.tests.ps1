@@ -61,6 +61,19 @@ Describe 'Condition' {
         }
     }
 
+    Describe 'Operator validation' {
+        It 'Throws at construction time when Operator is not a recognized value' {
+            {
+                [Condition]::new(@{ Property = 'Environment'; Operator = 'GreaterThanOrEquals'; Value = 'Staging' })
+            } | Should -Throw
+        }
+
+        It 'Accepts a valid Operator regardless of casing and normalizes it' {
+            $cg = [Condition]::new(@{ Property = 'Percentage'; Operator = 'greaterthanorequal'; Value = 10 })
+            $cg.Operator | Should -Be 'GreaterThanOrEqual'
+        }
+    }
+
     Describe 'IsValid' {
         It 'Returns $true for a flat leaf condition' {
             $cg = [Condition]::new(@{
